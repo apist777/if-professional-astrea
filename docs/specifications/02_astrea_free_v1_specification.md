@@ -3,6 +3,8 @@ If Professional ASTREA FREE v1 仕様書
 > 【2026-08-25 追記】本書の一部（§15 CONTACT、§16 SEO Foundation、§18 GA4/Search Console、§26 Update、§29 Compatibility/Migration）は、`04_astrea_free_v1_preconstruction_decisions.md`（Decision 001〜020）の内容を反映して更新されている。本書とDecision文書の間に食い違いが生じた場合はDecision文書を優先する。
 >
 > 【2026-08-26 追記】§3（製品構成）は、Decision 021（ASTREA Coreの位置付け：任意Plugin・公式推奨）の内容を反映して更新されている。
+>
+> 【2026-08-26 追記】§4（Core情報一元管理）、§8（PROFILE）、§13（ACCESS）は、Decision 022（士業法人・複数専門家対応、Office / Professional Profile責任境界）の内容を反映して更新されている。
 
 1. 本仕様書の目的
 本書は、If Professional ASTREA FREE v1の開発着工前仕様を定義する。
@@ -56,6 +58,13 @@ Coreの情報を各表示場所から参照する。
 を管理する。
 年末年始、夏季休業、臨時休業にも対応する。
 営業カレンダーは当月営業状況を分かりやすく確認できる表示を想定するが、予約機能とは分離する。
+
+【2026-08-26 Decision 022により確定】上記の一元管理対象は、以下のように責任範囲を分離する。
+
+- **Office Profile**（Construction Order 002で実装済み）：事務所情報、住所、電話、営業時間、定休日、臨時休業、SNS等。事務所・法人・専門家組織そのものの情報。個人事務所・士業法人（複数専門家が所属する事務所）のいずれにも対応する。
+- **Professional Profile**（§8参照、未実装）：代表者情報のうち資格・所属・経歴等、専門家個人に紐づく情報。Office 1に対しProfessional Profileは0〜複数人を扱える構造とする。
+- **CTA・相談方法**：Office Profile / Professional Profileのいずれにも含めず、別責任（CTA / Consultation）として扱う。
+- **アクセス固有情報**（最寄駅・徒歩時間・駐車場等、§13参照）：Office Profileには含めず、ACCESSの責任とする。所在地そのものはOffice Profileを正本として再利用する。
 ________________________________________
 5. Design System
 ASTREA FREEの最大級の競争力はデザイン品質とする。
@@ -88,6 +97,8 @@ ________________________________________
 経歴、学歴、所属、登録情報等
 も掲載可能とする。
 ただしすべて任意とし、項目を埋めなければデザインが成立しない構造にはしない。
+
+【2026-08-26 Decision 022により確定】本項の情報を「Professional Profile」と呼ぶ。事務所・法人そのものの情報（Office Profile、§4参照）とは責任範囲を分離する。個人事務所では通常1人、士業法人・複数専門家事務所では複数人を登録・表示できる、0〜複数人対応の構造として設計する（未実装。将来のConstruction Orderで対応）。
 ________________________________________
 9. FLOW
 相談から依頼までの流れを表示する。
@@ -126,6 +137,8 @@ ________________________________________
 13. ACCESS
 Coreに登録された住所、営業時間、最寄駅、徒歩時間、駐車場、臨時休業等を再利用する。
 Accessページで同じ情報を再入力させない。
+
+【2026-08-26 Decision 022により確定】住所・営業時間・臨時休業はOffice Profile（§4、Construction Order 002で実装済み）を正本として再利用する。最寄駅・徒歩時間・駐車場等のACCESSページ固有情報は、Office Profileには含めず、ACCESSの責任範囲で別途管理する（未実装）。
 地図は、
 ページ内表示 / Google Mapsで開く / 地図なし
 等から選択可能にする方向。

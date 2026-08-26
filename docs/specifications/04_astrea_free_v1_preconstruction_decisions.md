@@ -759,6 +759,58 @@ ASTREA ThemeはCoreのインストール・有効化を強制しない。Coreが
 
 ---
 
+## Decision 022 — ASTREA FREEの対象利用形態、および Office / Professional Profile 責任境界
+
+**Status:** FIXED
+**決定日:** 2026-08-26
+
+### 決定内容
+
+ASTREA FREEは、個人で運営する士業事務所だけを前提としない。以下の双方を正式な対象とする。
+
+- 個人の士業事務所
+- 士業法人、および複数の専門家が所属する事務所（例：行政書士法人、司法書士法人、税理士法人、社会保険労務士法人等）
+
+Core内のデータ責任を以下の2概念に明確に分離する。
+
+- **Office（Office Profile）**＝事務所・法人・専門家組織そのものの情報。事務所名、所在地、電話番号、営業時間、休業情報、SNSリンク等。
+- **Professional Profile**＝そこに所属する専門家個人の情報（資格・肩書、経歴、学歴、所属、登録情報、写真、紹介文等）。**0〜複数人**を将来的に扱えるデータ構造として設計する（Office 1 : Professional Profile 0..N）。
+
+Office Profileの「代表者名」等の項目について、将来のUI・データ設計・表示設計では、個人事務所のみを暗黙の前提とした不自然な設計にしない。ただし、法人番号・資本金・設立年月日等の一般的な法人台帳情報を大量に追加することは今回のFIXの目的ではなく、ASTREAのWebサイト構築に必要な情報だけを扱う。
+
+CTA・相談方法はOffice Profile / Professional Profileのいずれにも含めず、別責任（CTA / Consultation）として扱う。
+
+ACCESSページ固有の最寄駅・徒歩時間・駐車場・地図表示方式は、Office Profileに含めず、ACCESSの責任とする。所在地そのものはOffice Profileを正本として再利用する。
+
+### 理由・設計原則
+
+- AGENTS.md §6が元々「Office Profile」と「専門家情報」をCoreの責任範囲として別項目に列挙していたことと整合させる。
+- 士業法人・複数専門家事務所もFREEの正式な対象顧客であるというユーザー指示に基づく。
+- Construction Order 002実施報告（`docs/research/2026-08-26_construction_order_002_report.md`）で発見した「Office Profile項目範囲の要確認事項」への正式な回答（当該事項は本Decisionによりクローズする）。
+
+### 影響する既存仕様
+
+- **01仕様書 §3（想定ユーザー）を更新する。** 個人事務所に加え、法人・複数専門家事務所を正式対象として明記する。
+- **02仕様書 §4（ASTREA Core ― 情報一元管理）を更新する。**「事務所情報、代表者情報、資格・所属、住所、電話、営業時間、定休日、臨時休業、アクセス、相談方法、CTA、SNS等」という一括列挙を、Office Profile／Professional Profile／CTA・相談方法／ACCESS固有情報へ明確に分離する。
+- **02仕様書 §8（PROFILE）を更新する。** 専門家個人紹介の構造をProfessional Profileとして位置づけ、0〜複数人対応を明記する。
+- **02仕様書 §13（ACCESS）を更新する。** 所在地はOffice Profileを正本として再利用し、最寄駅・徒歩時間・駐車場等はACCESS固有情報として区別する。
+- `docs/research/2026-08-26_construction_order_002_report.md` §1・§8の要確認事項をCLOSEDとする。
+- `05_astrea_free_v1_construction_baseline.md`：既存の変更管理方針（同書§19）に従い、凍結済みの本文は書き換えず、末尾に本Decisionへの参照を追記する。
+
+### Theme / Core / WordPress の責任境界
+
+- Core：Office Profile（Construction Order 002で実装済み、変更なし）。Professional Profile（未実装。将来のConstruction Orderで0..N件の複数専門家データとして設計する）。
+- Theme：Office Profileの表示（Header / Footer等、実装済み）。Professional Profileの表示（専門家紹介ページ等、将来実装）。
+
+### 実装時に守るべき事項
+
+- Construction Order 002のOffice Profile実装（`astrea_core_office_profile` Option、管理画面、Block Bindings Source `astrea-core/office-profile`）は、本Decisionを理由に作り直さない。
+- Professional Profileを実装する際は、単一レコードのOptionではなく、0..N件を安全に扱えるデータ構造（WordPress標準機能— 例えばカスタム投稿タイプ等 — を優先し、独自DB Tableは避ける）を採用する。
+- Office Profileへ将来フィールドを追加する場合、個人事業主1名のみを暗黙の前提とした表現・UIにしない。
+- 法人台帳情報（法人番号・資本金・設立年月日等）をOffice Profileへ追加することは、本Decisionの範囲外である。追加が必要になった場合は独自判断で拡張せず、改めて仕様判断を仰ぐ。
+
+---
+
 ## 本書に基づき残る確認事項（新規Decisionではない）
 
 以下は、Decision 001〜021によっておおむね解消されたが、正式仕様の文言として明示的な一文が未整備、または性質上「実装フェーズの技術詳細」に属するため、本書ではこれ以上の判断を追加しない事項である。クロエ独自の判断でこれらを確定させることはしない。
@@ -768,6 +820,6 @@ ASTREA ThemeはCoreのインストール・有効化を強制しない。Coreが
 3. **Price（自由記述）と構造化データ（schema.org Offer等）の整合方法。** Core側のデータモデル設計時に決定する。
 4. **Pattern と Style Variation（Trust / Natural / Modern）の共有方式。** Design System設計時に決定する。
 5. **Service / FAQ / CASE等が0件のときの空状態UIパターンの統一。** Pattern設計時に決定する。
-6. **営業時間・臨時休業データモデルの詳細（将来の予約Pluginとの共有を見据えた設計）。** Core Office Profile設計時に決定する。
+6. ~~営業時間・臨時休業データモデルの詳細（将来の予約Pluginとの共有を見据えた設計）。~~ **CLOSED（2026-08-26 Construction Order 002により実装）。** `astrea_core_office_profile`内の`business_hours`（週次の定休日／開始・終了時刻＋臨時休業等の期間リスト）として実装済み。将来の予約Pluginとの共有インターフェースは未設計だが、データモデル自体は確定した。
 
 これらは最終監査（`docs/research/`配下の最終監査資料を参照）においてP0（着工前必須）ではなく、各設計フェーズでの決定事項として扱う。

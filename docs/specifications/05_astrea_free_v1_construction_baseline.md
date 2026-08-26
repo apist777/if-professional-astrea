@@ -98,7 +98,7 @@
 出典：`02_astrea_free_v1_specification.md` §6-14, §19-20
 
 - **HOME**：固定テンプレートではなくPatternの組み合わせ。Hero / Trust / Services / Profile / Flow / Price / FAQ / CASE / Access / CTA等から必要なものだけ使用。0件・少数構成でも破綻しない。
-- **SERVICES / PROFILE / FLOW / PRICE / FAQ / CASE・RESULTS・VOICE**：いずれもCoreを正本として一元管理し、複数画面から再利用する。件数（0件〜多数）を問わず成立するデザインとする。PRICEは自由記述含む複数の料金形態に対応（構造化データとの整合方法は実装フェーズで設計。セクション17参照）。
+- **SERVICES / PROFILE / FLOW / PRICE / FAQ / CASE・RESULTS・VOICE**：いずれもCoreを正本として一元管理し、複数画面から再利用する。件数（0件〜多数）を問わず成立するデザインとする。PRICEは自由記述含む複数の料金形態に対応（構造化データとの整合方法は実装フェーズで設計。セクション17参照）。PROFILEは「Professional Profile」としてOffice Profileと責任分離し、0〜複数人対応とする（2026-08-26 Decision 022、セクション21参照）。
 - **ACCESS**：Coreに登録した住所・営業時間・臨時休業等を再利用し、Accessページで再入力させない。地図表示は「ページ内表示 / Google Mapsで開く / 地図なし」から選択可能。
 - **Header / Navigation / Footer**：少数精鋭のPattern。スマートフォンHeaderは優先順位の再設計を行う（縮小コピーにしない）。事務所情報等はCoreから取得。
 - **BLOG / NEWS / ARCHIVE / SEARCH / 404**：WordPress標準投稿機能を最大限利用。0件でも公開可能。404も含めDesign Systemの一部として設計する。
@@ -298,3 +298,18 @@
 ## 20. 未実装の確認
 
 本書作成時点で、`theme/`・`core/`・`tools/`ディレクトリへの実装は行われていない（`.gitkeep`のみ）。本書はTheme / Core実装の着工可否判定に用いる基準文書であり、本書の作成自体は実装開始を意味しない。実装着手は別途の正式な着工命令による。
+
+---
+
+## 21. 追記（2026-08-26, Decision 022 — 士業法人・複数専門家対応）
+
+本書は2026-08-26時点のBaselineとして凍結済み（§19参照）であるため、本追記は既存セクションの本文を書き換えず、末尾への追加という形で反映する。
+
+CONSTRUCTION ORDER 002完了後、同日中に以下がDecision 022として正式FIXされた（`04_astrea_free_v1_preconstruction_decisions.md`参照）。
+
+- ASTREA FREEは個人の士業事務所に加え、士業法人・複数の専門家が所属する事務所も正式な対象とする。
+- Coreのデータ責任を **Office（Office Profile）** と **Professional Profile** に明確分離する。Office Profile＝事務所・法人そのものの情報（Construction Order 002で実装済み、変更なし）。Professional Profile＝所属する専門家個人の情報（資格・肩書・経歴・写真等）で、0〜複数人（Office 1 : Professional Profile 0..N）を扱える構造として将来実装する。
+- CTA・相談方法、およびACCESSページ固有情報（最寄駅・徒歩時間・駐車場等）は、Office Profile / Professional Profileのいずれにも含めない別責任とする。所在地そのものはOffice Profileを正本として再利用する。
+- Construction Order 002報告書で報告されていた「Office Profile項目範囲の要確認事項」は、本Decisionにより**CLOSED**となった。
+
+この追記により、本書セクション5（PROFILE）・セクション2（FREE/PRO境界の前提となる想定顧客像）の実質的な内容は、Decision 022の内容へ更新されたものとして扱う。将来Professional Profileを実装するConstruction Orderでは、本セクションおよび`04_astrea_free_v1_preconstruction_decisions.md`のDecision 022を基準文書とする。
