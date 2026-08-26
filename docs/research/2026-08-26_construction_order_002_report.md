@@ -8,6 +8,24 @@
 
 ---
 
+## 0. GitHub Actions CI 最終結果
+
+3コミット目で全ジョブGreenを確認した（[run 32944574074](https://github.com/apist777/if-professional-astrea/actions/runs/32944574074)）。
+
+- `PHP syntax + Coding Standards`：PASS
+- `Theme / Core independence smoke test`（Construction 001のA〜D + 本Orderで追加したE〜I）：PASS
+- `PHPUnit (ASTREA Core)`：PASS（20 tests, 40 assertions）
+
+### 発見・修正したCI Bug（Baseline/仕様変更を伴わない実装Bug）
+
+**`composer.lock`がこのセッションのホストPHP（8.1、プロジェクトの要求バージョン8.3未満）で`--ignore-platform-req=php`を使って生成されていたため、`doctrine/instantiator 2.1.0`（実際にはPHP 8.4以上が必要）がlockされてしまい、CIの実PHP 8.3環境では解決不能だった。**
+
+`--ignore-platform-req=php`はPHPのバージョンチェック全体を無視するため、ローカルでは矛盾に気づけなかった。修正は、wp-envの`tests-cli`コンテナ（実際のPHP 8.3.33を内蔵）へ`composer.json`/`composer.lock`/`vendor`をマウントし、そのコンテナの本物のPHP 8.3で`composer update`を実行して`composer.lock`を再生成すること。Ignore flagなしで`doctrine/instantiator`が自動的に2.0.0（PHP 8.3対応）へダウングレードされ、以後はホストのPHPバージョンに依存せず正しいlockを保証できるようになった。
+
+この経緯から、`.wp-env.json`の`mappings`へ`composer.json`と`composer.lock`も追加し、今後のComposer操作は「ホストの（プロジェクト要求より古い）PHPで無理に実行する」のではなく「wp-envコンテナの実PHP 8.3で実行する」ことを標準手順とした。
+
+---
+
 ## 1. Office Profileの項目とスコープ判断
 
 正式仕様（01仕様書§11「事務所基本情報」、02仕様書§4、AGENTS.md §6の「Office Profile」列挙）から、以下を今回のOffice Profileデータとして実装した。
