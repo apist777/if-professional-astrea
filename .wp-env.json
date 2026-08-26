@@ -5,7 +5,9 @@
     "wp-content/themes/astrea": "./theme",
     "wp-content/plugins/astrea-core": "./core",
     "vendor": "./vendor",
-    "tests": "./tests"
+    "tests": "./tests",
+    "composer.json": "./composer.json",
+    "composer.lock": "./composer.lock"
   },
   "config": {
     "WP_DEBUG": true,
