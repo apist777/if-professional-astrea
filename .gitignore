@@ -1,0 +1,26 @@
+# Dependencies
+/node_modules/
+/vendor/
+
+# wp-env local overrides (machine-specific, not shared)
+.wp-env.override.json
+
+# Build artifacts / release packages
+/dist/
+/build/
+*.zip
+
+# OS / Editor
+.DS_Store
+Thumbs.db
+.vscode/*
+!.vscode/extensions.json
+.idea/
+
+# Logs
+*.log
+npm-debug.log*
+
+# Local environment secrets
+.env
+.env.local

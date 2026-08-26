@@ -1,0 +1,51 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  php-lint:
+    name: PHP syntax + Coding Standards
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: shivammathur/setup-php@v2
+        with:
+          php-version: "8.3"
+          tools: composer
+
+      - name: PHP syntax check (php -l)
+        run: |
+          find theme core -name '*.php' -print0 | xargs -0 -n1 php -l
+
+      - name: Install Composer dependencies
+        run: composer install --no-progress --prefer-dist
+
+      - name: Run PHPCS (WordPress Coding Standards + PHP Compatibility)
+        run: composer run lint
+
+  theme-core-smoke-test:
+    name: Theme / Core independence smoke test
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Install Node dependencies
+        run: npm ci
+
+      - name: Start wp-env
+        run: npm run env:start
+
+      - name: Run Theme/Core independence checks (Decision 021)
+        run: npm run smoke-test
+
+      - name: Tear down wp-env
+        if: always()
+        run: npm run env:destroy

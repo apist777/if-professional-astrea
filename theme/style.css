@@ -1,0 +1,20 @@
+/*
+Theme Name: ASTREA
+Theme URI: https://project-if.com/astrea
+Author: Project-if
+Author URI: https://project-if.com/
+Description: If Professional ASTREA — 士業・専門家向けWordPress Block Theme。FREE単体で本番運用可能な専門家サイトを構築できることを目標とする（docs/specifications/05_astrea_free_v1_construction_baseline.md）。
+Version: 0.1.0
+Requires at least: 7.0
+Tested up to: 7.1
+Requires PHP: 8.3
+License: GNU General Public License v2 or later
+License URI: https://www.gnu.org/licenses/gpl-2.0.html
+Text Domain: astrea
+Domain Path: /languages
+Tags: block-theme, full-site-editing, translation-ready
+
+This construction-phase skeleton intentionally has no presentational CSS here.
+ASTREA's Design System is expressed through theme.json / Style Variations, not
+plain stylesheet rules (see Construction Baseline §14, Core → Theme Architecture).
+*/

@@ -1,0 +1,14 @@
+{
+  "core": null,
+  "phpVersion": "8.3",
+  "mappings": {
+    "wp-content/themes/astrea": "./theme",
+    "wp-content/plugins/astrea-core": "./core"
+  },
+  "config": {
+    "WP_DEBUG": true,
+    "WP_DEBUG_LOG": true,
+    "WP_DEBUG_DISPLAY": false,
+    "WP_ENVIRONMENT_TYPE": "local"
+  }
+}
