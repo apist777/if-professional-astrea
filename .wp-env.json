@@ -3,7 +3,9 @@
   "phpVersion": "8.3",
   "mappings": {
     "wp-content/themes/astrea": "./theme",
-    "wp-content/plugins/astrea-core": "./core"
+    "wp-content/plugins/astrea-core": "./core",
+    "vendor": "./vendor",
+    "tests": "./tests"
   },
   "config": {
     "WP_DEBUG": true,

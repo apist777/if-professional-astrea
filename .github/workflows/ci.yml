@@ -43,10 +43,42 @@ jobs:
       - name: Start wp-env
         run: npm run env:start
 
-      - name: Run Theme/Core independence checks (Decision 021)
+      - name: Run Theme/Core independence + Office Profile checks (Decision 021, Construction Order 002)
         run: npm run smoke-test
 
       - name: Tear down wp-env
         if: always()
         # `wp-env destroy` prompts for interactive confirmation; auto-confirm in CI.
+        run: yes | npm run env:destroy
+
+  unit-tests:
+    name: PHPUnit (ASTREA Core)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: shivammathur/setup-php@v2
+        with:
+          php-version: "8.3"
+          tools: composer
+          extensions: mbstring, xml, dom, mysqli
+
+      - name: Install Composer dependencies
+        run: composer install --no-progress --prefer-dist
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Install Node dependencies
+        run: npm ci
+
+      - name: Start wp-env
+        run: npm run env:start
+
+      - name: Run PHPUnit against the wp-env tests environment
+        run: npm run test:php
+
+      - name: Tear down wp-env
+        if: always()
         run: yes | npm run env:destroy

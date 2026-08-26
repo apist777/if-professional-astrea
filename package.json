@@ -9,7 +9,8 @@
     "env:destroy": "wp-env destroy",
     "env:cli": "wp-env run cli --",
     "env:logs": "wp-env logs",
-    "smoke-test": "bash tools/ci/smoke-test.sh"
+    "smoke-test": "bash tools/ci/smoke-test.sh",
+    "test:php": "wp-env run tests-cli -- bash -c \"cd /var/www/html && php vendor/bin/phpunit --bootstrap tests/bootstrap.php tests\""
   },
   "devDependencies": {
     "@wordpress/env": "^11.13.0"
