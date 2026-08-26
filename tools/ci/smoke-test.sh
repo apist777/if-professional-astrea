@@ -23,12 +23,19 @@
 # drives appears/disappears correctly, and a Professional Profile's
 # `is_representative` flag survives Core deactivate/reactivate.
 #
-# Part 5 (Y-AF) automates Construction Order 004: Service (CPT + Query
+# Part 5 (Y-AE) automates Construction Order 004: Service (CPT + Query
 # Loop + individual URL), Price (non-viewable CPT + astrea/price-list
 # Dynamic Block, deliberately no individual URL), and FAQ (CPT + Taxonomy
 # archive + 関連Service/重要FAQ) end to end, including the Empty State
 # guarantee (§8) and the same Core-inactive/deactivate/reactivate coverage
 # as Parts 1-4.
+#
+# Part 6 (AF-AS) automates Construction Order 005: the Contact form's
+# entire real HTTP lifecycle (astrea/contact-form Dynamic Block, CSRF,
+# Honeypot, Rate Limit, validation-error value retention, admin read
+# state, CSV Export + formula-injection neutralization, the notification-
+# email confirmation Token flow including replay rejection), plus the same
+# Core-inactive/deactivate/reactivate coverage as Parts 1-5.
 #
 # Requires a running `wp-env` environment (see package.json `env:start`).
 
@@ -507,3 +514,265 @@ wp_cli post delete "$SVC_A" "$SVC_B" "$SVC_C" "$SVC_DRAFT" "$SVC_FOR_FAQ" "$PRIC
 wp_cli term delete astrea_faq_category "$TERM_ID" > /dev/null 2>&1 || true
 
 echo "All ASTREA Service/Price/FAQ end-to-end checks passed."
+
+# ---------------------------------------------------------------------------
+# Part 6 (AF-AS): Construction Order 005 — Contact end to end.
+# ---------------------------------------------------------------------------
+
+# Every HTTP request in this script originates from the same apparent
+# source IP (the host, as seen through wp-env's Docker port mapping), so
+# any rate-limit state left over from manual testing/earlier runs must be
+# cleared before Part 6's rate-limit-sensitive checks (AG/AJ/AK) run.
+wp_cli db query "DELETE FROM wp_options WHERE option_name LIKE '\_transient\_astrea\_contact\_rl\_%' OR option_name LIKE '\_transient\_timeout\_astrea\_contact\_rl\_%'"
+
+echo "=== AF. Contact form page renders with nonce + required fields, no fatal ==="
+CONTACT_PAGE_ID=$(wp_cli post create --post_type=page --post_status=publish --post_title="Smoke Contact Page" --post_content='<!-- wp:astrea/contact-form /-->' --porcelain)
+CONTACT_PAGE_PATH="/$(wp_cli post get "$CONTACT_PAGE_ID" --field=post_name)/"
+check_no_fatal "AF: contact form page" "$CONTACT_PAGE_PATH"
+if ! grep -qF 'name="astrea_contact_nonce"' "$BODY_FILE" || ! grep -qF 'name="message"' "$BODY_FILE"; then
+	echo "FAIL [AF]: contact form did not render expected nonce/message field"
+	exit 1
+fi
+NONCE=$(sed -n 's/.*name="astrea_contact_nonce" value="\([a-f0-9]*\)".*/\1/p' "$BODY_FILE" | head -1)
+echo "OK   [AF: contact form renders with nonce ($NONCE) and required fields]"
+
+echo "=== AG. Real submission: saved + notified + redirected to success ==="
+SUBMIT_STATUS=$(curl -s -o /dev/null -w '%{http_code}' -D "$BODY_FILE.headers" -X POST "$SITE_URL/wp-admin/admin-post.php" \
+	--data-urlencode "action=astrea_submit_inquiry" \
+	--data-urlencode "astrea_contact_redirect=$SITE_URL$CONTACT_PAGE_PATH" \
+	--data-urlencode "astrea_contact_nonce=$NONCE" \
+	--data-urlencode "name=スモーク太郎" \
+	--data-urlencode "email=smoke@example.com" \
+	--data-urlencode "subject=スモーク件名" \
+	--data-urlencode "message=スモークテストの問い合わせです。" \
+	--data-urlencode "privacy_consent=1")
+if [ "$SUBMIT_STATUS" != "302" ] || ! grep -qF "astrea_contact_success=1" "$BODY_FILE.headers"; then
+	echo "FAIL [AG]: expected a 302 redirect to the success state, got HTTP $SUBMIT_STATUS"
+	cat "$BODY_FILE.headers"
+	exit 1
+fi
+INQUIRY_ID=$(wp_cli post list --post_type=astrea_inquiry --orderby=ID --order=DESC --posts_per_page=1 --field=ID)
+STORED_NAME=$(wp_cli post meta get "$INQUIRY_ID" astrea_inquiry_name)
+if [ "$STORED_NAME" != "スモーク太郎" ]; then
+	echo "FAIL [AG]: inquiry was not saved with the submitted name (got '$STORED_NAME')"
+	exit 1
+fi
+echo "OK   [AG: real HTTP submission saved (post $INQUIRY_ID) and redirected to success]"
+
+echo "=== AH. Validation error: values retained, error shown, nothing saved ==="
+BEFORE_COUNT=$(wp_cli post list --post_type=astrea_inquiry --format=count)
+ERROR_STATUS=$(curl -s -o /dev/null -w '%{http_code}' -D "$BODY_FILE.headers" -X POST "$SITE_URL/wp-admin/admin-post.php" \
+	--data-urlencode "action=astrea_submit_inquiry" \
+	--data-urlencode "astrea_contact_redirect=$SITE_URL$CONTACT_PAGE_PATH" \
+	--data-urlencode "astrea_contact_nonce=$NONCE" \
+	--data-urlencode "name=スモーク花子" \
+	--data-urlencode "email=" \
+	--data-urlencode "message=件名なしテスト" \
+	--data-urlencode "privacy_consent=1")
+AFTER_COUNT=$(wp_cli post list --post_type=astrea_inquiry --format=count)
+if [ "$ERROR_STATUS" != "302" ] || ! grep -qF "astrea_contact_error=1" "$BODY_FILE.headers"; then
+	echo "FAIL [AH]: expected a 302 redirect to the error state, got HTTP $ERROR_STATUS"
+	exit 1
+fi
+if [ "$AFTER_COUNT" != "$BEFORE_COUNT" ]; then
+	echo "FAIL [AH]: an inquiry was saved despite a missing required field (email)"
+	exit 1
+fi
+ERROR_REDIRECT=$(sed -n 's/^Location: \([^\r]*\)\r*$/\1/p' "$BODY_FILE.headers" | head -1)
+check_no_fatal "AH: form re-render with retained values" "${ERROR_REDIRECT#$SITE_URL}"
+if ! grep -qF "スモーク花子" "$BODY_FILE"; then
+	echo "FAIL [AH]: submitted name was not retained in the re-rendered form"
+	exit 1
+fi
+echo "OK   [AH: validation error retains values, shows an error, saves nothing]"
+
+echo "=== AI. CSRF: invalid nonce is rejected, nothing saved ==="
+BEFORE_COUNT=$(wp_cli post list --post_type=astrea_inquiry --format=count)
+curl -s -o /dev/null -X POST "$SITE_URL/wp-admin/admin-post.php" \
+	--data-urlencode "action=astrea_submit_inquiry" \
+	--data-urlencode "astrea_contact_redirect=$SITE_URL$CONTACT_PAGE_PATH" \
+	--data-urlencode "astrea_contact_nonce=not-a-real-nonce" \
+	--data-urlencode "name=不正リクエスト" \
+	--data-urlencode "email=csrf@example.com" \
+	--data-urlencode "message=CSRFテスト"
+AFTER_COUNT=$(wp_cli post list --post_type=astrea_inquiry --format=count)
+if [ "$AFTER_COUNT" != "$BEFORE_COUNT" ]; then
+	echo "FAIL [AI]: an inquiry was saved despite an invalid nonce"
+	exit 1
+fi
+echo "OK   [AI: invalid nonce rejected, nothing saved]"
+
+echo "=== AJ. Honeypot: filled hidden field is silently dropped (success shown, nothing saved) ==="
+BEFORE_COUNT=$(wp_cli post list --post_type=astrea_inquiry --format=count)
+HONEYPOT_STATUS=$(curl -s -o /dev/null -w '%{http_code}' -D "$BODY_FILE.headers" -X POST "$SITE_URL/wp-admin/admin-post.php" \
+	--data-urlencode "action=astrea_submit_inquiry" \
+	--data-urlencode "astrea_contact_redirect=$SITE_URL$CONTACT_PAGE_PATH" \
+	--data-urlencode "astrea_contact_nonce=$NONCE" \
+	--data-urlencode "astrea_contact_website=http://spam.example.com" \
+	--data-urlencode "name=Bot" \
+	--data-urlencode "email=bot@example.com" \
+	--data-urlencode "message=Bot message" \
+	--data-urlencode "privacy_consent=1")
+AFTER_COUNT=$(wp_cli post list --post_type=astrea_inquiry --format=count)
+if [ "$HONEYPOT_STATUS" != "302" ] || ! grep -qF "astrea_contact_success=1" "$BODY_FILE.headers"; then
+	echo "FAIL [AJ]: honeypot submission was not shown a success redirect"
+	exit 1
+fi
+if [ "$AFTER_COUNT" != "$BEFORE_COUNT" ]; then
+	echo "FAIL [AJ]: a honeypot-triggered submission was saved as a real inquiry"
+	exit 1
+fi
+echo "OK   [AJ: honeypot hit shown success but silently dropped]"
+
+echo "=== AK. Rate limit: rapid resubmission from the same client is rejected ==="
+# The prior [AG] submission already primed the minimum-interval throttle for
+# this client, so an immediate resubmission now must be rejected.
+BEFORE_COUNT=$(wp_cli post list --post_type=astrea_inquiry --format=count)
+curl -s -o /dev/null -X POST "$SITE_URL/wp-admin/admin-post.php" \
+	--data-urlencode "action=astrea_submit_inquiry" \
+	--data-urlencode "astrea_contact_redirect=$SITE_URL$CONTACT_PAGE_PATH" \
+	--data-urlencode "astrea_contact_nonce=$NONCE" \
+	--data-urlencode "name=連続送信" \
+	--data-urlencode "email=rl@example.com" \
+	--data-urlencode "message=Rate limit test" \
+	--data-urlencode "privacy_consent=1"
+AFTER_COUNT=$(wp_cli post list --post_type=astrea_inquiry --format=count)
+if [ "$AFTER_COUNT" != "$BEFORE_COUNT" ]; then
+	echo "FAIL [AK]: a rapid resubmission from the same client was not rate-limited"
+	exit 1
+fi
+echo "OK   [AK: rapid resubmission rate-limited]"
+
+echo "=== AL. Admin: unread count, mark-as-read toggle ==="
+COOKIE_JAR="$(mktemp)"
+curl -s -c "$COOKIE_JAR" "$SITE_URL/wp-login.php" > /dev/null
+LOGIN_STATUS=$(curl -s -c "$COOKIE_JAR" -b "$COOKIE_JAR" -X POST "$SITE_URL/wp-login.php" \
+	--data-urlencode "log=admin" --data-urlencode "pwd=password" \
+	--data-urlencode "wp-submit=Log In" --data-urlencode "redirect_to=$SITE_URL/wp-admin/" \
+	-o /dev/null -w "%{http_code}")
+if [ "$LOGIN_STATUS" != "302" ]; then
+	echo "FAIL [AL]: admin login did not redirect as expected (HTTP $LOGIN_STATUS)"
+	exit 1
+fi
+ADMIN_HTML=$(curl -s -b "$COOKIE_JAR" "$SITE_URL/wp-admin/admin.php?page=astrea-core-contact")
+if grep -q 'id="loginform"' <<< "$ADMIN_HTML"; then
+	echo "FAIL [AL]: admin session was not recognized"
+	exit 1
+fi
+if ! grep -qF "スモーク太郎" <<< "$ADMIN_HTML"; then
+	echo "FAIL [AL]: the saved inquiry from [AG] did not appear on the admin screen"
+	exit 1
+fi
+MARK_READ_NONCE=$(sed -n 's/.*name="astrea_contact_mark_read_nonce" value="\([a-f0-9]*\)".*/\1/p' <<< "$ADMIN_HTML" | head -1)
+curl -s -b "$COOKIE_JAR" -o /dev/null -X POST "$SITE_URL/wp-admin/admin-post.php" \
+	--data-urlencode "action=astrea_contact_mark_read" \
+	--data-urlencode "post_id=$INQUIRY_ID" \
+	--data-urlencode "is_read=1" \
+	--data-urlencode "astrea_contact_mark_read_nonce=$MARK_READ_NONCE"
+IS_READ_AFTER=$(wp_cli post meta get "$INQUIRY_ID" astrea_inquiry_is_read)
+if [ "$IS_READ_AFTER" != "1" ]; then
+	echo "FAIL [AL]: marking the inquiry as read did not persist"
+	exit 1
+fi
+echo "OK   [AL: admin screen shows the inquiry; mark-as-read toggle works]"
+
+echo "=== AM. CSV Export: correct headers, content, and formula-injection neutralization ==="
+CSV_INJECTION_ID=$(wp_cli post create --post_type=astrea_inquiry --post_status=private --post_title='=SUM(A1:A9)' --porcelain)
+wp_cli post meta update "$CSV_INJECTION_ID" astrea_inquiry_name '=cmd|/c calc'
+wp_cli post meta update "$CSV_INJECTION_ID" astrea_inquiry_email 'csv-injection@example.com'
+EXPORT_NONCE=$(grep -oE 'action=astrea_export_inquiries&#0?38;_wpnonce=[a-f0-9]+' <<< "$ADMIN_HTML" | grep -oE '[a-f0-9]+$')
+EXPORT_HEADERS=$(curl -s -b "$COOKIE_JAR" -D - -o "$BODY_FILE" "$SITE_URL/wp-admin/admin-post.php?action=astrea_export_inquiries&_wpnonce=$EXPORT_NONCE")
+if ! grep -qiF "text/csv" <<< "$EXPORT_HEADERS"; then
+	echo "FAIL [AM]: Export response was not served as text/csv"
+	exit 1
+fi
+if ! grep -qF "スモーク太郎" "$BODY_FILE"; then
+	echo "FAIL [AM]: CSV export did not include the saved inquiry"
+	exit 1
+fi
+if grep -qE $'^=cmd|,=cmd' "$BODY_FILE"; then
+	echo "FAIL [AM]: CSV formula injection was not neutralized"
+	exit 1
+fi
+if ! grep -qF "'=cmd" "$BODY_FILE"; then
+	echo "FAIL [AM]: expected the dangerous cell to be prefixed with a neutralizing quote"
+	exit 1
+fi
+wp_cli post delete "$CSV_INJECTION_ID" --force > /dev/null
+echo "OK   [AM: CSV export headers/content correct, formula injection neutralized]"
+
+echo "=== AN. Notification email confirmation: request, confirm via real HTTP, Replay rejected ==="
+wp_cli eval '
+add_filter( "wp_mail", function ( $args ) {
+	if ( preg_match( "/token=([^&\\s]+)/", $args["message"], $m ) ) {
+		set_transient( "smoke_captured_confirm_token", $m[1], 300 );
+	}
+	return $args;
+} );
+\Astrea\Core\Inquiry\request_email_confirmation( "smoke-confirm@example.com" );
+'
+CONFIRM_TOKEN=$(wp_cli eval 'echo get_transient( "smoke_captured_confirm_token" );')
+if [ -z "$CONFIRM_TOKEN" ]; then
+	echo "FAIL [AN]: could not capture the confirmation token"
+	exit 1
+fi
+fetch_no_fatal_any_status "AN: confirmation link (first use)" "/wp-admin/admin-post.php?action=astrea_confirm_contact_email&token=$CONFIRM_TOKEN"
+CONFIRMED_EMAIL=$(wp_cli eval 'echo \Astrea\Core\Inquiry\get_contact_settings()["notification_email"];')
+if [ "$CONFIRMED_EMAIL" != "smoke-confirm@example.com" ]; then
+	echo "FAIL [AN]: notification_email was not confirmed via the real HTTP link (got '$CONFIRMED_EMAIL')"
+	exit 1
+fi
+echo "OK   [AN: real HTTP confirmation link confirmed the notification email]"
+
+echo "=== AO. Token Replay: reusing the same confirmation link fails ==="
+wp_cli eval '\Astrea\Core\Inquiry\reschedule_digest_cron();' > /dev/null # no-op call to keep wp_cli warm; irrelevant to the assertion below
+wp_cli option update astrea_core_contact_settings '{"notification_email":"placeholder@example.com"}' --format=json
+fetch_no_fatal_any_status "AO: confirmation link (replay attempt)" "/wp-admin/admin-post.php?action=astrea_confirm_contact_email&token=$CONFIRM_TOKEN"
+STILL_PLACEHOLDER=$(wp_cli eval 'echo \Astrea\Core\Inquiry\get_contact_settings()["notification_email"];')
+if [ "$STILL_PLACEHOLDER" != "placeholder@example.com" ]; then
+	echo "FAIL [AO]: a replayed confirmation token was accepted a second time"
+	exit 1
+fi
+echo "OK   [AO: replayed confirmation token rejected]"
+wp_cli eval 'delete_option( "astrea_core_contact_settings" );'
+rm -f "$COOKIE_JAR"
+
+echo "=== AP. Core deactivated: no Fatal, Contact data retained, Cron cleared ==="
+wp_cli plugin deactivate astrea-core
+fetch_no_fatal_any_status "AP: contact page while Core inactive" "$CONTACT_PAGE_PATH"
+DB_INQUIRY_COUNT=$(wp_cli db query "SELECT COUNT(*) FROM wp_posts WHERE post_type='astrea_inquiry'" --skip-column-names)
+if [ "$DB_INQUIRY_COUNT" -lt 1 ]; then
+	echo "FAIL [AP]: inquiry data was lost while Core was deactivated"
+	exit 1
+fi
+CRON_AFTER_DEACTIVATE=$(wp_cli cron event list --fields=hook --format=csv 2>/dev/null | grep -c astrea_core_contact || true)
+if [ "$CRON_AFTER_DEACTIVATE" != "0" ]; then
+	echo "FAIL [AP]: Contact Cron events were not cleared on deactivation"
+	exit 1
+fi
+echo "OK   [AP: Contact data retained, Cron events cleared on deactivation]"
+
+echo "=== AQ. Core reactivated: Cron rescheduled, catch-up cleanup ran ==="
+wp_cli plugin activate astrea-core
+check_no_fatal "AQ: contact page after reactivation" "$CONTACT_PAGE_PATH"
+CRON_AFTER_ACTIVATE=$(wp_cli cron event list --fields=hook --format=csv 2>/dev/null | grep -c astrea_core_contact || true)
+if [ "$CRON_AFTER_ACTIVATE" -lt 2 ]; then
+	echo "FAIL [AQ]: Contact Cron events were not rescheduled on reactivation"
+	exit 1
+fi
+echo "OK   [AQ: Cron rescheduled after reactivation]"
+
+echo "=== AR. Retention Cleanup: an inquiry past its retention window is removed ==="
+EXPIRED_ID=$(wp_cli post create --post_type=astrea_inquiry --post_status=private --post_title='Expired Smoke Inquiry' --post_date="$(date -u -d '100 days ago' '+%Y-%m-%d %H:%M:%S' 2>/dev/null || date -u -v-100d '+%Y-%m-%d %H:%M:%S')" --porcelain)
+wp_cli eval '\Astrea\Core\Inquiry\cleanup_expired();'
+if wp_cli post get "$EXPIRED_ID" --field=ID > /dev/null 2>&1; then
+	echo "FAIL [AR]: an inquiry past its retention window was not cleaned up"
+	exit 1
+fi
+echo "OK   [AR: Retention cleanup removed an expired inquiry]"
+
+echo "=== Cleanup: remove Construction Order 005 smoke-test fixtures ==="
+wp_cli post delete "$INQUIRY_ID" "$CONTACT_PAGE_ID" --force > /dev/null 2>&1 || true
+wp_cli eval 'delete_option( "astrea_core_contact_settings" ); delete_transient( "astrea_core_contact_pending_email_confirm" ); delete_transient( "smoke_captured_confirm_token" );'
+
+echo "All ASTREA Contact end-to-end checks passed."

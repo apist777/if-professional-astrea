@@ -35,6 +35,16 @@
  * taxonomy terms) posts/postmeta are Core-owned data under the same
  * policy — intentionally NOT deleted here either.
  *
+ * As of Construction Order 005, `astrea_inquiry` posts/postmeta (Contact
+ * submissions) and the `astrea_core_contact_settings` option are
+ * Core-owned data under the same policy — intentionally NOT deleted here.
+ * Per Decision 019, this is a SEPARATE deletion path from the time-based
+ * Retention auto-delete (Decision 004): Retention removes individual
+ * inquiries once they age past the configured period regardless of
+ * plugin activation state; plain Uninstall must not additionally wipe
+ * whatever inquiries still happen to be within their Retention window.
+ *
+
  * A future Construction Order will add an explicit, confirmed "delete all
  * ASTREA Core data" admin action — this file will call into it only when
  * the user has affirmatively chosen full deletion, not automatically on
@@ -48,8 +58,9 @@ if ( ! defined( 'WP_UNINSTALL_PLUGIN' ) ) {
 }
 
 // Intentionally no-op: `astrea_core_office_profile`, `astrea_professional`,
-// `astrea_service`, `astrea_price`, `astrea_faq` posts/postmeta/taxonomy
-// terms, and their featured-image attachments must all survive a plain
-// "Delete" from the Plugins screen. Only a future, explicit,
-// user-confirmed deletion flow may remove them — and that flow must never
-// delete Media Library attachments.
+// `astrea_service`, `astrea_price`, `astrea_faq`, `astrea_inquiry`
+// posts/postmeta/taxonomy terms, `astrea_core_contact_settings`, and their
+// featured-image attachments must all survive a plain "Delete" from the
+// Plugins screen. Only a future, explicit, user-confirmed deletion flow
+// may remove them — and that flow must never delete Media Library
+// attachments.

@@ -3,7 +3,7 @@
  * Plugin Name: ASTREA Core
  * Plugin URI: https://project-if.com/astrea
  * Description: If Professional ASTREA — テーマを変更しても保持すべき情報とサイト共通機能を担当する、ASTREA Themeの公式推奨Plugin（任意）。「Coreは推奨する。しかしThemeを人質にしない。」（Decision 021）。
- * Version: 0.4.0
+ * Version: 0.5.0
  * Requires at least: 7.0
  * Requires PHP: 8.3
  * Author: Project-if
@@ -22,7 +22,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit; // Disallow direct access.
 }
 
-define( 'ASTREA_CORE_VERSION', '0.4.0' );
+define( 'ASTREA_CORE_VERSION', '0.5.0' );
 define( 'ASTREA_CORE_FILE', __FILE__ );
 define( 'ASTREA_CORE_DIR', plugin_dir_path( __FILE__ ) );
 
@@ -38,6 +38,11 @@ require ASTREA_CORE_DIR . 'includes/price-admin.php';
 require ASTREA_CORE_DIR . 'includes/price-list-block.php';
 require ASTREA_CORE_DIR . 'includes/faq.php';
 require ASTREA_CORE_DIR . 'includes/faq-admin.php';
+require ASTREA_CORE_DIR . 'includes/inquiry.php';
+require ASTREA_CORE_DIR . 'includes/inquiry-email-confirmation.php';
+require ASTREA_CORE_DIR . 'includes/inquiry-notifications.php';
+require ASTREA_CORE_DIR . 'includes/inquiry-admin.php';
+require ASTREA_CORE_DIR . 'includes/contact-form-block.php';
 
 add_action( 'plugins_loaded', __NAMESPACE__ . '\\load_textdomain' );
 
@@ -66,6 +71,12 @@ register_activation_hook( __FILE__, __NAMESPACE__ . '\\activate' );
  * rules for an unrelated reason. This does not create or modify any
  * content; it only makes routing aware of the post types.
  *
+ * Inquiry (Contact, Construction Order 005) schedules two daily Cron
+ * events (Retention cleanup, digest notification) on activation/
+ * reactivation, and runs one Retention cleanup pass immediately — this
+ * catches up on anything that should have expired while Core was
+ * inactive (its Cron events don't fire while deactivated).
+ *
  * @return void
  */
 function activate() {
@@ -74,6 +85,10 @@ function activate() {
 	Price\register_post_type_and_meta();
 	Faq\register_post_type_and_meta();
 	flush_rewrite_rules();
+
+	Inquiry\schedule_cleanup_cron();
+	Inquiry\reschedule_digest_cron();
+	Inquiry\cleanup_expired();
 }
 
 register_deactivation_hook( __FILE__, __NAMESPACE__ . '\\deactivate' );
@@ -87,8 +102,15 @@ register_deactivation_hook( __FILE__, __NAMESPACE__ . '\\deactivate' );
  * deactivated Core doesn't leave a dangling `professionals` rewrite rule
  * pointing at a post type that is no longer registered.
  *
+ * Inquiry's Cron events are unscheduled (not the data itself — see
+ * Decision 019) so a deactivated Core doesn't leave dangling scheduled
+ * events calling into code that is no longer loaded.
+ *
  * @return void
  */
 function deactivate() {
 	flush_rewrite_rules();
+
+	Inquiry\clear_cleanup_cron();
+	Inquiry\clear_digest_cron();
 }
