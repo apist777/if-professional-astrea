@@ -274,11 +274,19 @@ echo "OK   [T: v1 -> v2 migration ran on a real request, old key removed]"
 echo "=== U. Legacy representative notice appears; deprecated field removed from the form ==="
 COOKIE_JAR="$(mktemp)"
 curl -s -c "$COOKIE_JAR" "$SITE_URL/wp-login.php" > /dev/null
-curl -s -c "$COOKIE_JAR" -b "$COOKIE_JAR" -X POST "$SITE_URL/wp-login.php" \
+LOGIN_STATUS=$(curl -s -c "$COOKIE_JAR" -b "$COOKIE_JAR" -X POST "$SITE_URL/wp-login.php" \
 	--data-urlencode "log=admin" --data-urlencode "pwd=password" \
 	--data-urlencode "wp-submit=Log In" --data-urlencode "redirect_to=$SITE_URL/wp-admin/" \
-	-o /dev/null
+	-o /dev/null -w "%{http_code}")
+if [ "$LOGIN_STATUS" != "302" ]; then
+	echo "FAIL [U]: admin login did not redirect as expected (HTTP $LOGIN_STATUS) — cannot verify the admin notice"
+	exit 1
+fi
 ADMIN_HTML=$(curl -s -b "$COOKIE_JAR" "$SITE_URL/wp-admin/admin.php?page=astrea-core")
+if echo "$ADMIN_HTML" | grep -q 'id="loginform"'; then
+	echo "FAIL [U]: admin session was not recognized (bounced back to the login form)"
+	exit 1
+fi
 if ! echo "$ADMIN_HTML" | grep -q "$LEGACY_NAME"; then
 	echo "FAIL [U]: legacy representative notice did not appear on the ASTREA admin page"
 	exit 1
