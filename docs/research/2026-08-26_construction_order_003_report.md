@@ -150,7 +150,7 @@ wp-env上で以下をすべて実際のHTTPリクエストで確認した。
 - **PHPUnit**：`tests/ProfessionalProfileTest.php`（19件）+ 既存`tests/OfficeProfileTest.php`（20件）＝**39 tests / 64 assertions、全PASS**。
 - **PHPCS**：エラー・警告0件（実PHP 8.3環境、`wp-env`の`tests-cli`コンテナ経由）。
 - **smoke-test.sh**：既存A〜I（Construction 001/002）は無変更のままRegression PASS。新規J〜S（Professional Profile）を追加し全PASS。2回連続実行して冪等性を確認。
-- **GitHub Actions**：詳細は本報告書末尾（セクション0、最終検収後に追記）参照。
+- **GitHub Actions**：push後、初回で3ジョブ全Green（[run 32950426900](https://github.com/apist777/if-professional-astrea/actions/runs/32950426900)）。CI修正は不要だった。
 
 ---
 
