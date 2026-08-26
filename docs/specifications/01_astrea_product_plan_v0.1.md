@@ -6,6 +6,8 @@ If Professional ASTREA
 【2026-08-25 追記】本書の一部（§22 Child Theme等）は、`04_astrea_free_v1_preconstruction_decisions.md`（Decision 001〜020）の内容を反映して更新されている。本書とDecision文書の間に食い違いが生じた場合はDecision文書を優先する。
 
 【2026-08-26 追記】§3（想定ユーザー）は、Decision 022（士業法人・複数専門家対応）の内容を反映して更新されている。
+
+【2026-08-26 追記】§11（ASTREA Core）は、Decision 023（代表者情報の正本はProfessional Profile）の内容を反映して更新されている。
 ________________________________________
 1. プロジェクト概要
 If Professional ASTREA は、Project-ifが展開するIf-Themaシリーズにおける、士業・専門家向けWordPress製品シリーズである。
@@ -167,12 +169,13 @@ ________________________________________
 想定機能：
 事務所基本情報
 •	事務所名 
-•	代表者 
 •	所在地 
 •	電話番号 
 •	営業時間 
 •	SNS等 
 一度入力した情報をHeader・Footer・CTA等から共通利用できる仕組みを目指す。
+
+【2026-08-26 Decision 023により確定】代表者は「人」に属する情報であり、事務所基本情報（Office Profile）ではなくProfessional Profile側で管理する（代表者識別フラグ`is_representative`）。
 アクセス解析
 Google Analytics 4については、
 G-XXXXXXXXXX

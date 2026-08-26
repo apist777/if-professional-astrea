@@ -31,7 +31,7 @@ class OfficeProfileTest extends WP_UnitTestCase {
 
 		$this->assertSame( '', $profile['office_name'] );
 		$this->assertSame( '', $profile['phone'] );
-		$this->assertSame( 1, $profile['schema_version'] );
+		$this->assertSame( 2, $profile['schema_version'] );
 
 		foreach ( OfficeProfile\WEEKDAYS as $day ) {
 			$this->assertTrue( $profile['business_hours']['weekly'][ $day ]['closed'], "Day {$day} should default to closed" );
@@ -44,15 +44,86 @@ class OfficeProfileTest extends WP_UnitTestCase {
 	public function test_sanitize_strips_tags_from_text_fields() {
 		$result = OfficeProfile\sanitize(
 			array(
-				'office_name'         => '<script>alert(1)</script>テスト事務所',
-				'representative_name' => '<b>山田</b>太郎',
-				'address'             => "東京都\n千代田区", // sanitize_text_field also collapses newlines.
+				'office_name' => '<script>alert(1)</script>テスト事務所',
+				'address'     => "東京都\n千代田区", // sanitize_text_field also collapses newlines.
 			)
 		);
 
 		$this->assertSame( 'テスト事務所', $result['office_name'] );
-		$this->assertSame( '山田太郎', $result['representative_name'] );
 		$this->assertSame( '東京都 千代田区', $result['address'] );
+	}
+
+	public function test_sanitize_does_not_process_representative_name_anymore() {
+		// Decision 023: representative_name is retired. Even if somehow
+		// submitted (e.g. a stale cached form), sanitize() must not revive
+		// it as an active field.
+		$result = OfficeProfile\sanitize( array( 'representative_name' => '山田太郎' ) );
+
+		$this->assertArrayNotHasKey( 'representative_name', $result );
+	}
+
+	public function test_sanitize_never_touches_legacy_representative_name() {
+		update_option(
+			OfficeProfile\OPTION_NAME,
+			array_merge(
+				OfficeProfile\get_defaults(),
+				array( OfficeProfile\LEGACY_REPRESENTATIVE_NAME_KEY => '旧・代表者名' )
+			)
+		);
+
+		// Submitting the form (which no longer has a representative field
+		// at all) must not wipe the preserved legacy value.
+		$result = OfficeProfile\sanitize( array( 'office_name' => '事務所名のみ更新' ) );
+
+		$this->assertSame( '旧・代表者名', $result[ OfficeProfile\LEGACY_REPRESENTATIVE_NAME_KEY ] );
+	}
+
+	public function test_migration_preserves_v1_representative_name_as_legacy() {
+		update_option(
+			OfficeProfile\OPTION_NAME,
+			array(
+				'schema_version'      => 1,
+				'office_name'         => '旧事務所',
+				'representative_name' => '旧代表者',
+				'address'             => '',
+				'phone'               => '',
+			)
+		);
+
+		OfficeProfile\maybe_migrate();
+
+		$raw = get_option( OfficeProfile\OPTION_NAME );
+		$this->assertSame( 2, $raw['schema_version'] );
+		$this->assertArrayNotHasKey( 'representative_name', $raw );
+		$this->assertSame( '旧代表者', $raw[ OfficeProfile\LEGACY_REPRESENTATIVE_NAME_KEY ] );
+	}
+
+	public function test_migration_is_a_noop_when_nothing_was_ever_saved() {
+		delete_option( OfficeProfile\OPTION_NAME );
+
+		OfficeProfile\maybe_migrate();
+
+		$this->assertFalse( get_option( OfficeProfile\OPTION_NAME, false ), 'A site that never saved Office Profile must not gain a new option row from migration alone.' );
+	}
+
+	public function test_migration_does_not_run_twice() {
+		update_option(
+			OfficeProfile\OPTION_NAME,
+			array(
+				'schema_version'      => 1,
+				'representative_name' => '旧代表者',
+			)
+		);
+
+		OfficeProfile\maybe_migrate();
+		// Simulate the site owner manually clearing the legacy value after migrating by hand.
+		$after_first = get_option( OfficeProfile\OPTION_NAME );
+		$after_first[ OfficeProfile\LEGACY_REPRESENTATIVE_NAME_KEY ] = '';
+		update_option( OfficeProfile\OPTION_NAME, $after_first );
+
+		OfficeProfile\maybe_migrate();
+
+		$this->assertSame( '', get_option( OfficeProfile\OPTION_NAME )[ OfficeProfile\LEGACY_REPRESENTATIVE_NAME_KEY ], 'A second migration run must not resurrect a value the site owner already cleared.' );
 	}
 
 	public function test_sanitize_accepts_a_well_formed_phone_number() {
@@ -320,5 +391,58 @@ class OfficeProfileTest extends WP_UnitTestCase {
 
 		$profile = OfficeProfile\get_office_profile();
 		$this->assertSame( '削除されないはずの事務所', $profile['office_name'], 'Decision 019: deactivation must never delete Core-owned data.' );
+	}
+
+	// -- Decision 023: legacy representative_name admin notice --------------
+
+	public function test_legacy_representative_notice_shows_when_unresolved() {
+		set_current_screen( 'toplevel_page_astrea-core' );
+		$admin_id = self::factory()->user->create( array( 'role' => 'administrator' ) );
+		wp_set_current_user( $admin_id );
+		update_option(
+			OfficeProfile\OPTION_NAME,
+			array_merge( OfficeProfile\get_defaults(), array( OfficeProfile\LEGACY_REPRESENTATIVE_NAME_KEY => '旧代表太郎' ) )
+		);
+
+		ob_start();
+		\Astrea\Core\OfficeProfile\Admin\maybe_render_legacy_representative_notice();
+		$html = ob_get_clean();
+
+		$this->assertStringContainsString( '旧代表太郎', $html );
+	}
+
+	public function test_legacy_representative_notice_hidden_once_someone_is_flagged_representative() {
+		set_current_screen( 'toplevel_page_astrea-core' );
+		$admin_id = self::factory()->user->create( array( 'role' => 'administrator' ) );
+		wp_set_current_user( $admin_id );
+		update_option(
+			OfficeProfile\OPTION_NAME,
+			array_merge( OfficeProfile\get_defaults(), array( OfficeProfile\LEGACY_REPRESENTATIVE_NAME_KEY => '旧代表太郎' ) )
+		);
+		$prof_id = self::factory()->post->create(
+			array(
+				'post_type'   => \Astrea\Core\ProfessionalProfile\POST_TYPE,
+				'post_status' => 'publish',
+			)
+		);
+		update_post_meta( $prof_id, \Astrea\Core\ProfessionalProfile\META_IS_REPRESENTATIVE, true );
+
+		ob_start();
+		\Astrea\Core\OfficeProfile\Admin\maybe_render_legacy_representative_notice();
+		$html = ob_get_clean();
+
+		$this->assertSame( '', $html, 'The notice must disappear on its own once a Professional Profile is flagged as representative.' );
+	}
+
+	public function test_legacy_representative_notice_hidden_when_no_legacy_value() {
+		set_current_screen( 'toplevel_page_astrea-core' );
+		$admin_id = self::factory()->user->create( array( 'role' => 'administrator' ) );
+		wp_set_current_user( $admin_id );
+
+		ob_start();
+		\Astrea\Core\OfficeProfile\Admin\maybe_render_legacy_representative_notice();
+		$html = ob_get_clean();
+
+		$this->assertSame( '', $html );
 	}
 }

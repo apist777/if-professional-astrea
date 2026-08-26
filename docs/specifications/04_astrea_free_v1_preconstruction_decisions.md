@@ -811,9 +811,87 @@ ACCESSページ固有の最寄駅・徒歩時間・駐車場・地図表示方�
 
 ---
 
+## Decision 023 — 代表者情報の正本は Professional Profile
+
+**Status:** FIXED
+**決定日:** 2026-08-26
+
+### 決定内容
+
+代表者は「人」に属する情報であり、「組織」であるOffice Profileの管轄ではない。代表者情報の正本を**Professional Profile**とする。
+
+- Professional Profileに、その人物が代表者であることを識別するBoolean flag（`is_representative`、postmeta `astrea_professional_is_representative`）を追加する。
+- 具体的な肩書テキスト（代表社員・所長・代表税理士等）は、既存の「資格・肩書」フィールド（`qualification`）へ入力する。肩書テキスト専用の新しいフィールドは追加しない。
+- **複数の専門家を代表者として指定できるかについては、一意制約を設けない。** 士業法人には複数の代表社員が存在しうるため、単一代表者へ制限する明確な根拠が既存仕様・実態のいずれにも見当たらなかった。0人・1人・複数人のいずれの状態も許容する。**この判断（本当に複数代表者を許容すべきか）自体は、要確認事項として残す**（セクション末尾参照）。
+- Office Profileの`representative_name`は廃止する。ただし、「一度入力した情報は可能な限り再利用する」という原則に基づき、既存データを乱暴に削除しない。Schema v1→v2 Migrationにより、既存の`representative_name`値を`legacy_representative_name`という内部専用キーへ保存し直し、Professional Profileで代表者が指定されるまで管理画面に案内を表示する。**Migrationは、既存の人物データを推測して自動生成・自動統合することはしない**（Professional Profile 0件時・同名Professional存在時・異なるProfessional存在時のいずれにおいても、自動的な人物生成・自動flagづけは行わない）。
+
+### 理由・設計原則
+
+- 代表者情報の所在をOfficeからPersonへ移すというDecision 022の帰結を、具体的なデータ移行方式まで含めて確定する。
+- 自動Migrationでの人物生成・自動flagづけは、誤った代表者情報を生成するリスクがあり、正確性より危険性が上回ると判断した。
+- 複数代表者を制限する明確な仕様上・実務上の根拠がないため、クロエの独自判断で一意制約を追加しない。
+
+### 影響する既存仕様
+
+- **02仕様書 §4（Core情報一元管理）を更新する。** Office Profileの一元管理対象から代表者情報を除外する記述へ改める。
+- **02仕様書 §8（Professional Profile）を更新する。** 代表者識別（`is_representative`）を追加する。
+- `docs/research/2026-08-26_construction_order_002_report.md`・`docs/research/2026-08-26_construction_order_003_report.md`の該当する要確認事項をCLOSEDとする。
+
+### Theme / Core / WordPress の責任境界
+
+- Core：`is_representative` postmetaの登録・保存、Schema v1→v2 Migration Runner（`Astrea\Core\OfficeProfile\maybe_migrate()`）、管理画面通知。
+- Theme：変更なし（Theme側は現時点で代表者情報を一切表示していないため、本Decisionによる影響を受けない）。
+
+### 実装時に守るべき事項
+
+- 既存のOffice Profile Schema v1データに対し、Professional Profileの人物データを自動生成・自動統合しない。
+- 複数代表者を禁止する一意制約を実装しない（要確認事項として残す）。
+- `legacy_representative_name`は内部専用キーとして扱い、`get_office_profile()`の一般的な公開契約（ThemeやPROが読むべき値）には含めない。
+
+---
+
+## Decision 024 — Core無効時のCore所有URLに関する保証範囲
+
+**Status:** FIXED
+**決定日:** 2026-08-26
+
+### 決定内容
+
+ASTREA FREE v1では、Core無効時にCore所有機能のURL（例：`/professionals/`）が必ずHTTP 404を返すことを保証対象と**しない**。保証するのは以下の5点のみとする。
+
+1. Theme全体が正常動作する
+2. Fatal / Warning / Noticeを発生させない
+3. 壊れたMarkupを表示しない
+4. Core所有データを残留表示しない
+5. Core再有効化後に正常復帰する
+
+Construction Order 003で確認された「Core無効時に`/professionals/`がHTTP 200のFallback（サイトのトップページ相当）になる」という挙動は、上記5点をすべて満たしているため、FREE v1のBlocking Bugとして扱わない。
+
+このHTTP Statusを是正するためだけに、ThemeへCore所有のCPT名・URL構造等の知識を持たせる実装は行わない。
+
+### 理由・設計原則
+
+- Decision 021「Coreは推奨する。しかしThemeを人質にしない。」の原則を、より具体的な保証範囲として明文化する。
+- 完璧な404レスポンスを追求するためにTheme/Core間の望ましくない密結合を生むことを避ける。
+
+### 影響する既存仕様
+
+- `docs/research/2026-08-26_construction_order_003_report.md` §13の要確認事項2をCLOSEDとする（対応不要と正式判断）。
+- `05_astrea_free_v1_construction_baseline.md`：既存の変更管理方針に従い、Core無効時の要件（セクション4）に本Decisionへの参照を追記する。
+
+### Theme / Core / WordPress の責任境界
+
+- 変更なし。ThemeはCore所有のCPT・URL知識を持たない状態を維持する。
+
+### 実装時に守るべき事項
+
+- 将来、Core所有URLの404挙動改善が必要になった場合も、Theme経由ではなくCore自身（例：`template_redirect`等）で解決する方式を優先する。
+
+---
+
 ## 本書に基づき残る確認事項（新規Decisionではない）
 
-以下は、Decision 001〜021によっておおむね解消されたが、正式仕様の文言として明示的な一文が未整備、または性質上「実装フェーズの技術詳細」に属するため、本書ではこれ以上の判断を追加しない事項である。クロエ独自の判断でこれらを確定させることはしない。
+以下は、Decision 001〜024によっておおむね解消されたが、正式仕様の文言として明示的な一文が未整備、または性質上「実装フェーズの技術詳細」に属するため、本書ではこれ以上の判断を追加しない事項である。クロエ独自の判断でこれらを確定させることはしない。
 
 1. ~~ASTREA CoreがFREE v1において「必須」か「任意」かの明文化。~~ **CLOSED（2026-08-26 Decision 021により確定）。** ASTREA Coreは任意Plugin・公式推奨として位置付けることが正式にFIXされ、02仕様書 §3へ反映済み。
 2. **Schema Version / Migrationの具体的な実装機構。** Decision 020で「Versioned Migration方式を採る」という方針は確定したが、バージョン番号の管理場所、Migration実行のタイミング等の詳細設計は実装フェーズで行う。
@@ -821,5 +899,6 @@ ACCESSページ固有の最寄駅・徒歩時間・駐車場・地図表示方�
 4. **Pattern と Style Variation（Trust / Natural / Modern）の共有方式。** Design System設計時に決定する。
 5. **Service / FAQ / CASE等が0件のときの空状態UIパターンの統一。** Pattern設計時に決定する。
 6. ~~営業時間・臨時休業データモデルの詳細（将来の予約Pluginとの共有を見据えた設計）。~~ **CLOSED（2026-08-26 Construction Order 002により実装）。** `astrea_core_office_profile`内の`business_hours`（週次の定休日／開始・終了時刻＋臨時休業等の期間リスト）として実装済み。将来の予約Pluginとの共有インターフェースは未設計だが、データモデル自体は確定した。
+7. **複数のProfessional Profileを「代表者」として同時に指定できることの是非。** Decision 023で「一意制約を設けない」という実装方針は確定したが、これがFREE v1として正しい仕様かどうか（単一代表者に限定すべきという業務要件が将来判明する可能性を含む）は、クロエの独自判断で確定していない。次回の仕様確認を推奨する。
 
 これらは最終監査（`docs/research/`配下の最終監査資料を参照）においてP0（着工前必須）ではなく、各設計フェーズでの決定事項として扱う。

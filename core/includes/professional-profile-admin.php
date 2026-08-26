@@ -22,6 +22,7 @@ use const Astrea\Core\ProfessionalProfile\META_CAREER;
 use const Astrea\Core\ProfessionalProfile\META_EDUCATION;
 use const Astrea\Core\ProfessionalProfile\META_AFFILIATION;
 use const Astrea\Core\ProfessionalProfile\META_REGISTRATION_INFO;
+use const Astrea\Core\ProfessionalProfile\META_IS_REPRESENTATIVE;
 
 if ( ! defined( 'ABSPATH' ) ) {
 	exit; // Disallow direct access.
@@ -62,7 +63,23 @@ function render_meta_box( \WP_Post $post ) {
 	$education         = get_post_meta( $post->ID, META_EDUCATION, true );
 	$affiliation       = get_post_meta( $post->ID, META_AFFILIATION, true );
 	$registration_info = get_post_meta( $post->ID, META_REGISTRATION_INFO, true );
+	$is_representative = get_post_meta( $post->ID, META_IS_REPRESENTATIVE, true );
 	?>
+	<p>
+		<label for="astrea_professional_is_representative">
+			<input
+				type="checkbox"
+				id="astrea_professional_is_representative"
+				name="<?php echo esc_attr( META_IS_REPRESENTATIVE ); ?>"
+				value="1"
+				<?php checked( $is_representative ); ?>
+			/>
+			<strong><?php esc_html_e( '代表者として表示する', 'astrea-core' ); ?></strong>
+		</label>
+		<p class="description">
+			<?php esc_html_e( '複数人を代表者として指定することもできます。具体的な肩書（代表社員・所長など）は下の「資格・肩書」欄に入力してください。', 'astrea-core' ); ?>
+		</p>
+	</p>
 	<p>
 		<label for="astrea_professional_qualification"><strong><?php esc_html_e( '資格・肩書', 'astrea-core' ); ?></strong></label><br />
 		<input
@@ -153,4 +170,8 @@ function save_meta( int $post_id ) {
 		$value = call_user_func( $sanitize_callback, wp_unslash( $_POST[ $meta_key ] ) );
 		update_post_meta( $post_id, $meta_key, $value );
 	}
+
+	// Checkbox: absent from $_POST when unchecked, same pattern as Office
+	// Profile's weekly-hours "closed" checkboxes.
+	update_post_meta( $post_id, META_IS_REPRESENTATIVE, isset( $_POST[ META_IS_REPRESENTATIVE ] ) );
 }

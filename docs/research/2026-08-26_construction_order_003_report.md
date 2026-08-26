@@ -156,6 +156,6 @@ wp-env上で以下をすべて実際のHTTPリクエストで確認した。
 
 ## 13. 発見した仕様上の要確認事項
 
-1. **Office Profileの「代表者名」とProfessional Profileの重複可能性。** Construction Order 003の指示どおり、Office Profile（Construction Order 002）の`representative_name`フィールドは削除・移動していない。しかし、Professional Profileが実装された今、「代表者」は本来Professional Profileの中の1件（例えば`menu_order`が最も若い、または何らかのフラグを持つ1人）であるべきではないか、という設計上の重複・UX課題が存在する。現状は、Office Profileの`representative_name`（単純文字列）とProfessional Profile（構造化された複数人データ）が独立して併存しており、同じ「代表者名」を将来的に2箇所で管理・編集できてしまう可能性がある。**クロエの判断でこの重複を解消することはしていない。** 次回の仕様確認を推奨する。
-2. Core無効化時の`/professionals/`がクリーンな404ではなくHTTP 200のフォールバックになる点（セクション7参照）。安全性要件は満たすが、URL設計の観点で改善余地がある。
+1. ~~Office Profileの「代表者名」とProfessional Profileの重複可能性。~~ **CLOSED（2026-08-26 Decision 023により確定、Construction Order 003Aで実装）。** 代表者情報の正本はProfessional Profile（`is_representative`フラグ）とし、Office Profileの`representative_name`は廃止・Migrationした。詳細は`docs/research/2026-08-26_construction_order_003a_report.md`参照。
+2. ~~Core無効化時の`/professionals/`がクリーンな404ではなくHTTP 200のフォールバックになる点。~~ **CLOSED（2026-08-26 Decision 024により確定）。** FREE v1が保証する範囲はFatal/Warning/Notice無し・壊れたMarkup無し・古いデータ残留無し・再有効化後の正常復帰の5点であり、HTTP Statusの完全な404化は保証対象に含まないと正式に判断された。
 3. 上記以外に、Baseline / Decision 001〜022との矛盾は発見していない。

@@ -246,4 +246,80 @@ class ProfessionalProfileTest extends WP_UnitTestCase {
 		$this->assertNotNull( get_post( $id ), 'Decision 019: deactivation must never delete Core-owned data.' );
 		$this->assertSame( '削除されないはずの専門家', get_post( $id )->post_title );
 	}
+
+	// -- Decision 023: representative flag -----------------------------------
+
+	public function test_no_representative_by_default() {
+		$this->create_professional();
+
+		$this->assertSame( array(), ProfessionalProfile\get_representatives() );
+	}
+
+	public function test_one_representative_is_returned() {
+		$id = $this->create_professional( array( 'post_title' => '代表 太郎' ) );
+		update_post_meta( $id, ProfessionalProfile\META_IS_REPRESENTATIVE, true );
+
+		$reps = ProfessionalProfile\get_representatives();
+
+		$this->assertCount( 1, $reps );
+		$this->assertSame( '代表 太郎', $reps[0]['name'] );
+		$this->assertTrue( $reps[0]['is_representative'] );
+	}
+
+	public function test_multiple_representatives_are_allowed() {
+		// Decision 023 leaves this an open question (see the Construction
+		// Order 003A report) — no uniqueness constraint is enforced.
+		$a = $this->create_professional( array( 'post_title' => '代表社員A' ) );
+		$b = $this->create_professional( array( 'post_title' => '代表社員B' ) );
+		update_post_meta( $a, ProfessionalProfile\META_IS_REPRESENTATIVE, true );
+		update_post_meta( $b, ProfessionalProfile\META_IS_REPRESENTATIVE, true );
+
+		$this->assertCount( 2, ProfessionalProfile\get_representatives() );
+	}
+
+	public function test_non_representative_profiles_are_not_flagged() {
+		$id = $this->create_professional();
+
+		$this->assertFalse( ProfessionalProfile\get_profile( $id )['is_representative'] );
+	}
+
+	public function test_save_meta_sets_is_representative_when_checkbox_present() {
+		$admin_id = self::factory()->user->create( array( 'role' => 'administrator' ) );
+		wp_set_current_user( $admin_id );
+		$id = $this->create_professional();
+
+		$_POST[ ProfessionalProfileAdmin\NONCE_FIELD ]           = wp_create_nonce( ProfessionalProfileAdmin\NONCE_ACTION );
+		$_POST[ ProfessionalProfile\META_IS_REPRESENTATIVE ]     = '1';
+
+		ProfessionalProfileAdmin\save_meta( $id );
+
+		$this->assertTrue( ProfessionalProfile\get_profile( $id )['is_representative'] );
+	}
+
+	public function test_save_meta_unsets_is_representative_when_checkbox_absent() {
+		$admin_id = self::factory()->user->create( array( 'role' => 'administrator' ) );
+		wp_set_current_user( $admin_id );
+		$id = $this->create_professional();
+		update_post_meta( $id, ProfessionalProfile\META_IS_REPRESENTATIVE, true );
+
+		// Real unchecked checkboxes are simply absent from $_POST.
+		$_POST[ ProfessionalProfileAdmin\NONCE_FIELD ] = wp_create_nonce( ProfessionalProfileAdmin\NONCE_ACTION );
+
+		ProfessionalProfileAdmin\save_meta( $id );
+
+		$this->assertFalse( ProfessionalProfile\get_profile( $id )['is_representative'] );
+	}
+
+	public function test_save_meta_rejects_is_representative_change_without_nonce() {
+		$admin_id = self::factory()->user->create( array( 'role' => 'administrator' ) );
+		wp_set_current_user( $admin_id );
+		$id = $this->create_professional();
+
+		$_POST[ ProfessionalProfile\META_IS_REPRESENTATIVE ] = '1';
+		// No nonce field set.
+
+		ProfessionalProfileAdmin\save_meta( $id );
+
+		$this->assertFalse( ProfessionalProfile\get_profile( $id )['is_representative'] );
+	}
 }

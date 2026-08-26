@@ -6,9 +6,8 @@
  * 002). It stores the compact "事務所基本情報" set defined in
  * docs/specifications/01_astrea_product_plan_v0.1.md §11 and
  * docs/specifications/02_astrea_free_v1_specification.md §4: office name,
- * representative name, address, phone, weekly business hours (with
- * exception date ranges for closures such as 年末年始/夏季休業/臨時休業),
- * and SNS links.
+ * address, phone, weekly business hours (with exception date ranges for
+ * closures such as 年末年始/夏季休業/臨時休業), and SNS links.
  *
  * Deliberately excluded from this data set (see
  * docs/research/2026-08-26_construction_order_002_report.md): professional
@@ -16,6 +15,15 @@
  * ACCESS-page-only fields (nearest station, walk time, parking). These are
  * distinct Core responsibilities per AGENTS.md §6 and are left for a future
  * Construction Order rather than folded in here.
+ *
+ * Per Decision 023 (Construction Order 003A): the representative is a
+ * PERSON, not an attribute of the office, so their name is no longer
+ * edited here. It now lives on Professional Profile as an
+ * `is_representative` flag (see includes/professional-profile.php).
+ * A schema v1 -> v2 migration (see maybe_migrate()) preserves any
+ * previously entered `representative_name` under `legacy_representative_name`
+ * rather than deleting it or guessing which Professional Profile (if any)
+ * it refers to.
  *
  * @package Astrea\Core
  */
@@ -40,14 +48,87 @@ const SETTINGS_GROUP = 'astrea_core_office_profile_group';
 /**
  * Current data shape version, stored inside the option itself.
  *
- * There is no migration runner yet because this is the first schema
- * version ever shipped — there is nothing to migrate from. See the
- * Migration/Schema section of docs/research/2026-08-26_construction_order_002_report.md
- * for when a migration mechanism should be added.
+ * Version 1 (Construction Order 002): initial shape, included `representative_name`.
+ * Version 2 (Construction Order 003A / Decision 023): `representative_name`
+ * retired in favor of Professional Profile's `is_representative` flag. See
+ * maybe_migrate() for the v1 -> v2 upgrade path.
  */
-const SCHEMA_VERSION = 1;
+const SCHEMA_VERSION = 2;
+
+/** The schema v1 key name, read only by the v1 -> v2 migration. */
+const V1_REPRESENTATIVE_NAME_KEY = 'representative_name';
+
+/**
+ * Where a pre-existing v1 representative_name is preserved after
+ * migration. Intentionally NOT part of the supported get_office_profile()
+ * read contract for Theme/PRO use — it exists only so the admin notice
+ * (see office-profile-admin.php) can prompt a human to move it to a
+ * Professional Profile. New code must not read or write this key.
+ */
+const LEGACY_REPRESENTATIVE_NAME_KEY = 'legacy_representative_name';
 
 const WEEKDAYS = array( 'mon', 'tue', 'wed', 'thu', 'fri', 'sat', 'sun' );
+
+add_action( 'plugins_loaded', __NAMESPACE__ . '\\maybe_migrate' );
+
+/**
+ * Runs the Office Profile schema migration if the stored data is older
+ * than SCHEMA_VERSION. A no-op (and no write) for sites that have never
+ * saved Office Profile data at all — there is nothing to migrate, and
+ * get_defaults() already supplies the current schema for them.
+ *
+ * @return void
+ */
+function maybe_migrate() {
+	$stored = get_option( OPTION_NAME, null );
+
+	if ( ! is_array( $stored ) ) {
+		return;
+	}
+
+	$version = isset( $stored['schema_version'] ) ? (int) $stored['schema_version'] : 1;
+
+	if ( $version >= SCHEMA_VERSION ) {
+		return;
+	}
+
+	if ( $version < 2 ) {
+		$stored = migrate_v1_to_v2( $stored );
+	}
+
+	$stored['schema_version'] = SCHEMA_VERSION;
+	update_option( OPTION_NAME, $stored );
+}
+
+/**
+ * Schema v1 -> v2: retires `representative_name` (Decision 023 —
+ * representative is a person, and now belongs to Professional Profile's
+ * `is_representative` flag, not the office).
+ *
+ * Deliberately does NOT try to guess which Professional Profile (if any)
+ * this name refers to, and does NOT create a new Professional Profile
+ * from it — inventing or auto-selecting a person from a bare string is a
+ * real risk of wrong/misleading data, worse than asking a human. The old
+ * value is preserved verbatim under LEGACY_REPRESENTATIVE_NAME_KEY so
+ * nothing is lost, and stops being treated as the active field; a
+ * one-time admin notice (see office-profile-admin.php) prompts the site
+ * owner to assign it to a Professional Profile themselves.
+ *
+ * @param array $stored Raw v1 (or older) stored data.
+ * @return array
+ */
+function migrate_v1_to_v2( array $stored ): array {
+	if (
+		! empty( $stored[ V1_REPRESENTATIVE_NAME_KEY ] )
+		&& empty( $stored[ LEGACY_REPRESENTATIVE_NAME_KEY ] )
+	) {
+		$stored[ LEGACY_REPRESENTATIVE_NAME_KEY ] = $stored[ V1_REPRESENTATIVE_NAME_KEY ];
+	}
+
+	unset( $stored[ V1_REPRESENTATIVE_NAME_KEY ] );
+
+	return $stored;
+}
 
 add_action( 'admin_init', __NAMESPACE__ . '\\register' );
 
@@ -95,16 +176,16 @@ function get_defaults(): array {
 	}
 
 	return array(
-		'schema_version'      => SCHEMA_VERSION,
-		'office_name'         => '',
-		'representative_name' => '',
-		'address'             => '',
-		'phone'               => '',
-		'business_hours'      => array(
+		'schema_version'               => SCHEMA_VERSION,
+		'office_name'                  => '',
+		'address'                      => '',
+		'phone'                        => '',
+		'business_hours'               => array(
 			'weekly'     => $weekly,
 			'exceptions' => array(),
 		),
-		'sns_links'           => array(),
+		'sns_links'                    => array(),
+		LEGACY_REPRESENTATIVE_NAME_KEY => '',
 	);
 }
 
@@ -198,9 +279,12 @@ function sanitize( $input ): array {
 
 	$output['schema_version'] = SCHEMA_VERSION;
 
-	$output['office_name']         = isset( $input['office_name'] ) ? sanitize_text_field( wp_unslash( (string) $input['office_name'] ) ) : '';
-	$output['representative_name'] = isset( $input['representative_name'] ) ? sanitize_text_field( wp_unslash( (string) $input['representative_name'] ) ) : '';
-	$output['address']             = isset( $input['address'] ) ? sanitize_text_field( wp_unslash( (string) $input['address'] ) ) : '';
+	$output['office_name'] = isset( $input['office_name'] ) ? sanitize_text_field( wp_unslash( (string) $input['office_name'] ) ) : '';
+	$output['address']     = isset( $input['address'] ) ? sanitize_text_field( wp_unslash( (string) $input['address'] ) ) : '';
+
+	// LEGACY_REPRESENTATIVE_NAME_KEY is intentionally left untouched here:
+	// there is no form field for it any more (see office-profile-admin.php),
+	// so it must never be overwritten by a submission that doesn't include it.
 
 	$output['phone'] = sanitize_phone( $input, $existing );
 

@@ -31,8 +31,14 @@ if ( ! defined( 'ABSPATH' ) ) {
 /** Public contract: this string is what Theme templates bind to. */
 const OFFICE_PROFILE_SOURCE = 'astrea-core/office-profile';
 
-/** Public contract: the only `args.key` values a binding may request. */
-const ALLOWED_KEYS = array( 'office_name', 'representative_name', 'address', 'phone' );
+/**
+ * Public contract: the only `args.key` values a binding may request.
+ *
+ * `representative_name` was removed here in Decision 023 (Construction
+ * Order 003A): representative is a person and now belongs to Professional
+ * Profile's `is_representative` flag, not Office Profile.
+ */
+const ALLOWED_KEYS = array( 'office_name', 'address', 'phone' );
 
 add_action( 'init', __NAMESPACE__ . '\\register_office_profile_source' );
 

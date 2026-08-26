@@ -28,6 +28,14 @@
  * デザインが成立しない構造にはしない") — including 氏名. No field is
  * enforced as required at the storage layer.
  *
+ * Per Decision 023 (Construction Order 003A), this file also owns the
+ * `is_representative` flag (postmeta astrea_professional_is_representative):
+ * the office representative is now identified here, not by Office
+ * Profile's retired `representative_name` field. The specific job title
+ * text (代表社員, 所長, 代表税理士, etc.) belongs in the existing
+ * `qualification` field above — this flag only identifies *who* is a
+ * representative, it does not duplicate the title text.
+ *
  * @package Astrea\Core
  */
 
@@ -46,6 +54,16 @@ const META_CAREER            = 'astrea_professional_career';
 const META_EDUCATION         = 'astrea_professional_education';
 const META_AFFILIATION       = 'astrea_professional_affiliation';
 const META_REGISTRATION_INFO = 'astrea_professional_registration_info';
+
+/**
+ * Boolean flag: is this Professional Profile a representative of the
+ * Office (Decision 023)? Registered/sanitized separately from
+ * meta_sanitizers() below because it's a checkbox, not free text.
+ *
+ * No uniqueness is enforced — see docs/research/2026-08-26_construction_order_003a_report.md
+ * for why multiple representatives are allowed rather than restricted to one.
+ */
+const META_IS_REPRESENTATIVE = 'astrea_professional_is_representative';
 
 /**
  * All Professional Profile meta keys and how to sanitize each.
@@ -109,6 +127,21 @@ function register_post_type_and_meta() {
 			)
 		);
 	}
+
+	register_post_meta(
+		POST_TYPE,
+		META_IS_REPRESENTATIVE,
+		array(
+			'type'              => 'boolean',
+			'single'            => true,
+			'default'           => false,
+			'sanitize_callback' => 'rest_sanitize_boolean',
+			'show_in_rest'      => true,
+			'auth_callback'     => function () {
+				return current_user_can( 'edit_posts' );
+			},
+		)
+	);
 }
 
 add_action( 'pre_get_posts', __NAMESPACE__ . '\\enforce_deterministic_order' );
@@ -193,6 +226,29 @@ function get_profiles(): array {
 }
 
 /**
+ * Public read boundary: published Professional Profiles flagged as a
+ * representative (Decision 023), in the same deterministic order as
+ * get_profiles().
+ *
+ * No uniqueness is enforced: zero, one, or multiple Professional Profiles
+ * may be flagged as representative. Whether FREE v1 should restrict this
+ * to exactly one is an open question — see the Construction Order 003A
+ * report; this function deliberately does not decide it.
+ *
+ * @return array[]
+ */
+function get_representatives(): array {
+	return array_values(
+		array_filter(
+			get_profiles(),
+			static function ( array $profile ): bool {
+				return ! empty( $profile['is_representative'] );
+			}
+		)
+	);
+}
+
+/**
  * Converts a WP_Post into the public Professional Profile array shape.
  *
  * @param \WP_Post $post A published astrea_professional post.
@@ -216,5 +272,6 @@ function to_array( \WP_Post $post ): array {
 		'education'         => get_post_meta( $post->ID, META_EDUCATION, true ),
 		'affiliation'       => get_post_meta( $post->ID, META_AFFILIATION, true ),
 		'registration_info' => get_post_meta( $post->ID, META_REGISTRATION_INFO, true ),
+		'is_representative' => (bool) get_post_meta( $post->ID, META_IS_REPRESENTATIVE, true ),
 	);
 }

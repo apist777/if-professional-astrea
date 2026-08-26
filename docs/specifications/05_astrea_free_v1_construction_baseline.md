@@ -313,3 +313,26 @@ CONSTRUCTION ORDER 002完了後、同日中に以下がDecision 022として正�
 - Construction Order 002報告書で報告されていた「Office Profile項目範囲の要確認事項」は、本Decisionにより**CLOSED**となった。
 
 この追記により、本書セクション5（PROFILE）・セクション2（FREE/PRO境界の前提となる想定顧客像）の実質的な内容は、Decision 022の内容へ更新されたものとして扱う。将来Professional Profileを実装するConstruction Orderでは、本セクションおよび`04_astrea_free_v1_preconstruction_decisions.md`のDecision 022を基準文書とする。
+
+---
+
+## 22. 追記（2026-08-26, Decision 023・024 — 代表者情報の正本 / Core無効時URLの保証範囲）
+
+CONSTRUCTION ORDER 003完了後、同日中にCONSTRUCTION ORDER 003Aとして以下が正式FIXされた（`04_astrea_free_v1_preconstruction_decisions.md`のDecision 023・024参照）。既存セクションの本文は書き換えず、末尾への追加として反映する。
+
+**Decision 023（代表者情報の正本）**
+
+- 代表者情報の正本を**Professional Profile**とする。Office Profileの`representative_name`は廃止した。
+- Professional Profileに代表者識別フラグ（`is_representative`）を追加した（Construction Order 003Aで実装済み）。具体的な肩書テキストは既存の「資格・肩書」項目を使う。
+- 複数の専門家を代表者として同時に指定できるかどうかは一意制約を設けていない（要確認事項として残存。`04`文書参照）。
+- 既存のOffice Profile `representative_name`データは、Schema v1→v2 Migrationにより`legacy_representative_name`として保全し、自動的な人物生成・自動flagづけは行わない。管理画面に案内を表示し、人間の判断を仰ぐ。
+- Construction Order 002・003報告書の「Office Profile項目範囲」に関する要確認事項は、本Decisionにより**CLOSED**となった。
+
+**Decision 024（Core無効時のCore所有URLの保証範囲）**
+
+- 本書セクション4・14（Core無効時の要件）が求める保証は、「Theme正常動作」「Fatal/Warning/Notice無し」「壊れたMarkup無し」「Core所有データの残留表示無し」「再有効化後の正常復帰」の5点に限定される。**Core所有URLが必ずHTTP 404を返すことは保証対象に含まない。**
+- Construction Order 003で確認された「Core無効時に`/professionals/`がHTTP 200のFallbackになる」挙動は、上記5点をすべて満たすためBlocking Bugとして扱わない。
+- このHTTP Status是正のためだけに、ThemeへCore所有CPT・URL構造の知識を持たせる実装は行わない（Decision 021の原則を優先）。
+- Construction Order 003報告書の要確認事項2は、本Decisionにより**CLOSED**となった。
+
+将来Professional Profile・代表者関連機能を拡張するConstruction Orderでは、本セクションおよび`04_astrea_free_v1_preconstruction_decisions.md`のDecision 023・024を基準文書とする。

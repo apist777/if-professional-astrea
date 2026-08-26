@@ -13,6 +13,16 @@
 # (no stale leak while Core is inactive, data survives deactivation,
 # display is restored on reactivation).
 #
+# Part 3 (J-S) automates Construction Order 003 §14: the Professional
+# Profile vertical slice (CPT, deterministic ordering, featured image,
+# Core public API, Theme Query Loop display) end to end.
+#
+# Part 4 (T-X) automates Construction Order 003A / Decision 023: a
+# pre-existing (schema v1) Office Profile `representative_name` migrates
+# to `legacy_representative_name` on a real request, the admin notice it
+# drives appears/disappears correctly, and a Professional Profile's
+# `is_representative` flag survives Core deactivate/reactivate.
+#
 # Requires a running `wp-env` environment (see package.json `env:start`).
 
 set -euo pipefail
@@ -230,3 +240,92 @@ echo "=== Cleanup: remove smoke-test Professional Profile fixtures ==="
 wp_cli post delete "$PROF_A" "$PROF_B" "$PROF_C" "$PROF_DRAFT" "$ATTACHMENT_ID" --force > /dev/null
 
 echo "All ASTREA Professional Profile end-to-end checks passed."
+
+# ---------------------------------------------------------------------------
+# Part 4 (T-X): Construction Order 003A / Decision 023 — representative
+# migration and admin notice, end to end on a real site.
+# ---------------------------------------------------------------------------
+
+LEGACY_NAME="スモーク旧代表"
+
+echo "=== T. Seed a v1-style Office Profile option, migrate it via a real request ==="
+wp_cli eval '
+update_option( "astrea_core_office_profile", array(
+	"schema_version"      => 1,
+	"office_name"         => "スモーク旧事務所",
+	"representative_name" => "'"$LEGACY_NAME"'",
+	"address"             => "",
+	"phone"               => "",
+) );
+'
+check_no_fatal "T: trigger v1 -> v2 migration via a real request"
+MIGRATED=$(wp_cli option get astrea_core_office_profile --format=json)
+if ! echo "$MIGRATED" | grep -q '"schema_version":2'; then
+	echo "FAIL [T]: migration did not run (schema_version is not 2)"
+	exit 1
+fi
+HAS_OLD_KEY=$(echo "$MIGRATED" | node -e "let d=JSON.parse(require('fs').readFileSync(0,'utf8')); console.log(Object.prototype.hasOwnProperty.call(d,'representative_name') ? 'yes' : 'no');")
+if [ "$HAS_OLD_KEY" != "no" ]; then
+	echo "FAIL [T]: old representative_name key still present after migration"
+	exit 1
+fi
+echo "OK   [T: v1 -> v2 migration ran on a real request, old key removed]"
+
+echo "=== U. Legacy representative notice appears; deprecated field removed from the form ==="
+COOKIE_JAR="$(mktemp)"
+curl -s -c "$COOKIE_JAR" "$SITE_URL/wp-login.php" > /dev/null
+curl -s -c "$COOKIE_JAR" -b "$COOKIE_JAR" -X POST "$SITE_URL/wp-login.php" \
+	--data-urlencode "log=admin" --data-urlencode "pwd=password" \
+	--data-urlencode "wp-submit=Log In" --data-urlencode "redirect_to=$SITE_URL/wp-admin/" \
+	-o /dev/null
+ADMIN_HTML=$(curl -s -b "$COOKIE_JAR" "$SITE_URL/wp-admin/admin.php?page=astrea-core")
+if ! echo "$ADMIN_HTML" | grep -q "$LEGACY_NAME"; then
+	echo "FAIL [U]: legacy representative notice did not appear on the ASTREA admin page"
+	exit 1
+fi
+if echo "$ADMIN_HTML" | grep -qF 'name="astrea_core_office_profile[representative_name]"'; then
+	echo "FAIL [U]: deprecated representative_name field is still present in the Office Profile form"
+	exit 1
+fi
+echo "OK   [U: notice shown, deprecated field removed from the admin form]"
+
+echo "=== V. Flagging a Professional Profile as representative hides the notice ==="
+REP_PROF=$(wp_cli post create --post_type=astrea_professional --post_title="Rep Smoke" --post_status=publish --porcelain)
+wp_cli post meta update "$REP_PROF" astrea_professional_is_representative 1
+ADMIN_HTML_AFTER=$(curl -s -b "$COOKIE_JAR" "$SITE_URL/wp-admin/admin.php?page=astrea-core")
+if echo "$ADMIN_HTML_AFTER" | grep -q "$LEGACY_NAME"; then
+	echo "FAIL [V]: notice is still shown after a Professional Profile was flagged as representative"
+	exit 1
+fi
+echo "OK   [V: notice disappears once a representative is flagged]"
+
+echo "=== W. Public API reflects the representative ==="
+REP_COUNT=$(wp_cli eval 'echo count( \Astrea\Core\ProfessionalProfile\get_representatives() );')
+if [ "$REP_COUNT" != "1" ]; then
+	echo "FAIL [W]: get_representatives() expected 1, got $REP_COUNT"
+	exit 1
+fi
+echo "OK   [W: get_representatives() reflects the flagged Professional Profile]"
+
+echo "=== X. Core deactivate/reactivate preserves the representative flag ==="
+wp_cli plugin deactivate astrea-core
+fetch_no_fatal_any_status "X: homepage while Core inactive (representative)" "/"
+DB_META=$(wp_cli db query "SELECT meta_value FROM wp_postmeta WHERE post_id=$REP_PROF AND meta_key='astrea_professional_is_representative'" --skip-column-names)
+if [ "$DB_META" != "1" ]; then
+	echo "FAIL [X]: representative flag lost while Core was deactivated"
+	exit 1
+fi
+wp_cli plugin activate astrea-core
+REP_COUNT_AFTER=$(wp_cli eval 'echo count( \Astrea\Core\ProfessionalProfile\get_representatives() );')
+if [ "$REP_COUNT_AFTER" != "1" ]; then
+	echo "FAIL [X]: representative not restored after reactivation, got $REP_COUNT_AFTER"
+	exit 1
+fi
+echo "OK   [X: representative flag survives deactivate/reactivate]"
+
+echo "=== Cleanup: remove Decision 023 smoke-test fixtures ==="
+wp_cli post delete "$REP_PROF" --force > /dev/null
+wp_cli eval 'delete_option( "astrea_core_office_profile" );' > /dev/null
+rm -f "$COOKIE_JAR"
+
+echo "All ASTREA representative migration/notice checks passed."

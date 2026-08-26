@@ -14,9 +14,11 @@ namespace Astrea\Core\OfficeProfile\Admin;
 
 use function Astrea\Core\OfficeProfile\get_office_profile;
 use function Astrea\Core\OfficeProfile\weekday_label;
+use function Astrea\Core\ProfessionalProfile\get_representatives;
 use const Astrea\Core\OfficeProfile\OPTION_NAME;
 use const Astrea\Core\OfficeProfile\SETTINGS_GROUP;
 use const Astrea\Core\OfficeProfile\WEEKDAYS;
+use const Astrea\Core\OfficeProfile\LEGACY_REPRESENTATIVE_NAME_KEY;
 
 if ( ! defined( 'ABSPATH' ) ) {
 	exit; // Disallow direct access.
@@ -66,14 +68,6 @@ function register_fields() {
 		'astrea_core_office_name',
 		__( '事務所名', 'astrea-core' ),
 		__NAMESPACE__ . '\\field_office_name',
-		PAGE_SLUG,
-		'astrea_core_office_profile_basic'
-	);
-
-	add_settings_field(
-		'astrea_core_representative_name',
-		__( '代表者名', 'astrea-core' ),
-		__NAMESPACE__ . '\\field_representative_name',
 		PAGE_SLUG,
 		'astrea_core_office_profile_basic'
 	);
@@ -173,24 +167,6 @@ function field_office_name() {
 		id="astrea_core_office_name"
 		name="<?php echo esc_attr( OPTION_NAME ); ?>[office_name]"
 		value="<?php echo esc_attr( $profile['office_name'] ); ?>"
-		class="regular-text"
-	/>
-	<?php
-}
-
-/**
- * Representative name field.
- *
- * @return void
- */
-function field_representative_name() {
-	$profile = get_office_profile();
-	?>
-	<input
-		type="text"
-		id="astrea_core_representative_name"
-		name="<?php echo esc_attr( OPTION_NAME ); ?>[representative_name]"
-		value="<?php echo esc_attr( $profile['representative_name'] ); ?>"
 		class="regular-text"
 	/>
 	<?php
@@ -440,4 +416,52 @@ function field_sns_links() {
 	</table>
 	<p class="description"><?php esc_html_e( '使わない行は空欄のままで構いません。', 'astrea-core' ); ?></p>
 	<?php
+}
+
+add_action( 'admin_notices', __NAMESPACE__ . '\\maybe_render_legacy_representative_notice' );
+
+/**
+ * Prompts the site owner to assign a pre-existing (schema v1) office
+ * representative name to a Professional Profile (Decision 023).
+ *
+ * Intentionally not dismissible: it has no state of its own to persist.
+ * Its visibility condition — a legacy name exists AND no Professional
+ * Profile is currently flagged as representative — is exactly the
+ * condition that means the migration isn't done yet, so the notice
+ * disappears on its own the moment the site owner marks someone as
+ * representative. No AJAX/JS dismiss handling needed.
+ *
+ * @return void
+ */
+function maybe_render_legacy_representative_notice() {
+	if ( ! current_user_can( 'manage_options' ) ) {
+		return;
+	}
+
+	$screen = get_current_screen();
+	if ( ! $screen || ! in_array( $screen->id, array( 'toplevel_page_' . PAGE_SLUG, 'edit-astrea_professional', 'astrea_professional' ), true ) ) {
+		return;
+	}
+
+	$legacy_name = get_office_profile()[ LEGACY_REPRESENTATIVE_NAME_KEY ] ?? '';
+	if ( '' === $legacy_name ) {
+		return;
+	}
+
+	if ( ! empty( get_representatives() ) ) {
+		return; // Already resolved — someone is flagged as representative.
+	}
+
+	printf(
+		'<div class="notice notice-warning"><p>%s</p></div>',
+		wp_kses(
+			sprintf(
+				/* translators: 1: the previously entered representative name, 2: URL to add a new Professional Profile */
+				__( '以前入力されていた代表者名「%1$s」があります。この情報は現在、事務所情報ではなく専門家プロフィールで管理します。<a href="%2$s">専門家プロフィールを追加</a>し、「代表者として表示」にチェックを入れてください。', 'astrea-core' ),
+				esc_html( $legacy_name ),
+				esc_url( admin_url( 'post-new.php?post_type=astrea_professional' ) )
+			),
+			array( 'a' => array( 'href' => array() ) )
+		)
+	);
 }
