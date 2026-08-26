@@ -129,7 +129,7 @@ echo "=== H. Office Profile data retained while Core is deactivated ==="
 # `wp option get --format=json` escapes non-ASCII (\uXXXX), so check the
 # phone number (ASCII) rather than the Japanese office_name here.
 STORED=$(wp_cli option get astrea_core_office_profile --format=json)
-if ! echo "$STORED" | grep -q "03-1234-5678"; then
+if ! grep -qF "03-1234-5678" <<< "$STORED"; then
 	echo "FAIL [H]: Office Profile option lost while Core was deactivated"
 	exit 1
 fi
@@ -260,7 +260,7 @@ update_option( "astrea_core_office_profile", array(
 '
 check_no_fatal "T: trigger v1 -> v2 migration via a real request"
 MIGRATED=$(wp_cli option get astrea_core_office_profile --format=json)
-if ! echo "$MIGRATED" | grep -q '"schema_version":2'; then
+if ! grep -qF '"schema_version":2' <<< "$MIGRATED"; then
 	echo "FAIL [T]: migration did not run (schema_version is not 2)"
 	exit 1
 fi
@@ -283,11 +283,11 @@ if [ "$LOGIN_STATUS" != "302" ]; then
 	exit 1
 fi
 ADMIN_HTML=$(curl -s -b "$COOKIE_JAR" "$SITE_URL/wp-admin/admin.php?page=astrea-core")
-if echo "$ADMIN_HTML" | grep -q 'id="loginform"'; then
+if grep -q 'id="loginform"' <<< "$ADMIN_HTML"; then
 	echo "FAIL [U]: admin session was not recognized (bounced back to the login form)"
 	exit 1
 fi
-if ! echo "$ADMIN_HTML" | grep -qF "$LEGACY_NAME"; then
+if ! grep -qF "$LEGACY_NAME" <<< "$ADMIN_HTML"; then
 	echo "FAIL [U]: legacy representative notice did not appear on the ASTREA admin page"
 	echo "--- diagnostics ---"
 	echo "ADMIN_HTML length: $(echo "$ADMIN_HTML" | wc -c)"
@@ -305,7 +305,7 @@ if ! echo "$ADMIN_HTML" | grep -qF "$LEGACY_NAME"; then
 	echo "-------------------"
 	exit 1
 fi
-if echo "$ADMIN_HTML" | grep -qF 'name="astrea_core_office_profile[representative_name]"'; then
+if grep -qF 'name="astrea_core_office_profile[representative_name]"' <<< "$ADMIN_HTML"; then
 	echo "FAIL [U]: deprecated representative_name field is still present in the Office Profile form"
 	exit 1
 fi
@@ -315,7 +315,7 @@ echo "=== V. Flagging a Professional Profile as representative hides the notice 
 REP_PROF=$(wp_cli post create --post_type=astrea_professional --post_title="Rep Smoke" --post_status=publish --porcelain)
 wp_cli post meta update "$REP_PROF" astrea_professional_is_representative 1
 ADMIN_HTML_AFTER=$(curl -s -b "$COOKIE_JAR" "$SITE_URL/wp-admin/admin.php?page=astrea-core")
-if echo "$ADMIN_HTML_AFTER" | grep -qF "$LEGACY_NAME"; then
+if grep -qF "$LEGACY_NAME" <<< "$ADMIN_HTML_AFTER"; then
 	echo "FAIL [V]: notice is still shown after a Professional Profile was flagged as representative"
 	exit 1
 fi
