@@ -293,6 +293,9 @@ if ! echo "$ADMIN_HTML" | grep -q "$LEGACY_NAME"; then
 	echo "ADMIN_HTML length: $(echo "$ADMIN_HTML" | wc -c)"
 	echo "Contains 'notice-warning': $(echo "$ADMIN_HTML" | grep -c 'notice-warning' || true)"
 	echo "Contains page heading '事務所情報': $(echo "$ADMIN_HTML" | grep -c '事務所情報' || true)"
+	echo "Raw bytes around 'notice-warning' (hex + text):"
+	echo "$ADMIN_HTML" | grep -o '.\{0,40\}notice-warning.\{0,400\}' | head -1 | tee /tmp/notice_snippet.txt
+	echo "$ADMIN_HTML" | grep -o '.\{0,40\}notice-warning.\{0,400\}' | head -1 | xxd | head -20
 	echo "Ground truth via wp-cli:"
 	wp_cli eval 'echo "legacy_representative_name=" . \Astrea\Core\OfficeProfile\get_office_profile()[ \Astrea\Core\OfficeProfile\LEGACY_REPRESENTATIVE_NAME_KEY ] . "\n"; echo "representatives_count=" . count( \Astrea\Core\ProfessionalProfile\get_representatives() ) . "\n"; echo "current_screen_available=" . ( function_exists( "get_current_screen" ) ? "yes" : "no" ) . "\n";'
 	echo "-------------------"
