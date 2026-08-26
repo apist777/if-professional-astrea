@@ -48,4 +48,5 @@ jobs:
 
       - name: Tear down wp-env
         if: always()
-        run: npm run env:destroy
+        # `wp-env destroy` prompts for interactive confirmation; auto-confirm in CI.
+        run: yes | npm run env:destroy
