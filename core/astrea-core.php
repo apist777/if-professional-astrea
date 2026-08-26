@@ -3,7 +3,7 @@
  * Plugin Name: ASTREA Core
  * Plugin URI: https://project-if.com/astrea
  * Description: If Professional ASTREA — テーマを変更しても保持すべき情報とサイト共通機能を担当する、ASTREA Themeの公式推奨Plugin（任意）。「Coreは推奨する。しかしThemeを人質にしない。」（Decision 021）。
- * Version: 0.2.0
+ * Version: 0.3.0
  * Requires at least: 7.0
  * Requires PHP: 8.3
  * Author: Project-if
@@ -22,13 +22,15 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit; // Disallow direct access.
 }
 
-define( 'ASTREA_CORE_VERSION', '0.2.0' );
+define( 'ASTREA_CORE_VERSION', '0.3.0' );
 define( 'ASTREA_CORE_FILE', __FILE__ );
 define( 'ASTREA_CORE_DIR', plugin_dir_path( __FILE__ ) );
 
 require ASTREA_CORE_DIR . 'includes/office-profile.php';
 require ASTREA_CORE_DIR . 'includes/office-profile-admin.php';
 require ASTREA_CORE_DIR . 'includes/block-bindings.php';
+require ASTREA_CORE_DIR . 'includes/professional-profile.php';
+require ASTREA_CORE_DIR . 'includes/professional-profile-admin.php';
 
 add_action( 'plugins_loaded', __NAMESPACE__ . '\\load_textdomain' );
 
@@ -46,16 +48,21 @@ register_activation_hook( __FILE__, __NAMESPACE__ . '\\activate' );
 /**
  * Activation hook.
  *
- * Intentionally a no-op: Office Profile has nothing that needs seeding at
- * activation time — get_office_profile() already returns a well-formed
- * default shape even before the option has ever been saved. Future
- * feature Phases (Service, Price, FAQ, Contact, SEO/OGP, Search Console,
- * Setup) will add their own versioned setup here as needed.
+ * Office Profile has nothing that needs seeding at activation time —
+ * get_office_profile() already returns a well-formed default shape even
+ * before the option has ever been saved.
+ *
+ * Professional Profile registers a post type with its own rewrite rules
+ * (the `professionals` archive), so activation must register it and then
+ * flush rewrite rules — otherwise the archive URL 404s until WordPress
+ * happens to flush rules for an unrelated reason. This does not create or
+ * modify any content; it only makes routing aware of the post type.
  *
  * @return void
  */
 function activate() {
-	// Intentionally no-op.
+	ProfessionalProfile\register_post_type_and_meta();
+	flush_rewrite_rules();
 }
 
 register_deactivation_hook( __FILE__, __NAMESPACE__ . '\\deactivate' );
@@ -64,10 +71,13 @@ register_deactivation_hook( __FILE__, __NAMESPACE__ . '\\deactivate' );
  * Deactivation hook.
  *
  * Per Decision 019, deactivation must never delete Core-owned data
- * (including the Office Profile option). This remains a no-op by design.
+ * (including the Office Profile option and all astrea_professional posts
+ * / postmeta / featured images). Only rewrite rules are flushed, so a
+ * deactivated Core doesn't leave a dangling `professionals` rewrite rule
+ * pointing at a post type that is no longer registered.
  *
  * @return void
  */
 function deactivate() {
-	// Intentionally no-op: deactivation must never delete Core data (Decision 019).
+	flush_rewrite_rules();
 }
