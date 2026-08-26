@@ -30,6 +30,11 @@
  * behavior already treats featured images (it never deletes the
  * attachment either).
  *
+ * As of Construction Order 004, Service (`astrea_service`), Price
+ * (`astrea_price`) and FAQ (`astrea_faq`, plus its `astrea_faq_category`
+ * taxonomy terms) posts/postmeta are Core-owned data under the same
+ * policy — intentionally NOT deleted here either.
+ *
  * A future Construction Order will add an explicit, confirmed "delete all
  * ASTREA Core data" admin action — this file will call into it only when
  * the user has affirmatively chosen full deletion, not automatically on
@@ -42,8 +47,9 @@ if ( ! defined( 'WP_UNINSTALL_PLUGIN' ) ) {
 	exit;
 }
 
-// Intentionally no-op: `astrea_core_office_profile`, `astrea_professional`
-// posts/postmeta, and their featured-image attachments must all survive a
-// plain "Delete" from the Plugins screen. Only a future, explicit,
-// user-confirmed deletion flow may remove the first two — and that flow
-// must never delete Media Library attachments.
+// Intentionally no-op: `astrea_core_office_profile`, `astrea_professional`,
+// `astrea_service`, `astrea_price`, `astrea_faq` posts/postmeta/taxonomy
+// terms, and their featured-image attachments must all survive a plain
+// "Delete" from the Plugins screen. Only a future, explicit,
+// user-confirmed deletion flow may remove them — and that flow must never
+// delete Media Library attachments.

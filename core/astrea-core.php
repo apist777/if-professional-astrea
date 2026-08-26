@@ -3,7 +3,7 @@
  * Plugin Name: ASTREA Core
  * Plugin URI: https://project-if.com/astrea
  * Description: If Professional ASTREA — テーマを変更しても保持すべき情報とサイト共通機能を担当する、ASTREA Themeの公式推奨Plugin（任意）。「Coreは推奨する。しかしThemeを人質にしない。」（Decision 021）。
- * Version: 0.3.1
+ * Version: 0.4.0
  * Requires at least: 7.0
  * Requires PHP: 8.3
  * Author: Project-if
@@ -22,15 +22,22 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit; // Disallow direct access.
 }
 
-define( 'ASTREA_CORE_VERSION', '0.3.1' );
+define( 'ASTREA_CORE_VERSION', '0.4.0' );
 define( 'ASTREA_CORE_FILE', __FILE__ );
 define( 'ASTREA_CORE_DIR', plugin_dir_path( __FILE__ ) );
 
+require ASTREA_CORE_DIR . 'includes/shared.php';
 require ASTREA_CORE_DIR . 'includes/office-profile.php';
 require ASTREA_CORE_DIR . 'includes/office-profile-admin.php';
 require ASTREA_CORE_DIR . 'includes/block-bindings.php';
 require ASTREA_CORE_DIR . 'includes/professional-profile.php';
 require ASTREA_CORE_DIR . 'includes/professional-profile-admin.php';
+require ASTREA_CORE_DIR . 'includes/service.php';
+require ASTREA_CORE_DIR . 'includes/price.php';
+require ASTREA_CORE_DIR . 'includes/price-admin.php';
+require ASTREA_CORE_DIR . 'includes/price-list-block.php';
+require ASTREA_CORE_DIR . 'includes/faq.php';
+require ASTREA_CORE_DIR . 'includes/faq-admin.php';
 
 add_action( 'plugins_loaded', __NAMESPACE__ . '\\load_textdomain' );
 
@@ -52,16 +59,20 @@ register_activation_hook( __FILE__, __NAMESPACE__ . '\\activate' );
  * get_office_profile() already returns a well-formed default shape even
  * before the option has ever been saved.
  *
- * Professional Profile registers a post type with its own rewrite rules
- * (the `professionals` archive), so activation must register it and then
- * flush rewrite rules — otherwise the archive URL 404s until WordPress
- * happens to flush rules for an unrelated reason. This does not create or
- * modify any content; it only makes routing aware of the post type.
+ * Professional Profile, Service and FAQ each register a post type with
+ * its own rewrite rules (the `professionals` / `services` / `faq`
+ * archives), so activation must register them and then flush rewrite
+ * rules — otherwise the archive URLs 404 until WordPress happens to flush
+ * rules for an unrelated reason. This does not create or modify any
+ * content; it only makes routing aware of the post types.
  *
  * @return void
  */
 function activate() {
 	ProfessionalProfile\register_post_type_and_meta();
+	Service\register_post_type_and_meta();
+	Price\register_post_type_and_meta();
+	Faq\register_post_type_and_meta();
 	flush_rewrite_rules();
 }
 

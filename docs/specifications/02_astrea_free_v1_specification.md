@@ -7,6 +7,8 @@ If Professional ASTREA FREE v1 仕様書
 > 【2026-08-26 追記】§4（Core情報一元管理）、§8（PROFILE）、§13（ACCESS）は、Decision 022（士業法人・複数専門家対応、Office / Professional Profile責任境界）の内容を反映して更新されている。
 >
 > 【2026-08-26 追記】§4、§8は、Decision 023（代表者情報の正本はProfessional Profile）の内容もあわせて反映して更新されている。
+>
+> 【2026-08-26 追記】§8は、Decision 025（Professional Profile代表者の人数制約：0〜複数人を正式許可）の内容もあわせて反映して更新されている。
 
 1. 本仕様書の目的
 本書は、If Professional ASTREA FREE v1の開発着工前仕様を定義する。
@@ -68,7 +70,7 @@ Coreの情報を各表示場所から参照する。
 - **CTA・相談方法**：Office Profile / Professional Profileのいずれにも含めず、別責任（CTA / Consultation）として扱う。
 - **アクセス固有情報**（最寄駅・徒歩時間・駐車場等、§13参照）：Office Profileには含めず、ACCESSの責任とする。所在地そのものはOffice Profileを正本として再利用する。
 
-【2026-08-26 Decision 023により確定】代表者は「人」に属する情報であり、Office Profileの管轄ではない。代表者情報の正本はProfessional Profileとし、Professional Profileに代表者識別（`is_representative`）を持たせる（§8参照）。既存のOffice Profile「代表者名」は廃止し、Construction Order 003AでSchema Migrationを実施した（旧データは`legacy_representative_name`として保全し、自動的な人物生成は行わない）。複数の専門家を代表者として同時に指定できるかどうかは一意制約を設けず、要確認事項として残している。
+【2026-08-26 Decision 023により確定】代表者は「人」に属する情報であり、Office Profileの管轄ではない。代表者情報の正本はProfessional Profileとし、Professional Profileに代表者識別（`is_representative`）を持たせる（§8参照）。既存のOffice Profile「代表者名」は廃止し、Construction Order 003AでSchema Migrationを実施した（旧データは`legacy_representative_name`として保全し、自動的な人物生成は行わない）。複数の専門家を代表者として同時に指定できるかどうかは一意制約を設けない（2026-08-26 Decision 025により、0〜複数人を正式許可することが確定した）。
 ________________________________________
 5. Design System
 ASTREA FREEの最大級の競争力はデザイン品質とする。
@@ -104,7 +106,7 @@ ________________________________________
 
 【2026-08-26 Decision 022により確定】本項の情報を「Professional Profile」と呼ぶ。事務所・法人そのものの情報（Office Profile、§4参照）とは責任範囲を分離する。個人事務所では通常1人、士業法人・複数専門家事務所では複数人を登録・表示できる、0〜複数人対応の構造として設計する。**Construction Order 003で実装済み**（Custom Post Type + Post Meta）。
 
-【2026-08-26 Decision 023により確定】Professional Profileに、その人物が代表者であることを識別するフラグ（is_representative）を持たせる。代表者情報の正本はOffice Profileではなく本項とする。具体的な肩書テキスト（代表社員・所長・代表税理士等）は「資格・肩書」項目へ入力し、肩書専用の新しい項目は追加しない。複数人を代表者として指定できるかどうかは一意制約を設けていない（要確認事項）。**Construction Order 003Aで実装済み。**
+【2026-08-26 Decision 023により確定】Professional Profileに、その人物が代表者であることを識別するフラグ（is_representative）を持たせる。代表者情報の正本はOffice Profileではなく本項とする。具体的な肩書テキスト（代表社員・所長・代表税理士等）は「資格・肩書」項目へ入力し、肩書専用の新しい項目は追加しない。【2026-08-26 Decision 025により確定】複数人を代表者として指定できるかどうかは一意制約を設けず、0〜複数人を正式に許可する。**Construction Order 003Aで実装済み。**
 ________________________________________
 9. FLOW
 相談から依頼までの流れを表示する。

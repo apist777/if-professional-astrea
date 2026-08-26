@@ -36,6 +36,21 @@ function setup() {
 	);
 }
 
+add_action( 'init', __NAMESPACE__ . '\\register_pattern_categories' );
+
+/**
+ * Registers the pattern category used by theme/patterns/*.php
+ * (Construction Order 004: price-list.php).
+ *
+ * @return void
+ */
+function register_pattern_categories() {
+	register_block_pattern_category(
+		'astrea',
+		array( 'label' => __( 'ASTREA', 'astrea' ) )
+	);
+}
+
 /**
  * Reports whether ASTREA Core is active.
  *

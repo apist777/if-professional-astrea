@@ -889,6 +889,41 @@ Construction Order 003で確認された「Core無効時に`/professionals/`がH
 
 ---
 
+## Decision 025 — Professional Profile 代表者の人数制約（複数許可）
+
+**Status:** FIXED
+**決定日:** 2026-08-26
+
+### 決定内容
+
+Professional Profileの「代表者」指定（`is_representative`）は、**0〜複数人**を正式に許可する。ASTREA FREEは単一代表者を強制しない。
+
+現在実装済みのboolean（`astrea_professional_is_representative`）による各Professional単位での指定方式を、そのまま正式仕様として承認する。一意制約（単一代表者への制限）は設けない。
+
+### 理由・設計原則
+
+- 個人事務所では通常代表者は1人だが、士業法人等では複数の代表者（例：複数の代表社員）が存在しうる。
+- 代表者をWebサイト上で明示しない運用（0人）も妨げない。
+- ASTREA側が実態以上の制約を設ける必要がない。
+- Decision 023で残されていた要確認事項（本書「残る確認事項」旧項目7）への正式な回答。
+
+### 影響する既存仕様
+
+- Decision 023の「複数代表者への一意制約は実装していない」という実装状態を、正式仕様として確定する（Decision 023自体の内容変更ではない）。
+- 本書「本書に基づき残る確認事項」旧項目7を本Decisionにより**CLOSED**とする。
+- `docs/research/2026-08-26_construction_order_003a_report.md`の残存要確認事項を本Decisionにより**CLOSED**とする。
+
+### Theme / Core / WordPress の責任境界
+
+- 変更なし。Decision 023で確定した実装（`get_representatives()`が一意制約なしで複数件を返す）をそのまま正式仕様とする。
+
+### 実装時に守るべき事項
+
+- 本Decisionによる製品コード変更は不要（現状の実装を追認するのみ）。
+- 将来、単一代表者への制限が必要と判明した場合は、独自判断で追加せず改めて仕様判断を仰ぐ。
+
+---
+
 ## 本書に基づき残る確認事項（新規Decisionではない）
 
 以下は、Decision 001〜024によっておおむね解消されたが、正式仕様の文言として明示的な一文が未整備、または性質上「実装フェーズの技術詳細」に属するため、本書ではこれ以上の判断を追加しない事項である。クロエ独自の判断でこれらを確定させることはしない。
@@ -899,6 +934,6 @@ Construction Order 003で確認された「Core無効時に`/professionals/`がH
 4. **Pattern と Style Variation（Trust / Natural / Modern）の共有方式。** Design System設計時に決定する。
 5. **Service / FAQ / CASE等が0件のときの空状態UIパターンの統一。** Pattern設計時に決定する。
 6. ~~営業時間・臨時休業データモデルの詳細（将来の予約Pluginとの共有を見据えた設計）。~~ **CLOSED（2026-08-26 Construction Order 002により実装）。** `astrea_core_office_profile`内の`business_hours`（週次の定休日／開始・終了時刻＋臨時休業等の期間リスト）として実装済み。将来の予約Pluginとの共有インターフェースは未設計だが、データモデル自体は確定した。
-7. **複数のProfessional Profileを「代表者」として同時に指定できることの是非。** Decision 023で「一意制約を設けない」という実装方針は確定したが、これがFREE v1として正しい仕様かどうか（単一代表者に限定すべきという業務要件が将来判明する可能性を含む）は、クロエの独自判断で確定していない。次回の仕様確認を推奨する。
+7. ~~複数のProfessional Profileを「代表者」として同時に指定できることの是非。~~ **CLOSED（2026-08-26 Decision 025により確定）。** 0〜複数人を正式に許可し、一意制約は設けないことが正式仕様として確定した。
 
 これらは最終監査（`docs/research/`配下の最終監査資料を参照）においてP0（着工前必須）ではなく、各設計フェーズでの決定事項として扱う。

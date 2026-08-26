@@ -149,31 +149,11 @@ add_action( 'pre_get_posts', __NAMESPACE__ . '\\enforce_deterministic_order' );
 /**
  * Ensures a stable display order when nothing more specific was requested.
  *
- * The `menu_order` field defaults to 0 for every new post, so relying on
- * it alone produces ties. When a query for this post type didn't ask for a
- * specific orderby, fall back to menu_order, then title, then ID so the
- * result is deterministic instead of depending on incidental DB order.
- *
  * @param \WP_Query $query The query being filtered.
  * @return void
  */
 function enforce_deterministic_order( \WP_Query $query ) {
-	if ( POST_TYPE !== $query->get( 'post_type' ) ) {
-		return;
-	}
-
-	if ( '' !== $query->get( 'orderby' ) ) {
-		return; // Something more specific was explicitly requested; don't override it.
-	}
-
-	$query->set(
-		'orderby',
-		array(
-			'menu_order' => 'ASC',
-			'title'      => 'ASC',
-			'ID'         => 'ASC',
-		)
-	);
+	\Astrea\Core\Shared\enforce_deterministic_order( POST_TYPE, $query );
 }
 
 /**
@@ -193,9 +173,9 @@ function enforce_deterministic_order( \WP_Query $query ) {
  * @return array|null
  */
 function get_profile( int $post_id ): ?array {
-	$post = get_post( $post_id );
+	$post = \Astrea\Core\Shared\get_published_post( $post_id, POST_TYPE );
 
-	if ( ! $post instanceof \WP_Post || POST_TYPE !== $post->post_type || 'publish' !== $post->post_status ) {
+	if ( null === $post ) {
 		return null;
 	}
 
@@ -209,18 +189,7 @@ function get_profile( int $post_id ): ?array {
  * @return array[]
  */
 function get_profiles(): array {
-	$posts = get_posts(
-		array(
-			'post_type'      => POST_TYPE,
-			'post_status'    => 'publish',
-			'posts_per_page' => -1,
-			'orderby'        => array(
-				'menu_order' => 'ASC',
-				'title'      => 'ASC',
-				'ID'         => 'ASC',
-			),
-		)
-	);
+	$posts = \Astrea\Core\Shared\get_published_posts( POST_TYPE );
 
 	return array_map( __NAMESPACE__ . '\\to_array', $posts );
 }

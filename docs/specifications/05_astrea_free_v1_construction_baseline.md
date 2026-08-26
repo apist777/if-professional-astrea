@@ -336,3 +336,13 @@ CONSTRUCTION ORDER 003完了後、同日中にCONSTRUCTION ORDER 003Aとして�
 - Construction Order 003報告書の要確認事項2は、本Decisionにより**CLOSED**となった。
 
 将来Professional Profile・代表者関連機能を拡張するConstruction Orderでは、本セクションおよび`04_astrea_free_v1_preconstruction_decisions.md`のDecision 023・024を基準文書とする。
+
+---
+
+## 23. 追記（2026-08-26, Decision 025 — Professional Profile代表者の人数制約）
+
+CONSTRUCTION ORDER 004着工にあたり、Decision 023で残されていた要確認事項が以下のとおり正式FIXされた（`04_astrea_free_v1_preconstruction_decisions.md`のDecision 025参照）。既存セクションの本文は書き換えず、末尾への追加として反映する。
+
+- Professional Profileの「代表者」指定（`is_representative`）は、**0〜複数人**を正式に許可する。単一代表者への一意制約は設けない。
+- Construction Order 003A時点の実装（一意制約なし）をそのまま正式仕様として承認する。製品コード変更は不要。
+- `docs/research/2026-08-26_construction_order_003a_report.md`の残存要確認事項、および本書「本書に基づき残る確認事項」旧項目7は、本Decisionにより**CLOSED**となった。

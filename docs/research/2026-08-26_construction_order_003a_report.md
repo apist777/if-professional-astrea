@@ -131,5 +131,5 @@ Construction Order 003で発見された「Core無効時に`/professionals/`がH
 
 ## 7. 発見した仕様上の要確認事項（新規）
 
-1. **複数のProfessional Profileを「代表者」として同時に指定できることの是非。** 一意制約を設けない実装方針は確定したが、これがFREE v1として正しい仕様かどうか（将来的に単一代表者への制限が必要と判明する可能性を含む）は、クロエの独自判断で確定していない。次回の仕様確認を推奨する。
-2. 上記以外に、Baseline / Decision 001〜024との矛盾は発見していない。
+1. ~~複数のProfessional Profileを「代表者」として同時に指定できることの是非。~~ **CLOSED（2026-08-26 Decision 025により確定）。** 0〜複数人を正式に許可し、一意制約を設けないことが正式仕様として確定した（`docs/specifications/04_astrea_free_v1_preconstruction_decisions.md`参照）。
+2. 上記以外に、Baseline / Decision 001〜025との矛盾は発見していない。

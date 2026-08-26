@@ -23,6 +23,13 @@
 # drives appears/disappears correctly, and a Professional Profile's
 # `is_representative` flag survives Core deactivate/reactivate.
 #
+# Part 5 (Y-AF) automates Construction Order 004: Service (CPT + Query
+# Loop + individual URL), Price (non-viewable CPT + astrea/price-list
+# Dynamic Block, deliberately no individual URL), and FAQ (CPT + Taxonomy
+# archive + 関連Service/重要FAQ) end to end, including the Empty State
+# guarantee (§8) and the same Core-inactive/deactivate/reactivate coverage
+# as Parts 1-4.
+#
 # Requires a running `wp-env` environment (see package.json `env:start`).
 
 set -euo pipefail
@@ -351,3 +358,152 @@ wp_cli eval 'delete_option( "astrea_core_office_profile" );' > /dev/null
 rm -f "$COOKIE_JAR"
 
 echo "All ASTREA representative migration/notice checks passed."
+
+# ---------------------------------------------------------------------------
+# Part 5 (Y-AF): Construction Order 004 — Service / Price / FAQ end to end.
+# ---------------------------------------------------------------------------
+
+echo "=== Y. Empty State: 0 Service/Price/FAQ renders cleanly (no fatal, no broken markup) ==="
+check_no_fatal "Y: services archive, 0 items" "/services/"
+if grep -qiE "wp-block-post-template" "$BODY_FILE" && grep -qE '<article' "$BODY_FILE"; then
+	echo "FAIL [Y]: services archive rendered an article with 0 Service posts"
+	exit 1
+fi
+check_no_fatal "Y: faq archive, 0 items" "/faq/"
+PRICE_EMPTY_PAGE=$(wp_cli post create --post_type=page --post_status=publish --post_title="Smoke Price Page" --post_content='<!-- wp:astrea/price-list /-->' --porcelain)
+PRICE_PAGE_PATH="/$(wp_cli post get "$PRICE_EMPTY_PAGE" --field=post_name)/"
+check_no_fatal "Y: price-list Dynamic Block, 0 items" "$PRICE_PAGE_PATH"
+if grep -qF "wp-block-astrea-price-list" "$BODY_FILE"; then
+	echo "FAIL [Y]: astrea/price-list rendered a container with 0 Price posts (must render nothing per §8)"
+	exit 1
+fi
+echo "OK   [Y: Service archive, FAQ archive, and Price Dynamic Block all render nothing/no-fatal with 0 items]"
+
+echo "=== Z. Service: create three with a menu_order tie + a draft; verify archive order and individual URL ==="
+SVC_C=$(wp_cli post create --post_type=astrea_service --post_title="Charlie Service" --post_status=publish --menu_order=1 --post_content="Charlie description" --porcelain)
+SVC_A=$(wp_cli post create --post_type=astrea_service --post_title="Alpha Service" --post_status=publish --menu_order=0 --post_content="Alpha description" --porcelain)
+SVC_B=$(wp_cli post create --post_type=astrea_service --post_title="Bravo Service" --post_status=publish --menu_order=0 --porcelain)
+SVC_DRAFT=$(wp_cli post create --post_type=astrea_service --post_title="Draft Service" --post_status=draft --porcelain)
+
+check_no_fatal "Z: Service archive" "/services/"
+ORDER=$(grep -oE "Alpha Service|Bravo Service|Charlie Service|Draft Service" "$BODY_FILE" | tr '\n' ',')
+if [ "$ORDER" != "Alpha Service,Bravo Service,Charlie Service," ]; then
+	echo "FAIL [Z]: expected order 'Alpha Service,Bravo Service,Charlie Service,' (draft excluded), got '$ORDER'"
+	exit 1
+fi
+SVC_PERMALINK=$(wp_cli post get "$SVC_A" --field=url)
+check_no_fatal "Z: Service single page" "${SVC_PERMALINK#$SITE_URL}"
+if ! grep -qF "Alpha description" "$BODY_FILE"; then
+	echo "FAIL [Z]: Service single page did not render post_content"
+	exit 1
+fi
+echo "OK   [Z: Service archive order correct, draft excluded, individual URL (§7 個別Service) works]"
+
+echo "=== AA. Price: deliberately not viewable — Dynamic Block renders, no individual URL exists ==="
+PRICE_B=$(wp_cli post create --post_type=astrea_price --post_title="Bravo Price" --post_status=publish --menu_order=0 --porcelain)
+PRICE_A=$(wp_cli post create --post_type=astrea_price --post_title="Alpha Price" --post_status=publish --menu_order=0 --porcelain)
+wp_cli post meta update "$PRICE_A" astrea_price_amount "月額5,000円〜（スモーク）"
+wp_cli post meta update "$PRICE_A" astrea_price_notes "実費は別途（スモーク）"
+
+check_no_fatal "AA: price-list Dynamic Block" "$PRICE_PAGE_PATH"
+if ! grep -qF "月額5,000円〜（スモーク）" "$BODY_FILE"; then
+	echo "FAIL [AA]: Price amount not rendered via astrea/price-list Dynamic Block"
+	exit 1
+fi
+ORDER=$(grep -oE "Alpha Price|Bravo Price" "$BODY_FILE" | tr '\n' ',')
+if [ "$ORDER" != "Alpha Price,Bravo Price," ]; then
+	echo "FAIL [AA]: expected Price order 'Alpha Price,Bravo Price,' (menu_order tie -> title), got '$ORDER'"
+	exit 1
+fi
+fetch_no_fatal_any_status "AA: direct Price permalink must not be a normal page" "/?p=$PRICE_A"
+if [ "$(curl -s -o /dev/null -w '%{http_code}' "$SITE_URL/?p=$PRICE_A")" = "200" ]; then
+	echo "FAIL [AA]: Price post is reachable as a normal 200 page — §10 gives no basis for an individual Price URL"
+	exit 1
+fi
+echo "OK   [AA: Price data + order rendered via Dynamic Block; no individual Price URL exists]"
+
+echo "=== AB. FAQ: category taxonomy, 関連Service, 重要FAQ ==="
+SVC_FOR_FAQ=$(wp_cli post create --post_type=astrea_service --post_title="FAQ関連Service" --post_status=publish --porcelain)
+FAQ_1=$(wp_cli post create --post_type=astrea_faq --post_title="スモーク質問1" --post_content="スモーク回答1" --post_status=publish --menu_order=0 --porcelain)
+FAQ_2=$(wp_cli post create --post_type=astrea_faq --post_title="スモーク質問2" --post_content="スモーク回答2" --post_status=publish --menu_order=1 --porcelain)
+wp_cli post term add "$FAQ_1" astrea_faq_category "スモークカテゴリ"
+wp_cli post meta update "$FAQ_1" astrea_faq_is_important 1
+wp_cli post meta update "$FAQ_1" astrea_faq_related_services "[$SVC_FOR_FAQ]" --format=json
+
+check_no_fatal "AB: FAQ archive" "/faq/"
+if ! grep -qF "スモーク質問1" "$BODY_FILE" || ! grep -qF "スモーク回答1" "$BODY_FILE"; then
+	echo "FAIL [AB]: FAQ question/answer not rendered on the FAQ archive"
+	exit 1
+fi
+TERM_ID=$(wp_cli term list astrea_faq_category --field=term_id)
+TERM_SLUG=$(wp_cli term list astrea_faq_category --field=slug)
+check_no_fatal "AB: FAQ category taxonomy archive" "/faq-category/$TERM_SLUG/"
+if ! grep -qF "スモーク質問1" "$BODY_FILE" || grep -qF "スモーク質問2" "$BODY_FILE"; then
+	echo "FAIL [AB]: FAQ category archive did not correctly filter by term"
+	exit 1
+fi
+IMPORTANT_COUNT=$(wp_cli eval "echo count(\Astrea\Core\Faq\get_important_faqs());")
+if [ "$IMPORTANT_COUNT" != "1" ]; then
+	echo "FAIL [AB]: get_important_faqs() expected 1, got $IMPORTANT_COUNT"
+	exit 1
+fi
+RELATED_COUNT=$(wp_cli eval "echo count(\Astrea\Core\Faq\get_faqs_for_service($SVC_FOR_FAQ));")
+if [ "$RELATED_COUNT" != "1" ]; then
+	echo "FAIL [AB]: get_faqs_for_service() expected 1, got $RELATED_COUNT"
+	exit 1
+fi
+echo "OK   [AB: FAQ category archive filters correctly; 重要FAQ and 関連Service public API both correct]"
+
+echo "=== AC. Core deactivated: no Fatal, no stale Service/Price/FAQ leak ==="
+wp_cli plugin deactivate astrea-core
+fetch_no_fatal_any_status "AC: services archive while Core inactive" "/services/"
+if grep -qE "Alpha Service|Bravo Service|Charlie Service" "$BODY_FILE"; then
+	echo "FAIL [AC]: stale Service data leaked while Core is inactive"
+	exit 1
+fi
+fetch_no_fatal_any_status "AC: faq archive while Core inactive" "/faq/"
+if grep -qE "スモーク質問1|スモーク質問2" "$BODY_FILE"; then
+	echo "FAIL [AC]: stale FAQ data leaked while Core is inactive"
+	exit 1
+fi
+fetch_no_fatal_any_status "AC: price page while Core inactive" "$PRICE_PAGE_PATH"
+if grep -qF "月額5,000円〜（スモーク）" "$BODY_FILE"; then
+	echo "FAIL [AC]: stale Price data leaked while Core is inactive"
+	exit 1
+fi
+echo "OK   [AC: no stale Service/Price/FAQ leak while Core is inactive]"
+
+echo "=== AD. Service/Price/FAQ data retained while Core is deactivated ==="
+SVC_DB_COUNT=$(wp_cli db query "SELECT COUNT(*) FROM wp_posts WHERE post_type='astrea_service'" --skip-column-names)
+PRICE_DB_COUNT=$(wp_cli db query "SELECT COUNT(*) FROM wp_posts WHERE post_type='astrea_price'" --skip-column-names)
+FAQ_DB_COUNT=$(wp_cli db query "SELECT COUNT(*) FROM wp_posts WHERE post_type='astrea_faq'" --skip-column-names)
+if [ "$SVC_DB_COUNT" -lt 4 ] || [ "$PRICE_DB_COUNT" -lt 2 ] || [ "$FAQ_DB_COUNT" -lt 2 ]; then
+	echo "FAIL [AD]: expected Service>=4, Price>=2, FAQ>=2 rows to survive deactivation; got Service=$SVC_DB_COUNT Price=$PRICE_DB_COUNT FAQ=$FAQ_DB_COUNT"
+	exit 1
+fi
+echo "OK   [AD: Service/Price/FAQ data retained after deactivation]"
+
+echo "=== AE. Core reactivated: Service/Price/FAQ display restored ==="
+wp_cli plugin activate astrea-core
+check_no_fatal "AE: Service archive after reactivation" "/services/"
+if ! grep -qF "Alpha Service" "$BODY_FILE"; then
+	echo "FAIL [AE]: Service display not restored after reactivation"
+	exit 1
+fi
+check_no_fatal "AE: Price Dynamic Block after reactivation" "$PRICE_PAGE_PATH"
+if ! grep -qF "月額5,000円〜（スモーク）" "$BODY_FILE"; then
+	echo "FAIL [AE]: Price display not restored after reactivation"
+	exit 1
+fi
+check_no_fatal "AE: FAQ archive after reactivation" "/faq/"
+if ! grep -qF "スモーク質問1" "$BODY_FILE"; then
+	echo "FAIL [AE]: FAQ display not restored after reactivation"
+	exit 1
+fi
+echo "OK   [AE: Service/Price/FAQ display restored after reactivation]"
+
+echo "=== Cleanup: remove Construction Order 004 smoke-test fixtures ==="
+wp_cli post delete "$SVC_A" "$SVC_B" "$SVC_C" "$SVC_DRAFT" "$SVC_FOR_FAQ" "$PRICE_A" "$PRICE_B" "$FAQ_1" "$FAQ_2" "$PRICE_EMPTY_PAGE" --force > /dev/null
+wp_cli term delete astrea_faq_category "$TERM_ID" > /dev/null 2>&1 || true
+
+echo "All ASTREA Service/Price/FAQ end-to-end checks passed."
