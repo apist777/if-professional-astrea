@@ -110,7 +110,7 @@ echo "OK   [E: Office Profile save/read]"
 
 echo "=== F. Theme displays the saved Office Profile value via Block Bindings ==="
 check_no_fatal "F: Theme + Core, Office Profile set"
-if ! grep -q "$OFFICE_NAME" "$BODY_FILE"; then
+if ! grep -qF "$OFFICE_NAME" "$BODY_FILE"; then
 	echo "FAIL [F: Theme display]: office_name not found in homepage output"
 	exit 1
 fi
@@ -119,7 +119,7 @@ echo "OK   [F: office_name rendered via Block Bindings]"
 echo "=== G. Core deactivated: Theme still safe, no stale Office Profile leak ==="
 wp_cli plugin deactivate astrea-core
 check_no_fatal "G: Core deactivated (Office Profile)"
-if grep -q "$OFFICE_NAME" "$BODY_FILE"; then
+if grep -qF "$OFFICE_NAME" "$BODY_FILE"; then
 	echo "FAIL [G]: stale Office Profile value leaked while Core is inactive"
 	exit 1
 fi
@@ -138,7 +138,7 @@ echo "OK   [H: Office Profile data retained after deactivation]"
 echo "=== I. Core reactivated: Office Profile display restored ==="
 wp_cli plugin activate astrea-core
 check_no_fatal "I: Core reactivated (Office Profile)"
-if ! grep -q "$OFFICE_NAME" "$BODY_FILE"; then
+if ! grep -qF "$OFFICE_NAME" "$BODY_FILE"; then
 	echo "FAIL [I]: Office Profile value not restored after reactivation"
 	exit 1
 fi
@@ -170,7 +170,7 @@ if [ "$ORDER" != "Alpha Smoke,Bravo Smoke,Charlie Smoke," ]; then
 fi
 echo "OK   [K: order is Alpha, Bravo (tie-break by title), Charlie; draft excluded]"
 
-if ! grep -q "行政書士（スモークテスト）" "$BODY_FILE"; then
+if ! grep -qF "行政書士（スモークテスト）" "$BODY_FILE"; then
 	echo "FAIL [K]: qualification postmeta not rendered via core/post-meta Block Binding"
 	exit 1
 fi
@@ -287,7 +287,7 @@ if echo "$ADMIN_HTML" | grep -q 'id="loginform"'; then
 	echo "FAIL [U]: admin session was not recognized (bounced back to the login form)"
 	exit 1
 fi
-if ! echo "$ADMIN_HTML" | grep -q "$LEGACY_NAME"; then
+if ! echo "$ADMIN_HTML" | grep -qF "$LEGACY_NAME"; then
 	echo "FAIL [U]: legacy representative notice did not appear on the ASTREA admin page"
 	echo "--- diagnostics ---"
 	echo "ADMIN_HTML length: $(echo "$ADMIN_HTML" | wc -c)"
@@ -296,6 +296,10 @@ if ! echo "$ADMIN_HTML" | grep -q "$LEGACY_NAME"; then
 	echo "Raw bytes around 'notice-warning' (hex + text):"
 	echo "$ADMIN_HTML" | grep -o '.\{0,40\}notice-warning.\{0,400\}' | head -1 | tee /tmp/notice_snippet.txt
 	echo "$ADMIN_HTML" | grep -o '.\{0,40\}notice-warning.\{0,400\}' | head -1 | xxd | head -20
+	echo "grep -F re-check against the snippet directly: $(grep -cF "$LEGACY_NAME" /tmp/notice_snippet.txt || true)"
+	echo "grep -c (plain) against full ADMIN_HTML: $(echo "$ADMIN_HTML" | grep -c "$LEGACY_NAME" || true)"
+	echo "LEGACY_NAME hex: $(printf '%s' "$LEGACY_NAME" | xxd)"
+	echo "locale: $(locale 2>&1 | tr '\n' ' ')"
 	echo "Ground truth via wp-cli:"
 	wp_cli eval 'echo "legacy_representative_name=" . \Astrea\Core\OfficeProfile\get_office_profile()[ \Astrea\Core\OfficeProfile\LEGACY_REPRESENTATIVE_NAME_KEY ] . "\n"; echo "representatives_count=" . count( \Astrea\Core\ProfessionalProfile\get_representatives() ) . "\n"; echo "current_screen_available=" . ( function_exists( "get_current_screen" ) ? "yes" : "no" ) . "\n";'
 	echo "-------------------"
@@ -311,7 +315,7 @@ echo "=== V. Flagging a Professional Profile as representative hides the notice 
 REP_PROF=$(wp_cli post create --post_type=astrea_professional --post_title="Rep Smoke" --post_status=publish --porcelain)
 wp_cli post meta update "$REP_PROF" astrea_professional_is_representative 1
 ADMIN_HTML_AFTER=$(curl -s -b "$COOKIE_JAR" "$SITE_URL/wp-admin/admin.php?page=astrea-core")
-if echo "$ADMIN_HTML_AFTER" | grep -q "$LEGACY_NAME"; then
+if echo "$ADMIN_HTML_AFTER" | grep -qF "$LEGACY_NAME"; then
 	echo "FAIL [V]: notice is still shown after a Professional Profile was flagged as representative"
 	exit 1
 fi
