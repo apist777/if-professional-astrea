@@ -283,4 +283,61 @@ class FaqTest extends WP_UnitTestCase {
 		$this->assertNotNull( get_post( $id ), 'Decision 019: deactivation must never delete Core-owned data.' );
 		$this->assertSame( '削除されないはずのFAQ', get_post( $id )->post_title );
 	}
+
+	// -- astrea/faq-list Dynamic Block (Construction Order 008, Decision 028) --------
+
+	public function test_faq_list_block_self_hides_when_important_mode_has_no_matches() {
+		$this->create_faq(); // Published but not flagged important.
+
+		$this->assertSame( '', Faq\render_faq_list_block() );
+	}
+
+	public function test_faq_list_block_shows_empty_message_when_set() {
+		$html = Faq\render_faq_list_block( array( 'emptyMessage' => '現在準備中です。' ) );
+
+		$this->assertStringContainsString( '現在準備中です。', $html );
+	}
+
+	public function test_faq_list_block_important_mode_only_includes_flagged_faqs() {
+		$important_id = $this->create_faq( array( 'post_title' => '重要な質問' ) );
+		update_post_meta( $important_id, Faq\META_IS_IMPORTANT, '1' );
+		$this->create_faq( array( 'post_title' => '通常の質問' ) );
+
+		$html = Faq\render_faq_list_block( array( 'mode' => 'important' ) );
+
+		$this->assertStringContainsString( '重要な質問', $html );
+		$this->assertStringNotContainsString( '通常の質問', $html );
+	}
+
+	public function test_faq_list_block_all_mode_includes_every_published_faq() {
+		$this->create_faq( array( 'post_title' => '質問A' ) );
+		$this->create_faq( array( 'post_title' => '質問B' ) );
+
+		$html = Faq\render_faq_list_block( array( 'mode' => 'all' ) );
+
+		$this->assertStringContainsString( '質問A', $html );
+		$this->assertStringContainsString( '質問B', $html );
+	}
+
+	public function test_faq_list_block_respects_limit() {
+		$this->create_faq( array( 'post_title' => '質問1' ) );
+		$this->create_faq( array( 'post_title' => '質問2' ) );
+		$this->create_faq( array( 'post_title' => '質問3' ) );
+
+		$html = Faq\render_faq_list_block( array( 'mode' => 'all', 'limit' => 2 ) );
+
+		$this->assertStringContainsString( '質問1', $html );
+		$this->assertStringContainsString( '質問2', $html );
+		$this->assertStringNotContainsString( '質問3', $html );
+	}
+
+	public function test_faq_list_block_heading_only_appears_alongside_content() {
+		$this->create_faq( array( 'post_title' => '質問A' ) );
+
+		$with_content = Faq\render_faq_list_block( array( 'mode' => 'all', 'heading' => '見出し' ) );
+		$this->assertStringContainsString( '<h2>見出し</h2>', $with_content );
+
+		$without_content = Faq\render_faq_list_block( array( 'mode' => 'important', 'heading' => '見出し' ) );
+		$this->assertSame( '', $without_content, 'A heading must never be emitted alone when there is no content.' );
+	}
 }

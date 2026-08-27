@@ -373,3 +373,18 @@ CONSTRUCTION ORDER 007着工にあたり、Decision 016の一括生成対象ペ�
 - `docs/research/2026-08-27_construction_order_007_research.md`§20-1の要確認事項は、本Decisionにより**CLOSED**となった。
 
 将来Setup / Onboardingを拡張するConstruction Orderでは、本セクションおよび`04_astrea_free_v1_preconstruction_decisions.md`のDecision 027を基準文書とする。
+
+---
+
+## 26. 追記（2026-08-27, Decision 028 — Design System / Theme表示基盤：施工範囲とPattern共有方式の確定）
+
+CONSTRUCTION ORDER 008着工にあたり、本書セクション17項目4・5で実装フェーズへ委ねていた事項が以下のとおり正式FIXされた（`04_astrea_free_v1_preconstruction_decisions.md`のDecision 028参照）。既存セクション（セクション5, 17）の本文は書き換えず、末尾への追加として反映する。
+
+- **Pattern / Style Variation共有方式：** `theme/styles/{trust,natural,modern}.json`によるWordPress標準Style Variation機構を採用。Templates/Patternsは3案で完全共通とし、配色・Typography等のトークンのみをVariationファイル側に分離する。
+- **0件時表示の統一：** Archive専用ページは見出しを維持し前向きなNo Resultsメッセージ＋次行動導線を表示、HOME等のTeaserセクションは見出しを含めセクション全体を非表示にする、の2ルールに統一する。
+- **Flow / CASE・RESULTS・VOICE / ACCESS / CTAのスコープ：** FlowはCoreデータ化せず静的Patternとして008に含める。CASE/RESULTS/VOICE・ACCESS固有情報は対応するCore側データ機能が未実装のため008対象外とし、将来のConstruction Orderへ分離する。CTAは008では電話番号Bindingsと問い合わせページ導線までとし、新しいCTA固有データモデルは追加しない。
+- **FAQ一覧表示：** 新規Dynamic Block`astrea/faq-list`の追加を承認。新規CPT・独自DB Tableは追加しない。
+- **Professional代表者差し込み：** Block Bindings拡張 / Dynamic Blockのどちらを採用するかは施工判断に委任（Decision 013の既存方針どおり）。
+- 本書セクション17項目4・5、`04_astrea_free_v1_preconstruction_decisions.md`「残る確認事項」項目4・5は、本Decisionにより**CLOSED**となった。
+
+将来Design System / Theme表示基盤を拡張するConstruction Orderでは、本セクションおよび`04_astrea_free_v1_preconstruction_decisions.md`のDecision 028を基準文書とする。

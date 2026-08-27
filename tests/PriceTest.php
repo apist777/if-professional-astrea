@@ -184,4 +184,30 @@ class PriceTest extends WP_UnitTestCase {
 		$this->assertNotNull( get_post( $id ), 'Decision 019: deactivation must never delete Core-owned data.' );
 		$this->assertSame( '削除されないはずの料金', get_post( $id )->post_title );
 	}
+
+	// -- astrea/price-list Dynamic Block heading/emptyMessage (Construction Order 008, Decision 028) --
+
+	public function test_price_list_block_self_hides_with_zero_items_by_default() {
+		$this->assertSame( '', Price\render_price_list_block() );
+	}
+
+	public function test_price_list_block_shows_empty_message_when_set() {
+		$html = Price\render_price_list_block( array( 'emptyMessage' => '現在、料金情報は準備中です。' ) );
+
+		$this->assertStringContainsString( '現在、料金情報は準備中です。', $html );
+	}
+
+	public function test_price_list_block_heading_appears_alongside_content() {
+		$this->create_price( array( 'post_title' => 'テスト料金' ) );
+
+		$html = Price\render_price_list_block( array( 'heading' => '料金' ) );
+
+		$this->assertStringContainsString( '<h2>料金</h2>', $html );
+	}
+
+	public function test_price_list_block_heading_is_not_emitted_alone_with_zero_items() {
+		$html = Price\render_price_list_block( array( 'heading' => '料金' ) );
+
+		$this->assertSame( '', $html, 'A heading must never be emitted alone when there are zero Price entries.' );
+	}
 }

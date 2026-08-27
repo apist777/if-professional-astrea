@@ -57,7 +57,7 @@ function page_definitions(): array {
 		),
 		'price'   => array(
 			'title'   => __( '料金', 'astrea-core' ),
-			'content' => '<!-- wp:astrea/price-list /-->',
+			'content' => '<!-- wp:astrea/price-list {"emptyMessage":"現在、料金情報は準備中です。お問い合わせください。"} /-->',
 		),
 		'contact' => array(
 			'title'   => __( 'お問い合わせ', 'astrea-core' ),

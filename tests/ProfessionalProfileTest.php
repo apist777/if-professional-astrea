@@ -322,4 +322,51 @@ class ProfessionalProfileTest extends WP_UnitTestCase {
 
 		$this->assertFalse( ProfessionalProfile\get_profile( $id )['is_representative'] );
 	}
+
+	// -- astrea/representative Dynamic Block (Construction Order 008, Decision 028) --
+
+	public function test_representative_block_self_hides_when_no_one_is_flagged() {
+		$this->create_professional(); // Published, but not flagged representative.
+
+		$this->assertSame( '', ProfessionalProfile\render_representative_block() );
+	}
+
+	public function test_representative_block_shows_empty_message_when_set() {
+		$html = ProfessionalProfile\render_representative_block( array( 'emptyMessage' => '準備中です。' ) );
+
+		$this->assertStringContainsString( '準備中です。', $html );
+	}
+
+	public function test_representative_block_shows_the_first_flagged_representative() {
+		$id = $this->create_professional( array( 'post_title' => '代表 太郎' ) );
+		update_post_meta( $id, ProfessionalProfile\META_IS_REPRESENTATIVE, '1' );
+		update_post_meta( $id, ProfessionalProfile\META_QUALIFICATION, '行政書士' );
+
+		$html = ProfessionalProfile\render_representative_block();
+
+		$this->assertStringContainsString( '代表 太郎', $html );
+		$this->assertStringContainsString( '行政書士', $html );
+	}
+
+	public function test_representative_block_never_guesses_when_nobody_is_flagged() {
+		// Multiple published professionals exist, but none is flagged representative.
+		$this->create_professional( array( 'post_title' => '専門家A' ) );
+		$this->create_professional( array( 'post_title' => '専門家B' ) );
+
+		$this->assertSame( '', ProfessionalProfile\render_representative_block(), 'Must never guess a representative from unflagged profiles.' );
+	}
+
+	public function test_representative_block_heading_only_appears_alongside_content() {
+		$id = $this->create_professional( array( 'post_title' => '代表 花子' ) );
+		update_post_meta( $id, ProfessionalProfile\META_IS_REPRESENTATIVE, '1' );
+
+		$with_content = ProfessionalProfile\render_representative_block( array( 'heading' => '代表者紹介' ) );
+		$this->assertStringContainsString( '<h2>代表者紹介</h2>', $with_content );
+	}
+
+	public function test_representative_block_heading_is_not_emitted_alone_with_no_representative() {
+		$html = ProfessionalProfile\render_representative_block( array( 'heading' => '代表者紹介' ) );
+
+		$this->assertSame( '', $html, 'A heading must never be emitted alone when there is no representative.' );
+	}
 }

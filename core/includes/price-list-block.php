@@ -18,9 +18,24 @@
  * bypassing WP_Query's viewability gate entirely while keeping Price's "no
  * individual URL" property intact.
  *
- * Per §8 (Empty State), rendering nothing at all when there are zero Price
- * entries — no empty heading, no empty container — is a deliberate choice,
- * not an oversight.
+ * Per §8 (Empty State) and Decision 028 (Construction Order 008), this
+ * block supports both of the two standardized zero-item behaviors from a
+ * single implementation, selected per Pattern via block attributes rather
+ * than a mode enum:
+ *
+ * - `heading` (optional): rendered as an <h2> above the list, but ONLY
+ *   together with actual items — a heading is never emitted alone. Used
+ *   by HOME teaser Patterns that need their own section title.
+ * - `emptyMessage` (optional): when the item list is empty AND this is
+ *   set, it is rendered as a friendly zero-item message instead of the
+ *   heading+list. Used by the dedicated Price page Pattern (an "Archive
+ *   専用ページ" per Decision 028), where the page's own post-title
+ *   already serves as the heading and a blank page would be worse than a
+ *   short message.
+ *
+ * Leaving both attributes unset reproduces the original Construction
+ * Order 004 behavior exactly: zero items renders nothing at all — no
+ * empty heading, no empty container (the HOME-teaser self-hide rule).
  *
  * @package Astrea\Core
  */
@@ -46,22 +61,37 @@ function register_block() {
 		'astrea/price-list',
 		array(
 			'render_callback' => __NAMESPACE__ . '\\render_price_list_block',
-			'attributes'      => array(),
+			'attributes'      => array(
+				'heading'      => array(
+					'type'    => 'string',
+					'default' => '',
+				),
+				'emptyMessage' => array(
+					'type'    => 'string',
+					'default' => '',
+				),
+			),
 		)
 	);
 }
 
 /**
- * Renders the Price list as plain semantic HTML. Returns an empty string
- * when there are zero Price entries (§8 Empty State).
+ * Renders the Price list as plain semantic HTML.
  *
+ * @param array $attributes Block attributes (`heading`, `emptyMessage`), see the file docblock.
  * @return string
  */
-function render_price_list_block(): string {
-	$prices = get_prices();
+function render_price_list_block( array $attributes = array() ): string {
+	$prices        = get_prices();
+	$heading       = isset( $attributes['heading'] ) ? (string) $attributes['heading'] : '';
+	$empty_message = isset( $attributes['emptyMessage'] ) ? (string) $attributes['emptyMessage'] : '';
 
 	if ( empty( $prices ) ) {
-		return '';
+		if ( '' === $empty_message ) {
+			return '';
+		}
+
+		return '<p class="wp-block-astrea-price-list-empty">' . esc_html( $empty_message ) . '</p>';
 	}
 
 	$items = '';
@@ -81,5 +111,7 @@ function render_price_list_block(): string {
 		$items .= '</div>';
 	}
 
-	return '<div class="wp-block-astrea-price-list">' . $items . '</div>';
+	$heading_html = '' !== $heading ? '<h2>' . esc_html( $heading ) . '</h2>' : '';
+
+	return $heading_html . '<div class="wp-block-astrea-price-list">' . $items . '</div>';
 }

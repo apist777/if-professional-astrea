@@ -1159,3 +1159,132 @@ wp_cli eval 'delete_option( "astrea_core_generated_pages" ); delete_option( \Ast
 rm -f "$COOKIE_JAR"
 
 echo "All ASTREA Setup / Onboarding end-to-end checks passed."
+
+# Part 9 (BM-BY) automates Construction Order 008 (Design System / Theme
+# 表示基盤, Decision 028): Style Variations are recognized by WordPress,
+# the new front-page/home/page/single/search/404 templates and Header/
+# Footer parts render without fatal, the phone_tel Block Bindings key,
+# the astrea/faq-list and astrea/representative Dynamic Blocks' heading/
+# emptyMessage/self-hide behaviour on a real page, core/query-no-results
+# on a real 0-result archive, and the same Core-inactive/deactivate/
+# reactivate coverage as Parts 1-8.
+
+echo "=== BM. Style Variations (Trust/Natural/Modern) are recognized by WordPress ==="
+VARIATION_TITLES=$(wp_cli eval 'echo implode(",", array_map(function($v){return $v["title"];}, WP_Theme_JSON_Resolver::get_style_variations()));')
+for name in Trust Natural Modern; do
+	if ! grep -qF "$name" <<< "$VARIATION_TITLES"; then
+		echo "FAIL [BM]: Style Variation '$name' not recognized by WordPress (found: $VARIATION_TITLES)"
+		exit 1
+	fi
+done
+echo "OK   [BM: Trust/Natural/Modern Style Variations recognized ($VARIATION_TITLES)]"
+
+echo "=== BN. New templates render without fatal: Home, Search, 404 ==="
+check_no_fatal "BN: Home (front-page/home template)"
+check_no_fatal "BN: Search results" "/?s=smoke-008"
+fetch_no_fatal_any_status "BN: a nonexistent URL (404 template)" "/astrea-smoke-008-nonexistent-page/"
+echo "OK   [BN: Home/Search/404 templates render without fatal]"
+
+echo "=== BO. Header shows Office Profile data and a working tel: link ==="
+wp_cli eval 'update_option( \Astrea\Core\OfficeProfile\OPTION_NAME, \Astrea\Core\OfficeProfile\sanitize( array( "office_name" => "スモーク008事務所", "phone" => "03-1234-5678" ) ) );'
+check_no_fatal "BO: Home with Office Profile data"
+if ! grep -qF "スモーク008事務所" "$BODY_FILE"; then
+	echo "FAIL [BO]: Header does not show the bound office_name"
+	exit 1
+fi
+if ! grep -qF 'href="tel:03-1234-5678"' "$BODY_FILE"; then
+	echo "FAIL [BO]: Header phone CTA is not a working tel: link"
+	exit 1
+fi
+echo "OK   [BO: Header renders office_name and a tel: link CTA]"
+
+echo "=== BP. Footer template part renders Office Profile data ==="
+if ! grep -qF "<footer" "$BODY_FILE"; then
+	echo "FAIL [BP]: Footer template part did not render"
+	exit 1
+fi
+echo "OK   [BP: Footer template part renders]"
+
+echo "=== BQ. astrea/faq-list: self-hides with zero important FAQs, shows heading+content once one exists ==="
+FAQ_TEASER_PAGE=$(wp_cli post create --post_type=page --post_title="Smoke008 FAQ Teaser" --post_status=publish --post_content='<!-- wp:astrea/faq-list {"mode":"important","limit":3,"heading":"よくあるご質問"} /-->' --porcelain)
+FAQ_TEASER_PATH="/$(wp_cli post get "$FAQ_TEASER_PAGE" --field=post_name)/"
+check_no_fatal "BQ: FAQ teaser page with zero important FAQs" "$FAQ_TEASER_PATH"
+if grep -qF "よくあるご質問" "$BODY_FILE"; then
+	echo "FAIL [BQ]: heading appeared even though there is no important FAQ (whole-section self-hide expected)"
+	exit 1
+fi
+SMOKE_FAQ=$(wp_cli post create --post_type=astrea_faq --post_title="スモーク008重要FAQ" --post_status=publish --post_content="回答本文スモーク008" --porcelain)
+wp_cli post meta update "$SMOKE_FAQ" astrea_faq_is_important 1
+check_no_fatal "BQ: FAQ teaser page with one important FAQ" "$FAQ_TEASER_PATH"
+if ! grep -qF "よくあるご質問" "$BODY_FILE" || ! grep -qF "スモーク008重要FAQ" "$BODY_FILE"; then
+	echo "FAIL [BQ]: heading+important FAQ did not render once one exists"
+	exit 1
+fi
+echo "OK   [BQ: astrea/faq-list self-hides at zero items, shows heading+content once populated]"
+
+echo "=== BR. astrea/representative: self-hides with no flagged representative, shows once flagged ==="
+REP_TEASER_PAGE=$(wp_cli post create --post_type=page --post_title="Smoke008 Representative Teaser" --post_status=publish --post_content='<!-- wp:astrea/representative {"heading":"代表者紹介"} /-->' --porcelain)
+REP_TEASER_PATH="/$(wp_cli post get "$REP_TEASER_PAGE" --field=post_name)/"
+SMOKE_PROF=$(wp_cli post create --post_type=astrea_professional --post_title="スモーク008代表" --post_status=publish --porcelain)
+check_no_fatal "BR: Representative teaser page with nobody flagged" "$REP_TEASER_PATH"
+if grep -qF "代表者紹介" "$BODY_FILE"; then
+	echo "FAIL [BR]: heading appeared even though nobody is flagged representative"
+	exit 1
+fi
+wp_cli post meta update "$SMOKE_PROF" astrea_professional_is_representative 1
+check_no_fatal "BR: Representative teaser page with one flagged representative" "$REP_TEASER_PATH"
+if ! grep -qF "代表者紹介" "$BODY_FILE" || ! grep -qF "スモーク008代表" "$BODY_FILE"; then
+	echo "FAIL [BR]: heading+representative did not render once one is flagged"
+	exit 1
+fi
+echo "OK   [BR: astrea/representative self-hides with nobody flagged, shows once one is flagged]"
+
+echo "=== BS. astrea/price-list dedicated-page mode: friendly message at zero items, list once populated ==="
+PRICE_MSG_PAGE=$(wp_cli post create --post_type=page --post_title="Smoke008 Price Message" --post_status=publish --post_content='<!-- wp:astrea/price-list {"emptyMessage":"現在、料金情報は準備中です。"} /-->' --porcelain)
+PRICE_MSG_PATH="/$(wp_cli post get "$PRICE_MSG_PAGE" --field=post_name)/"
+check_no_fatal "BS: Price message page with zero prices" "$PRICE_MSG_PATH"
+if ! grep -qF "現在、料金情報は準備中です。" "$BODY_FILE"; then
+	echo "FAIL [BS]: dedicated-page empty message did not render for zero Price entries"
+	exit 1
+fi
+echo "OK   [BS: astrea/price-list shows a friendly message (not a blank page) at zero items in dedicated-page mode]"
+
+echo "=== BT. Service archive: core/query-no-results shows a friendly message at zero Services ==="
+check_no_fatal "BT: Service archive with zero Services" "/services/"
+if ! grep -qF "現在、取扱業務の情報は準備中です。" "$BODY_FILE"; then
+	echo "FAIL [BT]: core/query-no-results message did not render on the empty Service archive"
+	exit 1
+fi
+SMOKE_SVC=$(wp_cli post create --post_type=astrea_service --post_title="スモーク008業務" --post_status=publish --porcelain)
+check_no_fatal "BT: Service archive with one Service" "/services/"
+if grep -qF "現在、取扱業務の情報は準備中です。" "$BODY_FILE"; then
+	echo "FAIL [BT]: No Results message still shown even though a Service now exists"
+	exit 1
+fi
+echo "OK   [BT: core/query-no-results correctly shown at zero items, hidden once a Service exists]"
+
+echo "=== BU. Core deactivated: new Dynamic Blocks/Bindings degrade safely, no Fatal ==="
+wp_cli plugin deactivate astrea-core
+fetch_no_fatal_any_status "BU: Home while Core inactive" "/"
+fetch_no_fatal_any_status "BU: FAQ teaser page while Core inactive" "$FAQ_TEASER_PATH"
+fetch_no_fatal_any_status "BU: Representative teaser page while Core inactive" "$REP_TEASER_PATH"
+if grep -qF "スモーク008事務所" "$BODY_FILE"; then
+	echo "FAIL [BU]: stale Office Profile data leaked while Core is inactive"
+	exit 1
+fi
+echo "OK   [BU: Theme degrades safely with no Fatal while Core is inactive]"
+
+echo "=== BV. Core reactivated: Design System output restored ==="
+wp_cli plugin activate astrea-core
+check_no_fatal "BV: Home after reactivation"
+if ! grep -qF "スモーク008事務所" "$BODY_FILE"; then
+	echo "FAIL [BV]: Office Profile display not restored after reactivation"
+	exit 1
+fi
+echo "OK   [BV: Design System output restored after Core reactivation]"
+
+echo "=== Cleanup: remove Construction Order 008 smoke-test fixtures ==="
+wp_cli post delete "$FAQ_TEASER_PAGE" "$REP_TEASER_PAGE" "$PRICE_MSG_PAGE" "$SMOKE_FAQ" "$SMOKE_PROF" "$SMOKE_SVC" --force > /dev/null
+wp_cli eval 'delete_option( \Astrea\Core\OfficeProfile\OPTION_NAME );'
+
+echo "All ASTREA Design System / Theme end-to-end checks passed."

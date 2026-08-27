@@ -282,3 +282,69 @@ Core側の追加（008の対象。新規CPTやDBスキーマ変更ではなく�
 - **要確認事項：** 上記§14の4点（うち2点は着工前確認・Decision化が必要、2点は軽微）。
 
 いずれも本調査で与えられた9つの制約（見た目先行禁止、Core/Block/Theme/Pattern責任分離維持、Core密結合禁止、FREE単体運用思想維持、PRO専用デザイン先行禁止、既存Decisionとの矛盾禁止）に反する提案は行っていない。
+
+---
+
+## 16. 着工承認・要確認事項の解決（2026-08-27追記）
+
+CONSTRUCTION 008 作戦承認を受け、§14の要確認事項について以下のとおり確定した（**Decision 028**として正式記録、`docs/specifications/04_astrea_free_v1_preconstruction_decisions.md`参照）。
+
+1. Flowは静的Pattern（Coreデータ化しない）として008に含める。CASE/RESULTS/VOICE・ACCESS固有情報は008対象外、009以降へ分離。CTAは電話番号Bindings＋問い合わせページ導線までとし、新規データモデルは追加しない。
+2. §6の0件時表示の統一ルール（Archive＝No Resultsメッセージ表示、Teaser＝完全非表示）を正式採用。
+3. `astrea/faq-list` Dynamic Blockの新規追加を承認。
+4. 代表者差し込みの実装方式は施工判断に委任——採用方式・不採用方式・理由は施工報告に記録する（本文書§17に記載）。
+
+---
+
+## 17. 実装報告（2026-08-27追記）
+
+### 17.1 追加・変更ファイル
+
+**Core（新規）：**
+- `core/includes/faq-list-block.php` — `astrea/faq-list` Dynamic Block。`get_faqs()`/`get_important_faqs()`を直接呼び出す。新規CPT・DB Tableなし。
+- `core/includes/professional-profile-block.php` — `astrea/representative` Dynamic Block（§17.2参照）。
+
+**Core（変更）：**
+- `core/includes/block-bindings.php` — `phone_tel`キーを追加（`office_profile.phone`を`tel:`URIへ変換。RFC 3966によりハイフンはそのまま許容）。
+- `core/includes/price-list-block.php` — `heading`/`emptyMessage`属性を追加。両方未指定なら従来どおり0件で完全に何も出力しない（Construction 004の挙動を保持）。
+- `core/includes/setup-pages.php` — Setup生成の「料金」ページに`emptyMessage`を設定（Decision 028のArchive専用ページ規則を適用）。
+- `core/astrea-core.php` — 新規ファイルのrequire追加。Version 0.7.0 → 0.8.0。
+
+**Theme（新規）：**
+- `theme/styles/{trust,natural,modern}.json` — Style Variation 3種。
+- `theme/templates/{front-page,home,page,single,search,404}.html`
+- `theme/parts/footer.html`
+- `theme/patterns/{home-hero,home-trust,home-flow,home-services-teaser,home-professional-teaser,home-price,home-faq,home-cta}.php`
+
+**Theme（変更）：**
+- `theme/theme.json` — Typography/Spacing/Layout設定の追加、共通色パレット（base/contrast/primary/secondary/surface）の追加。
+- `theme/parts/header.html` — Navigation Block・電話CTA（`phone_tel`バインディング）を追加。
+- `theme/templates/index.html`, `single-astrea_service.html`, `archive-astrea_service.html`, `archive-astrea_professional.html`, `archive-astrea_faq.html`, `taxonomy-astrea_faq_category.html` — Footer template part追加、既存Archiveに`core/query-no-results`追加。
+- `theme/patterns/price-list.php` — `emptyMessage`属性を追加（Decision 028）。
+- `theme/style.css` — Version 0.6.0 → 0.7.0。
+
+### 17.2 代表者差し込み：採用方式・不採用方式・理由（FIX項目4への回答）
+
+**採用：Dynamic Block（`astrea/representative`）。**
+
+**不採用：Block Bindings Source拡張。**
+
+**理由：** Block Bindingsは「単一のBlockが自身の静的コンテンツへフォールバックする」機構であり、写真・氏名・資格肩書・紹介文という複数フィールドから成るセクション全体を、代表者が0人のときに**見出しごと丸ごと非表示にする**ことができない（Bindingsは値がnullのとき各Blockが個別に自身の静的内容へ戻るだけで、Group全体を消す手段を持たない）。Decision 028のHOME Teaser規則（0件時は見出しを含め完全非表示）を満たすには、Construction 004の`astrea/price-list`と同じ「Dynamic Blockが自分自身の要否を判定して丸ごと出力するか空文字列を返すか決める」方式が必要であり、これが決定的な採用理由である。
+
+Decision 013・WordPress標準API・Core/Theme責任分離・Core非活性時Fallback・Accessibility（Semantic HTML）・保守コストの各観点では両方式はほぼ同等（いずれもCore側で完結し、Theme側はBlock挿入のみ、Core非活性時はBlock自体が未登録になり安全にフォールバックする）。したがって上記の自己非表示要件が唯一かつ決定的な判断材料となった。
+
+代表者が0人（誰も`is_representative`フラグを立てていない）場合、複数のProfessional Profileが存在してもランダム・先頭順等で代表者を推測することは一切行わない（Decision 023の「推測しない」方針を踏襲）。
+
+### 17.3 実装中に発見・修正した事項（実機検証）
+
+いずれも本Decisionの範囲内で、コード実装時・実機検証時に発見し、その場で修正した実装上の不具合であり、新たな仕様判断を要するものではない。
+
+1. **Header/FooterのLandmarkネスト。** `theme.json`で`header`/`footer`の`templateParts`に`"area"`を指定すると、WordPressは`<!-- wp:template-part -->`自体を`<header>`/`<footer>`で自動的に包む。当初`header.html`/`footer.html`側のGroup Blockにも`"tagName":"header"`/`"footer"`を指定していたため、`<header><header>...</header></header>`という二重のLandmarkが実機で確認された。Group側のtagName指定を削除（`<div>`に変更）し、外側の自動Landmarkのみを残すよう修正した。
+2. **`astrea/price-list`等のtheme.json CSSスコープ指定と既存Regressionの衝突。** 0件時に完全非表示となるDynamic Block（`astrea/price-list`等）へ余白用のCSSを`styles.blocks`経由で指定したところ、WordPressのGlobal Styles機構はページの実際の描画内容に関わらず`.wp-block-astrea-price-list`という文字列を全ページの`<style>`タグへ常に出力することが実機検証で判明した。これにより、Construction Order 004の既存Regression Test（「0件時は`wp-block-astrea-price-list`という文字列が一切出力されない」という前提の検査）が誤って失敗する事態を実機テストで検出した。対応として、該当のCSS指定（未使用の`.astrea-surface`ユーティリティも含む）を削除し、既存Regressionとの衝突を解消した。HOME Teaser用Blockの余白は現時点で未調整（機能的な欠陥ではなく見た目の微調整事項として記録する）。
+3. **Query Loopベースの新規セクション（取扱業務Teaser）は仕様上の自己非表示ができない。** `home-services-teaser.php`はDecision 028の「HOME Teaser＝見出し含め完全非表示」を技術的に満たせない（Query Loopは`core/query-no-results`による代替コンテンツ表示はできても、見出しを含むセクション全体の消去はできない）。今回は明示承認された新規Dynamic Blockが`astrea/faq-list`のみであったため、取扱業務Teaserについては新規Blockを追加せず、Archive専用ページと同じ「前向きなメッセージ表示」規則を代わりに適用した。取扱業務専用の自己非表示Dynamic Block（`astrea/service-list`相当）を追加するかどうかは、次工程での確認事項として残す。
+
+### 17.4 Test / CI結果
+
+- PHPUnit：224 tests / 365 assertions、全PASS（新規追加：`FaqTest`/`PriceTest`/`ProfessionalProfileTest`/`OfficeProfileTest`への追加分、計19件）。
+- PHPCS：`core/`・`theme/`全体で0エラー。
+- 実HTTP検証：`tools/ci/smoke-test.sh`のnpx wp-envラッパー経由の完走は、本セッション中同一サンドボックス上で並行稼働していた別プロジェクトのwp-env（`if-thema-mybase`）によるものと推測される既知のネットワーク不安定性（本セッション既出の事象と同種）により複数回中断した。**製品コードの不具合による失敗は1件のみ**（§17.3-2、Regressionとの衝突。特定・修正済み）。中断されなかった項目、および`docker exec`による直接実機検証（Style Variation認識・Header/Footer・新規テンプレート・`astrea/faq-list`/`astrea/representative`/`astrea/price-list`の見出し/空メッセージ/自己非表示挙動・Service Archiveの`query-no-results`・Core無効化/再有効化の安全性）はすべて手動で実機確認しPASSした。完全な`smoke-test.sh`の連続PASSは、この後のGitHub Actions CI（クリーンな別環境）で最終確認する。

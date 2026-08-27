@@ -1015,6 +1015,62 @@ Decision 016本体（「ユーザーの明示操作のみで生成」「再実�
 
 ---
 
+## Decision 028 — Design System / Theme表示基盤：施工範囲とPattern共有方式の確定
+
+**Status:** FIXED
+**決定日:** 2026-08-27
+
+### 決定内容
+
+CONSTRUCTION ORDER 008（Design System / Theme表示基盤）着工にあたり、同008着工前調査（`docs/research/2026-08-27_construction_order_008_research.md`）を踏まえ、以下を正式に確定する。
+
+**1. Flow / CASE・RESULTS・VOICE / ACCESS / CTA のスコープ**
+
+- **Flow**はCONSTRUCTION 008へ含める。ただしCoreデータ化せず、WordPress標準Blockのみで構成する**編集可能な静的Pattern**とする。件数固定を前提とせず、Site Editor / Block Editorでユーザーが自由に行（ステップ）を追加・削除・編集できる構造とする。
+- **CASE / RESULTS / VOICE**はCONSTRUCTION 008の対象外とする。Core側データ機能（VOICEの掲載許可確認支援UIを含む）が未実装であるため、その設計・実装を伴う将来のConstruction Orderへ分離する。
+- **ACCESS固有情報**（最寄駅・徒歩時間・駐車場・地図表示方式等）もCONSTRUCTION 008の対象外とする。Decision 022で責任範囲は分離済みだが、Core側データ機能自体が未実装であるため、その設計後に扱う。
+- **CTA**はCONSTRUCTION 008では、既存Office Profileの電話番号（Block Bindings）および問い合わせページへの導線（Construction 007のSetup機能が確認・生成する到達可能な問い合わせページ）までとする。新しいCTA固有データモデル（相談方法等）は追加しない。
+
+**2. 0件時表示の統一ルール**
+
+着工前調査§6の推奨案を正式採用する。
+
+- **Archive専用ページ**（Service / Professional / FAQ等の一覧が主目的のページ）：見出しは維持し、0件時は`core/query-no-results`等を用いて前向きなNo Resultsメッセージと次の行動への導線（例：お問い合わせへのリンク）を表示する。
+- **HOME等に埋め込むTeaserセクション**：0件時は見出しを含むセクション全体を表示しない（Construction Order 004のPrice Dynamic Blockで既に確立済みの挙動を他セクションへも横展開する）。
+
+**3. FAQ一覧表示用の新規Dynamic Block**
+
+重要FAQ抜粋・カテゴリ別表示等を実現するため、新規Dynamic Block `astrea/faq-list` の追加をCONSTRUCTION 008の施工範囲として承認する。新規CPT・独自DB Table・新しい業務データの正本は追加しない。既存FAQデータ（`Astrea\Core\Faq`）への新しい表示経路としてのみ実装する。
+
+**4. Professional代表者差し込みの実装方式**
+
+Block Bindings Source拡張とDynamic Blockのどちらを採用するかは、Decision 013の「具体的な使い分けの詳細は実装設計時に決定する」という既存方針どおり、施工担当の技術判断に委任する。新しいProfessionalデータモデル・DBスキーマの追加は行わない。採用方式・不採用方式とその理由は、CONSTRUCTION 008の施工報告に記録する（本Decisionでは方式そのものを確定しない）。
+
+### 理由・設計原則
+
+- 05 Baseline §17（実装フェーズへ委ねる技術詳細）項目4（Pattern/Style Variation共有方式）・項目5（0件時UIパターン統一）への正式な回答である。
+- CASE/RESULTS/VOICE・ACCESS固有情報は、対応するCore側データ機能が存在しない状態でTheme側のPatternだけを先に作ると、Core実装時に手戻り（Pattern構造の作り直し）が発生するリスクが高いため、データ機能の設計を待つ。
+- Flowは構造化データを要求する必然性がなく（02仕様書§9は「件数固定にしない」を求めるのみ）、静的Patternで十分に要求を満たせるため、Core側の新規実装なしに008へ含めることができる。
+
+### 影響する既存仕様
+
+- 05 Baseline §17項目4・項目5、および本書「本書に基づき残る確認事項」項目4・項目5を、本Decisionにより**CLOSED**とする。
+- `docs/research/2026-08-27_construction_order_008_research.md`§14の要確認事項1〜3を、本Decisionにより**CLOSED**とする（要確認事項4はDecision対象外、施工報告で扱う）。
+
+### Theme / Core / WordPress の責任境界
+
+- Theme：Style Variation（`theme/styles/*.json`）、Flow静的Pattern、HOME/Archive等のTemplates・Template Parts、0件時表示の実装。
+- Core：`astrea/faq-list` Dynamic Block（既存FAQデータの新しい表示経路）、Professional代表者差し込みの実装（方式は施工判断）。
+- WordPress：`core/query-no-results`等の標準Block機構、Style Variationのスキャン・切替UI（Site Editor標準機能）。
+
+### 実装時に守るべき事項
+
+- CASE/RESULTS/VOICE・ACCESS固有情報向けのPattern・Template領域を先回りして確保しない（将来の手戻りを避けるため、今回は本当に必要な範囲のみ実装する）。
+- `astrea/faq-list`はFAQの新しい正本を作らず、既存`Astrea\Core\Faq`の関数のみを参照する。
+- 0件時表示の2ルールは、既存および新規のPattern/Templateすべてに一貫して適用し、混在させない。
+
+---
+
 ## 本書に基づき残る確認事項（新規Decisionではない）
 
 以下は、Decision 001〜024によっておおむね解消されたが、正式仕様の文言として明示的な一文が未整備、または性質上「実装フェーズの技術詳細」に属するため、本書ではこれ以上の判断を追加しない事項である。クロエ独自の判断でこれらを確定させることはしない。
@@ -1022,8 +1078,8 @@ Decision 016本体（「ユーザーの明示操作のみで生成」「再実�
 1. ~~ASTREA CoreがFREE v1において「必須」か「任意」かの明文化。~~ **CLOSED（2026-08-26 Decision 021により確定）。** ASTREA Coreは任意Plugin・公式推奨として位置付けることが正式にFIXされ、02仕様書 §3へ反映済み。
 2. **Schema Version / Migrationの具体的な実装機構。** Decision 020で「Versioned Migration方式を採る」という方針は確定したが、バージョン番号の管理場所、Migration実行のタイミング等の詳細設計は実装フェーズで行う。
 3. ~~Price（自由記述）と構造化データ（schema.org Offer等）の整合方法。~~ **CLOSED（2026-08-27 Decision 026により確定）。** ASTREA Priceの自由記述モデルはOffer/PriceSpecificationとして意味的に正確な構造化データを安全に自動生成できないため、FREE v1では出力しないことが正式に確定した。
-4. **Pattern と Style Variation（Trust / Natural / Modern）の共有方式。** Design System設計時に決定する。
-5. **Service / FAQ / CASE等が0件のときの空状態UIパターンの統一。** Pattern設計時に決定する。
+4. ~~Pattern と Style Variation（Trust / Natural / Modern）の共有方式。~~ **CLOSED（2026-08-27 Decision 028により確定）。** `theme/styles/*.json`によるWordPress標準Style Variation機構を採用し、Templates/Patternsは3案で完全共通、配色・Typography等のトークンのみをVariationファイル側に分離することが正式に確定した。
+5. ~~Service / FAQ / CASE等が0件のときの空状態UIパターンの統一。~~ **CLOSED（2026-08-27 Decision 028により確定）。** Archive専用ページは`core/query-no-results`等による前向きなメッセージ表示、HOME等のTeaserセクションは見出し含め完全非表示、という2ルールに統一することが正式に確定した。
 6. ~~営業時間・臨時休業データモデルの詳細（将来の予約Pluginとの共有を見据えた設計）。~~ **CLOSED（2026-08-26 Construction Order 002により実装）。** `astrea_core_office_profile`内の`business_hours`（週次の定休日／開始・終了時刻＋臨時休業等の期間リスト）として実装済み。将来の予約Pluginとの共有インターフェースは未設計だが、データモデル自体は確定した。
 7. ~~複数のProfessional Profileを「代表者」として同時に指定できることの是非。~~ **CLOSED（2026-08-26 Decision 025により確定）。** 0〜複数人を正式に許可し、一意制約は設けないことが正式仕様として確定した。
 

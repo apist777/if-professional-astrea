@@ -38,7 +38,7 @@ const OFFICE_PROFILE_SOURCE = 'astrea-core/office-profile';
  * Order 003A): representative is a person and now belongs to Professional
  * Profile's `is_representative` flag, not Office Profile.
  */
-const ALLOWED_KEYS = array( 'office_name', 'address', 'phone' );
+const ALLOWED_KEYS = array( 'office_name', 'address', 'phone', 'phone_tel' );
 
 add_action( 'init', __NAMESPACE__ . '\\register_office_profile_source' );
 
@@ -81,7 +81,28 @@ function get_bound_value( $source_args, $block_instance, $attribute_name ) { // 
 	}
 
 	$profile = get_office_profile();
-	$value   = $profile[ $key ] ?? '';
+
+	if ( 'phone_tel' === $key ) {
+		return phone_to_tel_uri( (string) ( $profile['phone'] ?? '' ) );
+	}
+
+	$value = $profile[ $key ] ?? '';
 
 	return ( '' !== $value ) ? $value : null;
+}
+
+/**
+ * Converts a free-text phone number (Office Profile's `phone` field, e.g.
+ * "03-1234-5678") into a `tel:` URI for a Button block's `url` binding.
+ * `tel:` URIs (RFC 3966) accept hyphens as visual separators, so no
+ * reformatting beyond stripping characters that aren't digits, `+`, or
+ * `-` is necessary or desirable.
+ *
+ * @param string $phone Raw phone number as stored on Office Profile.
+ * @return string|null `tel:` URI, or null when there is no phone number to link.
+ */
+function phone_to_tel_uri( string $phone ): ?string {
+	$digits = preg_replace( '/[^0-9+\-]/', '', $phone );
+
+	return ( null !== $digits && '' !== $digits ) ? 'tel:' . $digits : null;
 }

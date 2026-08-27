@@ -381,6 +381,34 @@ class OfficeProfileTest extends WP_UnitTestCase {
 		$this->assertNull( $value, 'An empty/unconfigured value must fall back to the block\'s static content, not override it with an empty string.' );
 	}
 
+	public function test_block_binding_phone_tel_converts_phone_to_tel_uri() {
+		update_option(
+			OfficeProfile\OPTION_NAME,
+			OfficeProfile\sanitize( array( 'phone' => '03-1234-5678' ) )
+		);
+
+		$value = Bindings\get_bound_value( array( 'key' => 'phone_tel' ), null, 'url' );
+
+		$this->assertSame( 'tel:03-1234-5678', $value );
+	}
+
+	public function test_block_binding_phone_tel_strips_non_tel_safe_characters() {
+		update_option(
+			OfficeProfile\OPTION_NAME,
+			OfficeProfile\sanitize( array( 'phone' => '03（1234）5678' ) )
+		);
+
+		$value = Bindings\get_bound_value( array( 'key' => 'phone_tel' ), null, 'url' );
+
+		$this->assertSame( 'tel:0312345678', $value );
+	}
+
+	public function test_block_binding_phone_tel_returns_null_when_no_phone_is_set() {
+		$value = Bindings\get_bound_value( array( 'key' => 'phone_tel' ), null, 'url' );
+
+		$this->assertNull( $value );
+	}
+
 	public function test_deactivate_does_not_delete_office_profile_data() {
 		update_option(
 			OfficeProfile\OPTION_NAME,
