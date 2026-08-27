@@ -1009,3 +1009,153 @@ wp_cli eval 'delete_option( \Astrea\Core\OfficeProfile\OPTION_NAME ); delete_opt
 rm -f "$COOKIE_JAR"
 
 echo "All ASTREA SEO Foundation end-to-end checks passed."
+
+# Part 8 (BD-BM) automates Construction Order 007 (Setup / Onboarding):
+# the setup checklist rendered on the ASTREA Office Profile page (derived
+# from real data, no separate progress store), the "基本ページを作成する"
+# / "基本メニューを作成する" admin-post actions (idempotent, never
+# overwriting existing content, never generating a Navigation when one
+# already exists), and the Theme-side Core-recommendation notice
+# (Decision 021) with its per-user Dismiss.
+
+COOKIE_JAR="$(mktemp)"
+curl -s -c "$COOKIE_JAR" "$SITE_URL/wp-login.php" > /dev/null
+curl -s -c "$COOKIE_JAR" -b "$COOKIE_JAR" -X POST "$SITE_URL/wp-login.php" \
+	--data-urlencode "log=admin" --data-urlencode "pwd=password" \
+	--data-urlencode "wp-submit=Log In" --data-urlencode "redirect_to=$SITE_URL/wp-admin/" \
+	-o /dev/null
+
+echo "=== BD. Setup checklist renders on the ASTREA admin page, reflecting real (empty) state ==="
+ADMIN_HTML=$(curl -s -b "$COOKIE_JAR" "$SITE_URL/wp-admin/admin.php?page=astrea-core")
+if grep -q 'id="loginform"' <<< "$ADMIN_HTML"; then
+	echo "FAIL [BD]: admin session was not recognized"
+	exit 1
+fi
+if ! grep -qF 'セットアップ状況' <<< "$ADMIN_HTML"; then
+	echo "FAIL [BD]: setup checklist heading did not render"
+	exit 1
+fi
+if ! grep -qF '取扱業務を1件以上登録する' <<< "$ADMIN_HTML"; then
+	echo "FAIL [BD]: Service checklist item did not render"
+	exit 1
+fi
+echo "OK   [BD: setup checklist renders on the ASTREA admin page]"
+
+echo "=== BE. 基本ページを作成する generates exactly 事務所概要/料金/お問い合わせ (draft), no Service/FAQ page ==="
+PAGES_NONCE=$(sed -n 's/.*name="astrea_setup_generate_pages_nonce" value="\([a-f0-9]*\)".*/\1/p' <<< "$ADMIN_HTML" | head -1)
+curl -s -b "$COOKIE_JAR" -o /dev/null "$SITE_URL/wp-admin/admin-post.php?action=astrea_setup_generate_pages&astrea_setup_generate_pages_nonce=$PAGES_NONCE"
+GENERATED=$(wp_cli option get astrea_core_generated_pages --format=json)
+GENERATED_KEYS=$(echo "$GENERATED" | node -e "console.log(Object.keys(JSON.parse(require('fs').readFileSync(0,'utf8'))).sort().join(','))")
+if [ "$GENERATED_KEYS" != "about,contact,price" ]; then
+	echo "FAIL [BE]: expected generated page keys 'about,contact,price', got '$GENERATED_KEYS'"
+	exit 1
+fi
+ABOUT_ID=$(echo "$GENERATED" | node -e "console.log(JSON.parse(require('fs').readFileSync(0,'utf8')).about)")
+PRICE_ID=$(echo "$GENERATED" | node -e "console.log(JSON.parse(require('fs').readFileSync(0,'utf8')).price)")
+CONTACT_ID=$(echo "$GENERATED" | node -e "console.log(JSON.parse(require('fs').readFileSync(0,'utf8')).contact)")
+for id in "$ABOUT_ID" "$PRICE_ID" "$CONTACT_ID"; do
+	STATUS=$(wp_cli post get "$id" --field=post_status)
+	if [ "$STATUS" != "draft" ]; then
+		echo "FAIL [BE]: generated page $id expected status 'draft', got '$STATUS'"
+		exit 1
+	fi
+done
+echo "OK   [BE: generated exactly the 3 non-duplicate pages, all draft]"
+
+echo "=== BF. Re-running 基本ページを作成する does not duplicate or overwrite existing content ==="
+wp_cli post update "$ABOUT_ID" --post_content="スモークテストが書いた本文"
+curl -s -b "$COOKIE_JAR" -o /dev/null "$SITE_URL/wp-admin/admin-post.php?action=astrea_setup_generate_pages&astrea_setup_generate_pages_nonce=$PAGES_NONCE"
+GENERATED_AFTER=$(wp_cli option get astrea_core_generated_pages --format=json)
+ABOUT_ID_AFTER=$(echo "$GENERATED_AFTER" | node -e "console.log(JSON.parse(require('fs').readFileSync(0,'utf8')).about)")
+if [ "$ABOUT_ID_AFTER" != "$ABOUT_ID" ]; then
+	echo "FAIL [BF]: re-running generated a new page instead of recognizing the existing one"
+	exit 1
+fi
+ABOUT_CONTENT=$(wp_cli post get "$ABOUT_ID" --field=post_content)
+if [ "$ABOUT_CONTENT" != "スモークテストが書いた本文" ]; then
+	echo "FAIL [BF]: re-running overwrote existing page content"
+	exit 1
+fi
+echo "OK   [BF: re-running is idempotent and never overwrites existing content]"
+
+echo "=== BG. Publishing the generated Contact page flips the checklist's Contact-reachable item to done ==="
+wp_cli post update "$CONTACT_ID" --post_status=publish
+ADMIN_HTML=$(curl -s -b "$COOKIE_JAR" "$SITE_URL/wp-admin/admin.php?page=astrea-core")
+# Done items render as plain text (no <a>); a not-done item has an <a> wrapping the label.
+CONTACT_LINE=$(grep -oE '.{0,80}問い合わせフォームを設置したページを公開する.{0,10}' <<< "$ADMIN_HTML")
+if grep -q '<a ' <<< "$CONTACT_LINE"; then
+	echo "FAIL [BG]: Contact-reachable checklist item still shows as not-done after publishing the Contact page"
+	exit 1
+fi
+echo "OK   [BG: Contact-reachable checklist item reflects the published Contact page]"
+
+echo "=== BH. Confirmed notification email flips the checklist's notification item to done ==="
+wp_cli eval 'update_option( \Astrea\Core\Inquiry\SETTINGS_OPTION, array_merge( \Astrea\Core\Inquiry\get_contact_settings(), array( "notification_email" => "smoke-007@example.com" ) ) );'
+ADMIN_HTML=$(curl -s -b "$COOKIE_JAR" "$SITE_URL/wp-admin/admin.php?page=astrea-core")
+NOTIFY_LINE=$(grep -oE '.{0,80}問い合わせの通知先メールアドレスを確認する.{0,10}' <<< "$ADMIN_HTML")
+if grep -q '<a ' <<< "$NOTIFY_LINE"; then
+	echo "FAIL [BH]: notification-confirmed checklist item still shows as not-done after setting a confirmed address"
+	exit 1
+fi
+echo "OK   [BH: notification-confirmed checklist item reflects the confirmed address]"
+
+echo "=== BI. 基本メニューを作成する generates a draft Navigation with links to real content ==="
+if ! grep -qF '基本メニューを作成する' <<< "$ADMIN_HTML"; then
+	echo "FAIL [BI]: Navigation generation button did not render (no Navigation should exist yet)"
+	exit 1
+fi
+NAV_NONCE=$(sed -n 's/.*name="astrea_setup_generate_navigation_nonce" value="\([a-f0-9]*\)".*/\1/p' <<< "$ADMIN_HTML" | head -1)
+curl -s -b "$COOKIE_JAR" -o /dev/null "$SITE_URL/wp-admin/admin-post.php?action=astrea_setup_generate_navigation&astrea_setup_generate_navigation_nonce=$NAV_NONCE"
+NAV_COUNT=$(wp_cli post list --post_type=wp_navigation --format=count)
+if [ "$NAV_COUNT" != "1" ]; then
+	echo "FAIL [BI]: expected exactly 1 generated wp_navigation post, found $NAV_COUNT"
+	exit 1
+fi
+NAV_ID=$(wp_cli post list --post_type=wp_navigation --field=ID)
+NAV_CONTENT=$(wp_cli post get "$NAV_ID" --field=post_content)
+if ! grep -qF '料金' <<< "$NAV_CONTENT" || ! grep -qF 'お問い合わせ' <<< "$NAV_CONTENT"; then
+	echo "FAIL [BI]: generated Navigation is missing expected links"
+	exit 1
+fi
+echo "OK   [BI: generated a draft Navigation with links to the generated pages]"
+
+echo "=== BJ. 基本メニューを作成する is not offered once a Navigation already exists ==="
+ADMIN_HTML=$(curl -s -b "$COOKIE_JAR" "$SITE_URL/wp-admin/admin.php?page=astrea-core")
+if grep -qF 'name="astrea_setup_generate_navigation_nonce"' <<< "$ADMIN_HTML"; then
+	echo "FAIL [BJ]: Navigation generation form still rendered after a Navigation already exists"
+	exit 1
+fi
+echo "OK   [BJ: Navigation generation is correctly withheld once a Navigation exists]"
+
+echo "=== BK. Core-recommendation notice appears while Core is inactive, and can be dismissed per-user ==="
+wp_cli plugin deactivate astrea-core
+DASHBOARD_HTML=$(curl -s -b "$COOKIE_JAR" "$SITE_URL/wp-admin/index.php")
+if ! grep -qF 'ASTREA Coreを有効化すると' <<< "$DASHBOARD_HTML"; then
+	echo "FAIL [BK]: Core-recommendation notice did not appear on the Dashboard while Core is inactive"
+	exit 1
+fi
+DISMISS_URL=$(grep -oE "admin-post\.php\?action=astrea_dismiss_core_notice[^\"']*" <<< "$DASHBOARD_HTML" | sed 's/&#0\?38;/\&/g' | head -1)
+curl -s -b "$COOKIE_JAR" -o /dev/null "$SITE_URL/wp-admin/$DISMISS_URL"
+DASHBOARD_HTML_AFTER=$(curl -s -b "$COOKIE_JAR" "$SITE_URL/wp-admin/index.php")
+if grep -qF 'ASTREA Coreを有効化すると' <<< "$DASHBOARD_HTML_AFTER"; then
+	echo "FAIL [BK]: Core-recommendation notice still appeared after being dismissed"
+	exit 1
+fi
+echo "OK   [BK: Core-recommendation notice appears while Core is inactive and is dismissible per-user]"
+
+echo "=== BL. Core reactivated: notice stays gone (Core now active), Theme still safe throughout ==="
+wp_cli plugin activate astrea-core
+check_no_fatal "BL: Home after reactivation"
+DASHBOARD_HTML_REACTIVATED=$(curl -s -b "$COOKIE_JAR" "$SITE_URL/wp-admin/index.php")
+if grep -qF 'ASTREA Coreを有効化すると' <<< "$DASHBOARD_HTML_REACTIVATED"; then
+	echo "FAIL [BL]: Core-recommendation notice appeared while Core is active"
+	exit 1
+fi
+echo "OK   [BL: no Fatal across deactivate/reactivate, notice correctly gone once Core is active]"
+
+echo "=== Cleanup: remove Construction Order 007 smoke-test fixtures ==="
+wp_cli post delete "$ABOUT_ID" "$PRICE_ID" "$CONTACT_ID" "$NAV_ID" --force > /dev/null
+wp_cli eval 'delete_option( "astrea_core_generated_pages" ); delete_option( \Astrea\Core\Inquiry\SETTINGS_OPTION ); $u = get_user_by( "login", "admin" ); if ( $u ) { delete_user_meta( $u->ID, "astrea_core_notice_dismissed" ); }'
+rm -f "$COOKIE_JAR"
+
+echo "All ASTREA Setup / Onboarding end-to-end checks passed."

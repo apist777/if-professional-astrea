@@ -142,6 +142,15 @@ function render_page() {
 		<p class="description">
 			<?php esc_html_e( 'ここで入力した情報は、テーマの表示（ヘッダー・フッター等）から共通で利用されます。すべての項目は任意です。未入力のまま公開しても問題ありません。', 'astrea-core' ); ?>
 		</p>
+		<?php
+		/**
+		 * Fires near the top of the ASTREA Office Profile page, before the
+		 * settings form. Used by includes/setup-admin.php (Construction
+		 * Order 007) to render the setup checklist without coupling this
+		 * file to the Setup module directly.
+		 */
+		do_action( 'astrea_core_office_profile_page_top' );
+		?>
 		<?php settings_errors( OPTION_NAME ); ?>
 		<form method="post" action="options.php" novalidate="novalidate">
 			<?php

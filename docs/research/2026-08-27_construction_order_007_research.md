@@ -336,3 +336,39 @@ WordPressバージョンの前提：本調査は2026年8月時点の最新安定
 2. **Office Profile画面のチェックリスト表示位置の細部：** 02§22は「営業時間」を「事務所情報」と並列の入口として明示しているが、現在の実装ではOffice Profile単一画面の中に統合されている。チェックリスト上で2行に分けて表示するか、1行にまとめるかは実装時の些末な判断で足りると考えられるが、念のため記録する。
 
 いずれも本調査の9つの停止条件（既存Decisionとの矛盾／Core必須化／FREE-PRO境界変更／既存ユーザーデータの自動改変／新規DBテーブル／外部サービス／Telemetry／Design System仕様確定の必要／重大Security-Privacy判断）には該当しないと判断し、RESEARCH COMPLETEとして報告する。
+
+---
+
+## 21. 着工承認・要確認事項の解決（2026-08-27追記）
+
+CONSTRUCTION 007 作戦承認を受け、§20-1の要確認事項について着工前確認を実施した。ユーザーは本調査の推奨案（重複を避けた3ページのみ生成）を選択した。この判断を**Decision 027**として正式に記録した（`docs/specifications/04_astrea_free_v1_preconstruction_decisions.md`）。§20-2（営業時間チェックリスト表示位置）は実装時の些末な判断として、事務所情報と統合した1項目として扱うことにした（新規Decision不要）。
+
+## 22. 実装報告（2026-08-27追記）
+
+§18の実装提案どおり、以下を実装した。
+
+**追加ファイル（Core）:**
+- `core/includes/setup-checklist.php` — チェックリスト状態判定（既存データAPIからの動的算出、進捗DB無し）。
+- `core/includes/setup-pages.php` — 事務所概要/料金/お問い合わせページの一括生成（Decision 016/027準拠、下書き作成、重複防止、上書き無し）。
+- `core/includes/setup-navigation.php` — 基本メニュー（`wp_navigation`）生成（既存Navigationが無い場合のみ）。
+- `core/includes/setup-admin.php` — 上記のチェックリストUIと2つの生成ボタンを、既存の「ASTREA」Office Profile画面へ`astrea_core_office_profile_page_top`アクション経由で追加描画。
+
+**変更ファイル（Core）:**
+- `core/includes/office-profile-admin.php` — チェックリスト差し込み用のアクションフックを1箇所追加。
+- `core/astrea-core.php` — 新規4ファイルのrequire追加。Version 0.6.0 → 0.7.0。
+- `core/uninstall.php` — `astrea_core_generated_pages`オプションをCore所有データとして明記（削除しない）。
+
+**変更ファイル（Theme）:**
+- `theme/functions.php` — Core未導入時の推奨Notice（Decision 021が既に許可済み）。Transient不要でuser meta Dismissのみのシンプルな実装とした（activation hookからの直接表示ではなく`admin_notices`自体で毎回`is_core_active()`を判定するため、当初検討したTransient経由の設計は不要と判断——Pluginのアクティベーション直後のリダイレクト問題を回避する目的のTransientは、ASTREA Coreというサイト全体の状態を毎回判定する常設Noticeには当てはまらないため）。
+
+**Security/Accessibility：** 全アクション（ページ生成・メニュー生成・Notice Dismiss）は`current_user_can()`+Nonce（`check_admin_referer`）で保護。出力は`esc_html()`/`esc_url()`/`esc_attr()`で徹底。チェックリストは完了/推奨/任意をテキストラベル併記（色のみに依存しない）。
+
+**Core非活性時の挙動：** チェックリストはCore画面自体の一部のため、Core非活性時は表示されない（Core画面自体が存在しないため、既存のCore非活性時の一般的挙動と同じ）。Theme側のCore推奨Noticeは、Core非活性時にのみ表示され、Fatal/Warning無しで動作することを実HTTPで確認した。
+
+**Test/CI結果：**
+- 新規PHPUnit：`tests/SetupTest.php`（18 tests / 44 assertions）追加。
+- Regression含む全体：205 tests / 340 assertions、PASS。
+- PHPCS：新規・変更ファイル、および`core/`/`theme/`全体で0エラー。
+- 実HTTP smoke-test（`tools/ci/smoke-test.sh`）：Part 8（BD-BL）を新規追加し、チェックリスト描画・ページ生成の冪等性・Navigation生成のガード・Core推奨Notice表示/Dismiss・Core非活性化/再有効化時のFatal無しを実機確認。Part 1-7の既存Regressionも含め全項目PASS（2回目の実行で成功。1回目は`npx wp-env run cli`のETIMEDOUT——本セッションで既知のサンドボックス側ネットワーク不安定性——により中断、製品コードの不具合ではない）。
+
+**発見した追加の要確認事項：** なし。§20で提起した2件のうち、§20-1はDecision 027で解決済み、§20-2は実装レベルの軽微な判断として処理した。

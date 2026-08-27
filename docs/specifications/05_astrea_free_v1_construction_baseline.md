@@ -361,3 +361,15 @@ CONSTRUCTION ORDER 006着工にあたり、本書セクション17項目3で実�
 - 本書セクション17項目3、`docs/research/2026-08-26_construction_order_004_research.md`§6の要確認事項、`04_astrea_free_v1_preconstruction_decisions.md`「残る確認事項」項目3は、本Decisionにより**CLOSED**となった。
 
 将来SEO Foundationを拡張するConstruction Orderでは、本セクションおよび`04_astrea_free_v1_preconstruction_decisions.md`のDecision 026を基準文書とする。
+
+---
+
+## 25. 追記（2026-08-27, Decision 027 — Setup Page 一括生成の対象範囲確定）
+
+CONSTRUCTION ORDER 007着工にあたり、Decision 016の一括生成対象ページ例示が以下のとおり具体化された（`04_astrea_free_v1_preconstruction_decisions.md`のDecision 027参照）。既存セクション（セクション19「変更管理方針」に基づく本Decision導入部の記載方針）の本文は書き換えず、末尾への追加として反映する。
+
+- 一括生成の対象を**事務所概要・料金・お問い合わせの3ページ**に限定する。取扱業務・専門家紹介・FAQは、Construction Order 003/004で獲得済みのCPT Archive URL（`/services/`, `/professionals/`, `/faq/`）で既に到達可能なため、重複するページを生成しない。ホームは対象外とし、Design System着手時に改めて扱う。
+- Decision 016本体（明示操作のみで生成、重複生成・上書きをしない、生成物は通常のPageとしてCore Uninstall対象外）は変更しない。
+- `docs/research/2026-08-27_construction_order_007_research.md`§20-1の要確認事項は、本Decisionにより**CLOSED**となった。
+
+将来Setup / Onboardingを拡張するConstruction Orderでは、本セクションおよび`04_astrea_free_v1_preconstruction_decisions.md`のDecision 027を基準文書とする。

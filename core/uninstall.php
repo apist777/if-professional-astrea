@@ -51,6 +51,14 @@
  * Profile photos, an ordinary Media Library attachment the user selected —
  * this option only stores its ID, never a copy of the file.
  *
+ * As of Construction Order 007, `astrea_core_generated_pages` (an index of
+ * which Page ID was generated for the Setup "基本ページを作成する" action)
+ * is Core-owned data under the same policy — intentionally NOT deleted
+ * here. The generated Pages themselves (and any Setup-generated
+ * `wp_navigation` post) are ordinary WordPress content the site owner can
+ * freely edit or delete, exactly like Decision 016 requires; only this
+ * index option is Core's own bookkeeping.
+ *
  * A future Construction Order will add an explicit, confirmed "delete all
  * ASTREA Core data" admin action — this file will call into it only when
  * the user has affirmatively chosen full deletion, not automatically on
@@ -66,7 +74,9 @@ if ( ! defined( 'WP_UNINSTALL_PLUGIN' ) ) {
 // Intentionally no-op: `astrea_core_office_profile`, `astrea_professional`,
 // `astrea_service`, `astrea_price`, `astrea_faq`, `astrea_inquiry`
 // posts/postmeta/taxonomy terms, `astrea_core_contact_settings`,
-// `astrea_core_seo_settings`, and their featured-image / OGP-image
-// attachments must all survive a plain "Delete" from the Plugins screen.
-// Only a future, explicit, user-confirmed deletion flow may remove them —
-// and that flow must never delete Media Library attachments.
+// `astrea_core_seo_settings`, `astrea_core_generated_pages`, and their
+// featured-image / OGP-image attachments must all survive a plain
+// "Delete" from the Plugins screen. Only a future, explicit,
+// user-confirmed deletion flow may remove them — and that flow must never
+// delete Media Library attachments or Setup-generated Pages/Navigation
+// (those are user content per Decision 016).

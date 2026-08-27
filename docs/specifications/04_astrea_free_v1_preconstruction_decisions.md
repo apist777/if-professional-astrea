@@ -981,6 +981,40 @@ Office Profile → `Organization`。Professional Profile → `Organization.emplo
 
 ---
 
+## Decision 027 — Setup Page 一括生成の対象範囲確定（Decision 016 実装解釈）
+
+**Status:** FIXED
+**決定日:** 2026-08-27
+
+### 決定内容
+
+CONSTRUCTION ORDER 007（Setup / Onboarding / Initial UX）着工にあたり、Decision 016（初期セットアップ）が例示する一括生成対象ページ「ホーム・事務所概要・取扱業務・料金・FAQ・問い合わせ」を、Construction Order 003/004でService/Professional/FAQが独自のCPT Archive URL（`/services/`, `/professionals/`, `/faq/`）を獲得した後の現状を踏まえ、以下のとおり具体化する。
+
+一括生成の対象は**事務所概要・料金・お問い合わせの3ページのみ**とする。取扱業務・専門家紹介・FAQは既存のCPT Archiveで到達可能であるため、重複するページは生成しない。ホームは本Decisionの対象外とし、Design System着手時に改めて扱う。
+
+Decision 016本体（「ユーザーの明示操作のみで生成」「再実行しても重複生成・上書きしない」「生成物は通常のPage、Core Uninstallの対象外」等）は変更しない。本Decisionはその対象ページリストの実装解釈を確定するものである。
+
+### 理由・設計原則
+
+- `docs/research/2026-08-27_construction_order_007_research.md` §8/§20-1で提起した要確認事項への正式な回答。Decision 016策定（2026-08-25）はConstruction Order 003/004より前であり、CPT Archive URLの存在を前提にできなかった。
+- 同一内容への二重の到達導線（CPT ArchiveとPage）を作らないことを優先する。
+
+### 影響する既存仕様
+
+- Decision 016本体の文言は変更しない（対象リストの実装解釈の確定のみ）。
+- `docs/research/2026-08-27_construction_order_007_research.md`§20-1の要確認事項を本Decisionにより**CLOSED**とする。
+
+### Theme / Core / WordPress の責任境界
+
+- Core：`astrea_core_generated_pages`オプションによる生成済みページの記録、事務所概要/料金/お問い合わせページの生成・重複防止ロジック。
+- WordPress：生成された固定ページ自体（標準の投稿データとして保存）。
+
+### 実装時に守るべき事項
+
+- 生成対象を増減する場合（例：ホームページ生成をDesign System側で追加する等）は、本Decisionを更新するか新しいDecisionを起票する。独自判断で対象を拡大しない。
+
+---
+
 ## 本書に基づき残る確認事項（新規Decisionではない）
 
 以下は、Decision 001〜024によっておおむね解消されたが、正式仕様の文言として明示的な一文が未整備、または性質上「実装フェーズの技術詳細」に属するため、本書ではこれ以上の判断を追加しない事項である。クロエ独自の判断でこれらを確定させることはしない。
