@@ -9,6 +9,8 @@ If Professional ASTREA FREE v1 仕様書
 > 【2026-08-26 追記】§4、§8は、Decision 023（代表者情報の正本はProfessional Profile）の内容もあわせて反映して更新されている。
 >
 > 【2026-08-26 追記】§8は、Decision 025（Professional Profile代表者の人数制約：0〜複数人を正式許可）の内容もあわせて反映して更新されている。
+>
+> 【2026-08-27 追記】§16（SEO Foundation）は、Decision 026（SEO Foundation：構造化データ方針の確定）の内容を反映して更新されている。
 
 1. 本仕様書の目的
 本書は、If Professional ASTREA FREE v1の開発着工前仕様を定義する。
@@ -197,6 +199,13 @@ SEOを知らないユーザーでも基本的に妥当な状態になるよう�
 他SEO Pluginを利用したいユーザーについては二重出力を避け、邪魔をしない。この方針はSEO Plugin以外の主要な第三者Pluginとの競合可能性にも一般化し、既知の競合事例が判明したものをUpdateで検出リストへ追加できる運用とする。未知Pluginを推測で制御しない（Decision 018）。
 
 【2026-08-25 Decision 010により更新】Breadcrumbは、視覚的なBreadcrumb UI（Theme側で表示）と、検索エンジン向けのBreadcrumbList構造化データ（Core側でJSON-LD出力）の両方を標準対応する。WordPress標準の投稿階層・分類（Taxonomy）を利用し、Breadcrumb専用の独自データ正本は作らない。過剰なユーザー設定は要求しない。
+
+【2026-08-27 Decision 026により確定】基本構造化データの対象範囲を以下のとおり確定する。
+
+- **対象とする**：Organization（Office Profile由来）、Organization.employee内のPerson（Professional Profile由来）、BreadcrumbList（Decision 010）。
+- **対象としない**：Offer / PriceSpecification（Price）、FAQPage（FAQ）。理由はDecision 026を参照（Priceの自由記述モデルはOfferとして意味的に正確な構造化データを安全に自動生成できないため。FAQPageはGoogle検索のRich Result自体が2026年5月に廃止され実益が失われたため）。
+- 一般用途のProfessionalService型（Schema.org側でdeprecated）は採用せず、特定士業へ固定したSchema型への決め打ちも行わない。
+- WordPress標準機能（title-tag、canonical、robots meta、XML Sitemap、Site Icon、Featured Image）はASTREAが重複実装せず、標準Hook / Filter経由で連携する。
 ________________________________________
 17. OGP
 サイト標準OGP画像を設定可能とする。

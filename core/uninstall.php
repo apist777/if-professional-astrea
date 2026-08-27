@@ -44,7 +44,13 @@
  * plugin activation state; plain Uninstall must not additionally wipe
  * whatever inquiries still happen to be within their Retention window.
  *
-
+ * As of Construction Order 006, the `astrea_core_seo_settings` option
+ * (site-wide OGP fallback image reference, Search Console verification
+ * code) is Core-owned data under the same policy — intentionally NOT
+ * deleted here. The OGP fallback image itself is, like Professional
+ * Profile photos, an ordinary Media Library attachment the user selected —
+ * this option only stores its ID, never a copy of the file.
+ *
  * A future Construction Order will add an explicit, confirmed "delete all
  * ASTREA Core data" admin action — this file will call into it only when
  * the user has affirmatively chosen full deletion, not automatically on
@@ -59,8 +65,8 @@ if ( ! defined( 'WP_UNINSTALL_PLUGIN' ) ) {
 
 // Intentionally no-op: `astrea_core_office_profile`, `astrea_professional`,
 // `astrea_service`, `astrea_price`, `astrea_faq`, `astrea_inquiry`
-// posts/postmeta/taxonomy terms, `astrea_core_contact_settings`, and their
-// featured-image attachments must all survive a plain "Delete" from the
-// Plugins screen. Only a future, explicit, user-confirmed deletion flow
-// may remove them — and that flow must never delete Media Library
-// attachments.
+// posts/postmeta/taxonomy terms, `astrea_core_contact_settings`,
+// `astrea_core_seo_settings`, and their featured-image / OGP-image
+// attachments must all survive a plain "Delete" from the Plugins screen.
+// Only a future, explicit, user-confirmed deletion flow may remove them —
+// and that flow must never delete Media Library attachments.

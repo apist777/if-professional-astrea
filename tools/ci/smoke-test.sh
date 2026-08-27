@@ -30,12 +30,19 @@
 # guarantee (§8) and the same Core-inactive/deactivate/reactivate coverage
 # as Parts 1-4.
 #
-# Part 6 (AF-AS) automates Construction Order 005: the Contact form's
+# Part 6 (AF-AR) automates Construction Order 005: the Contact form's
 # entire real HTTP lifecycle (astrea/contact-form Dynamic Block, CSRF,
 # Honeypot, Rate Limit, validation-error value retention, admin read
 # state, CSV Export + formula-injection neutralization, the notification-
 # email confirmation Token flow including replay rejection), plus the same
 # Core-inactive/deactivate/reactivate coverage as Parts 1-5.
+#
+# Part 7 (AS-BE) automates Construction Order 006 (SEO Foundation): meta
+# description/OGP/Organization+Person+BreadcrumbList JSON-LD across
+# Home/Service Archive/Service Single/Professional Archive/FAQ Archive,
+# the Search Console verification meta (set/invalid-rejected), XSS/JSON-LD
+# injection safety, real coexistence with an installed SEO Plugin (Yoast),
+# and the same Core-inactive/deactivate/reactivate coverage as Parts 1-6.
 #
 # Requires a running `wp-env` environment (see package.json `env:start`).
 
@@ -67,6 +74,19 @@ check_no_fatal() {
 	fi
 
 	echo "OK   [$label]: HTTP $status, no fatal error detected"
+}
+
+# Strips <script>...</script> blocks (notably JSON-LD, Construction Order
+# 006) from the last BODY_FILE before printing it. Order-sensitive checks
+# that scan for a set of names/titles must use this instead of the raw
+# file — since Organization JSON-LD legitimately repeats those same names
+# sitewide, a plain grep across the whole body would double-count them.
+visible_content_only() {
+	node -e '
+		const fs = require("fs");
+		const html = fs.readFileSync(process.argv[1], "utf8");
+		process.stdout.write(html.replace(/<script[\s\S]*?<\/script>/g, ""));
+	' "$BODY_FILE"
 }
 
 # Fetches a page without requiring HTTP 200 or checking BODY_FILE afterwards
@@ -177,7 +197,7 @@ echo "OK   [J: created Alpha($PROF_A) Bravo($PROF_B) Charlie($PROF_C) + draft($P
 
 echo "=== K. Archive shows all published professionals in deterministic order (menu_order, then title) ==="
 check_no_fatal "K: Professional Profile archive" "/professionals/"
-ORDER=$(grep -oE "Alpha Smoke|Bravo Smoke|Charlie Smoke|Draft Smoke" "$BODY_FILE" | tr '\n' ',')
+ORDER=$(visible_content_only | grep -oE "Alpha Smoke|Bravo Smoke|Charlie Smoke|Draft Smoke" | tr '\n' ',')
 if [ "$ORDER" != "Alpha Smoke,Bravo Smoke,Charlie Smoke," ]; then
 	echo "FAIL [K]: expected order 'Alpha Smoke,Bravo Smoke,Charlie Smoke,' (draft excluded), got '$ORDER'"
 	exit 1
@@ -243,7 +263,7 @@ echo "OK   [R: Professional Profile data retained after deactivation ($DB_COUNT 
 echo "=== S. Core reactivated: Professional Profile display restored ==="
 wp_cli plugin activate astrea-core
 check_no_fatal "S: Professional Profile archive after reactivation" "/professionals/"
-ORDER_AFTER=$(grep -oE "Alpha Smoke|Bravo Smoke|Charlie Smoke" "$BODY_FILE" | tr '\n' ',')
+ORDER_AFTER=$(visible_content_only | grep -oE "Alpha Smoke|Bravo Smoke|Charlie Smoke" | tr '\n' ',')
 if [ "$ORDER_AFTER" != "Alpha Smoke,Bravo Smoke,Charlie Smoke," ]; then
 	echo "FAIL [S]: expected restored order 'Alpha Smoke,Bravo Smoke,Charlie Smoke,', got '$ORDER_AFTER'"
 	exit 1
@@ -393,7 +413,7 @@ SVC_B=$(wp_cli post create --post_type=astrea_service --post_title="Bravo Servic
 SVC_DRAFT=$(wp_cli post create --post_type=astrea_service --post_title="Draft Service" --post_status=draft --porcelain)
 
 check_no_fatal "Z: Service archive" "/services/"
-ORDER=$(grep -oE "Alpha Service|Bravo Service|Charlie Service|Draft Service" "$BODY_FILE" | tr '\n' ',')
+ORDER=$(visible_content_only | grep -oE "Alpha Service|Bravo Service|Charlie Service|Draft Service" | tr '\n' ',')
 if [ "$ORDER" != "Alpha Service,Bravo Service,Charlie Service," ]; then
 	echo "FAIL [Z]: expected order 'Alpha Service,Bravo Service,Charlie Service,' (draft excluded), got '$ORDER'"
 	exit 1
@@ -417,7 +437,7 @@ if ! grep -qF "月額5,000円〜（スモーク）" "$BODY_FILE"; then
 	echo "FAIL [AA]: Price amount not rendered via astrea/price-list Dynamic Block"
 	exit 1
 fi
-ORDER=$(grep -oE "Alpha Price|Bravo Price" "$BODY_FILE" | tr '\n' ',')
+ORDER=$(visible_content_only | grep -oE "Alpha Price|Bravo Price" | tr '\n' ',')
 if [ "$ORDER" != "Alpha Price,Bravo Price," ]; then
 	echo "FAIL [AA]: expected Price order 'Alpha Price,Bravo Price,' (menu_order tie -> title), got '$ORDER'"
 	exit 1
@@ -776,3 +796,216 @@ wp_cli post delete "$INQUIRY_ID" "$CONTACT_PAGE_ID" --force > /dev/null 2>&1 || 
 wp_cli eval 'delete_option( "astrea_core_contact_settings" ); delete_transient( "astrea_core_contact_pending_email_confirm" ); delete_transient( "smoke_captured_confirm_token" );'
 
 echo "All ASTREA Contact end-to-end checks passed."
+
+# ---------------------------------------------------------------------------
+# Part 7 (AS-BE): Construction Order 006 — SEO Foundation end to end.
+# ---------------------------------------------------------------------------
+
+# Extracts every <script type="application/ld+json"> block from the last
+# BODY_FILE and asserts each one parses as valid JSON. Exits 1 on failure.
+assert_all_json_ld_valid() {
+	local label="$1"
+	node -e '
+		const fs = require("fs");
+		const html = fs.readFileSync(process.argv[1], "utf8");
+		const re = /<script type="application\/ld\+json">([\s\S]*?)<\/script>/g;
+		let m, count = 0;
+		while ((m = re.exec(html)) !== null) {
+			count++;
+			try { JSON.parse(m[1]); } catch (e) {
+				console.error("Invalid JSON-LD block #" + count + ": " + e.message);
+				process.exit(1);
+			}
+		}
+		process.exit(0);
+	' "$BODY_FILE"
+	if [ $? -ne 0 ]; then
+		echo "FAIL [$label]: malformed JSON-LD detected"
+		exit 1
+	fi
+	echo "OK   [$label: all JSON-LD blocks on the page are valid JSON]"
+}
+
+echo "=== AS. Office/Professional fixtures for SEO checks ==="
+wp_cli eval '
+$sanitized = \Astrea\Core\OfficeProfile\sanitize( array(
+	"office_name" => "スモークSEO事務所",
+	"address"     => "東京都スモーク区1-1-1",
+	"phone"       => "03-0000-0000",
+) );
+update_option( \Astrea\Core\OfficeProfile\OPTION_NAME, $sanitized );
+'
+SEO_PROF_ID=$(wp_cli post create --post_type=astrea_professional --post_title="スモーク代表" --post_status=publish --porcelain)
+wp_cli post meta update "$SEO_PROF_ID" astrea_professional_qualification "弁護士（スモーク）"
+SEO_SVC_ID=$(wp_cli post create --post_type=astrea_service --post_title="スモークSEO業務" --post_content="スモークSEO業務の説明です。" --post_status=publish --porcelain)
+SEO_FAQ_ID=$(wp_cli post create --post_type=astrea_faq --post_title="スモークSEO質問" --post_content="スモークSEO回答です。" --post_status=publish --porcelain)
+echo "OK   [AS: fixtures created]"
+
+echo "=== AT. Home <head>: meta/OGP/Organization JSON-LD, no fatal, no duplicate meta ==="
+check_no_fatal "AT: Home"
+if [ "$(grep -c '<meta name="description"' "$BODY_FILE" || true)" -gt 1 ] || [ "$(grep -c '<meta property="og:title"' "$BODY_FILE" || true)" -gt 1 ]; then
+	echo "FAIL [AT]: duplicate meta description/og:title detected on Home"
+	exit 1
+fi
+if ! grep -qF '"@type":"Organization"' "$BODY_FILE"; then
+	echo "FAIL [AT]: Organization JSON-LD not found on Home"
+	exit 1
+fi
+if ! grep -qF 'スモークSEO事務所' "$BODY_FILE"; then
+	echo "FAIL [AT]: Office Profile data not reflected in Home JSON-LD"
+	exit 1
+fi
+assert_all_json_ld_valid "AT: Home JSON-LD"
+
+echo "=== AU. Service Archive <head>: Breadcrumb + meta description ==="
+check_no_fatal "AU: Service Archive" "/services/"
+if ! grep -qF 'wp-block-astrea-breadcrumb' "$BODY_FILE" || ! grep -qF '"@type":"BreadcrumbList"' "$BODY_FILE"; then
+	echo "FAIL [AU]: Breadcrumb (visual or JSON-LD) missing on Service Archive"
+	exit 1
+fi
+assert_all_json_ld_valid "AU: Service Archive JSON-LD"
+
+echo "=== AV. Service Single <head>: 3-level Breadcrumb, meta description from content ==="
+SEO_SVC_PATH="/services/$(wp_cli post get "$SEO_SVC_ID" --field=post_name)/"
+check_no_fatal "AV: Service Single" "$SEO_SVC_PATH"
+BREADCRUMB_ITEM_COUNT=$(grep -oE '<li>' "$BODY_FILE" | wc -l)
+if [ "$BREADCRUMB_ITEM_COUNT" -lt 3 ]; then
+	echo "FAIL [AV]: expected at least 3 Breadcrumb items on Service Single, found $BREADCRUMB_ITEM_COUNT"
+	exit 1
+fi
+if ! grep -qF 'content="スモークSEO業務の説明です。"' "$BODY_FILE"; then
+	echo "FAIL [AV]: meta description did not reflect Service content"
+	exit 1
+fi
+assert_all_json_ld_valid "AV: Service Single JSON-LD"
+
+echo "=== AW. Professional Archive <head>: Breadcrumb, Organization JSON-LD includes employee ==="
+check_no_fatal "AW: Professional Archive" "/professionals/"
+if ! grep -qF 'スモーク代表' "$BODY_FILE"; then
+	echo "FAIL [AW]: Professional Profile not reflected in Organization JSON-LD employee list"
+	exit 1
+fi
+assert_all_json_ld_valid "AW: Professional Archive JSON-LD"
+
+echo "=== AX. FAQ Archive <head>: Breadcrumb + no FAQPage JSON-LD (Decision 026) ==="
+check_no_fatal "AX: FAQ Archive" "/faq/"
+if grep -qF '"@type":"FAQPage"' "$BODY_FILE"; then
+	echo "FAIL [AX]: FAQPage JSON-LD must not be emitted (Decision 026)"
+	exit 1
+fi
+if grep -qiE '"@type":"Offer"|PriceSpecification' "$BODY_FILE"; then
+	echo "FAIL [AX]: Offer/PriceSpecification JSON-LD must not be emitted (Decision 026)"
+	exit 1
+fi
+assert_all_json_ld_valid "AX: FAQ Archive JSON-LD"
+
+echo "=== AY. Search Console verification: set via real admin form, output correctly, invalid rejected ==="
+COOKIE_JAR="$(mktemp)"
+curl -s -c "$COOKIE_JAR" "$SITE_URL/wp-login.php" > /dev/null
+LOGIN_STATUS=$(curl -s -c "$COOKIE_JAR" -b "$COOKIE_JAR" -X POST "$SITE_URL/wp-login.php" \
+	--data-urlencode "log=admin" --data-urlencode "pwd=password" \
+	--data-urlencode "wp-submit=Log In" --data-urlencode "redirect_to=$SITE_URL/wp-admin/" \
+	-o /dev/null -w "%{http_code}")
+if [ "$LOGIN_STATUS" != "302" ]; then
+	echo "FAIL [AY]: admin login did not redirect as expected (HTTP $LOGIN_STATUS)"
+	exit 1
+fi
+SEO_ADMIN_HTML=$(curl -s -b "$COOKIE_JAR" "$SITE_URL/wp-admin/admin.php?page=astrea-core-seo")
+if grep -q 'id="loginform"' <<< "$SEO_ADMIN_HTML"; then
+	echo "FAIL [AY]: admin session was not recognized on the SEO settings screen"
+	exit 1
+fi
+SEO_NONCE=$(sed -n 's/.*name="_wpnonce" value="\([a-f0-9]*\)".*/\1/p' <<< "$SEO_ADMIN_HTML" | head -1)
+curl -s -b "$COOKIE_JAR" -o /dev/null -X POST "$SITE_URL/wp-admin/options.php" \
+	--data-urlencode "option_page=astrea_core_seo_settings_group" \
+	--data-urlencode "action=update" \
+	--data-urlencode "_wpnonce=$SEO_NONCE" \
+	--data-urlencode "_wp_http_referer=/wp-admin/admin.php?page=astrea-core-seo" \
+	--data-urlencode "astrea_core_seo_settings[search_console_verification]=SmokeTestCode123-_"
+check_no_fatal "AY: Home after setting verification code"
+if ! grep -qF '<meta name="google-site-verification" content="SmokeTestCode123-_" />' "$BODY_FILE"; then
+	echo "FAIL [AY]: Search Console verification meta not output after saving a valid code"
+	exit 1
+fi
+curl -s -b "$COOKIE_JAR" -o /dev/null -X POST "$SITE_URL/wp-admin/options.php" \
+	--data-urlencode "option_page=astrea_core_seo_settings_group" \
+	--data-urlencode "action=update" \
+	--data-urlencode "_wpnonce=$SEO_NONCE" \
+	--data-urlencode "_wp_http_referer=/wp-admin/admin.php?page=astrea-core-seo" \
+	--data-urlencode 'astrea_core_seo_settings[search_console_verification]=<script>alert(1)</script>'
+check_no_fatal "AY: Home after attempting an invalid verification code"
+if grep -qF 'google-site-verification' "$BODY_FILE"; then
+	echo "FAIL [AY]: an invalid verification code was not rejected"
+	exit 1
+fi
+echo "OK   [AY: Search Console verification set/output correctly, invalid input rejected]"
+
+echo "=== AZ. XSS / JSON-LD injection: malicious Office Profile data cannot break out of <script> or leak raw HTML ==="
+wp_cli eval '
+$sanitized = \Astrea\Core\OfficeProfile\sanitize( array(
+	"office_name" => "</script><script>alert(1)</script>スモーク",
+	"address"     => "テスト住所",
+) );
+update_option( \Astrea\Core\OfficeProfile\OPTION_NAME, $sanitized );
+'
+check_no_fatal "AZ: Home with malicious Office Profile data"
+if grep -qF '</script><script>alert' "$BODY_FILE"; then
+	echo "FAIL [AZ]: JSON-LD script-closing injection was not neutralized"
+	exit 1
+fi
+assert_all_json_ld_valid "AZ: Home JSON-LD with malicious input"
+# Restore benign fixture data for the remaining checks.
+wp_cli eval '
+$sanitized = \Astrea\Core\OfficeProfile\sanitize( array(
+	"office_name" => "スモークSEO事務所",
+	"address"     => "東京都スモーク区1-1-1",
+	"phone"       => "03-0000-0000",
+) );
+update_option( \Astrea\Core\OfficeProfile\OPTION_NAME, $sanitized );
+'
+echo "OK   [AZ: malicious input cannot break JSON-LD or leak a script tag]"
+
+echo "=== BA. SEO Plugin coexistence: Yoast SEO suppresses ASTREA's own meta/OGP/structured data ==="
+# AY's last step deliberately left the verification code rejected/empty; set
+# a valid one again so this step can confirm it survives Plugin detection.
+wp_cli eval 'update_option( \Astrea\Core\Seo\SETTINGS_OPTION, array_merge( \Astrea\Core\Seo\get_seo_settings(), array( "search_console_verification" => "BASmokeTestCode" ) ) );'
+wp_cli plugin install wordpress-seo --activate > /dev/null 2>&1
+check_no_fatal "BA: Home with Yoast SEO active"
+ASTREA_OG_SITE_NAME_COUNT=$(grep -c '<meta property="og:site_name"' "$BODY_FILE" || true)
+ASTREA_ORGANIZATION_COUNT=$(grep -c '"@type":"Organization"' "$BODY_FILE" || true)
+if [ "$ASTREA_OG_SITE_NAME_COUNT" -gt 1 ] || [ "$ASTREA_ORGANIZATION_COUNT" -gt 0 ]; then
+	echo "FAIL [BA]: ASTREA's own OGP/Organization JSON-LD was not suppressed while a known SEO Plugin is active"
+	exit 1
+fi
+if ! grep -qF 'google-site-verification' "$BODY_FILE"; then
+	echo "FAIL [BA]: Search Console verification meta must NOT be suppressed by SEO Plugin detection"
+	exit 1
+fi
+wp_cli plugin deactivate wordpress-seo > /dev/null
+wp_cli plugin uninstall wordpress-seo > /dev/null
+echo "OK   [BA: known SEO Plugin coexistence — ASTREA's overlapping output suppressed, Search Console kept]"
+
+echo "=== BB. Core deactivated: no Fatal, ASTREA SEO output removed ==="
+wp_cli plugin deactivate astrea-core
+fetch_no_fatal_any_status "BB: Home while Core inactive" "/"
+if grep -qF '"@type":"Organization"' "$BODY_FILE" || grep -qF 'wp-block-astrea-breadcrumb' "$BODY_FILE"; then
+	echo "FAIL [BB]: ASTREA SEO output leaked while Core is inactive"
+	exit 1
+fi
+echo "OK   [BB: ASTREA SEO output cleanly absent while Core is inactive]"
+
+echo "=== BC. Core reactivated: ASTREA SEO output restored ==="
+wp_cli plugin activate astrea-core
+check_no_fatal "BC: Home after reactivation"
+if ! grep -qF '"@type":"Organization"' "$BODY_FILE"; then
+	echo "FAIL [BC]: Organization JSON-LD not restored after reactivation"
+	exit 1
+fi
+echo "OK   [BC: ASTREA SEO output restored after reactivation]"
+
+echo "=== Cleanup: remove Construction Order 006 smoke-test fixtures ==="
+wp_cli post delete "$SEO_PROF_ID" "$SEO_SVC_ID" "$SEO_FAQ_ID" --force > /dev/null
+wp_cli eval 'delete_option( \Astrea\Core\OfficeProfile\OPTION_NAME ); delete_option( \Astrea\Core\Seo\SETTINGS_OPTION );'
+rm -f "$COOKIE_JAR"
+
+echo "All ASTREA SEO Foundation end-to-end checks passed."

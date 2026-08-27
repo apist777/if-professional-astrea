@@ -54,6 +54,7 @@ function register_post_type_and_meta() {
 		POST_TYPE,
 		array(
 			'label'        => __( 'FAQ', 'astrea-core' ),
+			'description'  => __( 'よくある質問の一覧です。', 'astrea-core' ),
 			'labels'       => array(
 				'name'          => __( 'FAQ', 'astrea-core' ),
 				'singular_name' => __( 'FAQ', 'astrea-core' ),

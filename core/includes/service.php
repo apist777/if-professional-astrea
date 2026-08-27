@@ -44,6 +44,7 @@ function register_post_type_and_meta() {
 		POST_TYPE,
 		array(
 			'label'        => __( '取扱業務', 'astrea-core' ),
+			'description'  => __( '取扱業務の一覧です。', 'astrea-core' ),
 			'labels'       => array(
 				'name'          => __( '取扱業務', 'astrea-core' ),
 				'singular_name' => __( '取扱業務', 'astrea-core' ),

@@ -924,13 +924,70 @@ Professional Profileの「代表者」指定（`is_representative`）は、**0�
 
 ---
 
+## Decision 026 — SEO Foundation：構造化データ方針の確定
+
+**Status:** FIXED
+**決定日:** 2026-08-27
+
+### 決定内容
+
+CONSTRUCTION ORDER 006（SEO Foundation）着工にあたり、Construction Order 004からの引き継ぎ事項および同006着工前調査（`docs/research/2026-08-27_construction_order_006_research.md`）を踏まえ、以下を正式に確定する。
+
+**1. Price → Offer / PriceSpecification は自動出力しない**
+
+ASTREA Priceは、固定額・○円〜・月額・時間制・無料・個別見積・自由表記等を**単一の自由記述モデル**で扱う（Construction Order 004で確定済みのデータモデル、変更なし）。この判断の理由は「schema.org priceが数値必須だから」という技術的制約のみに帰着させない。より正確には、**自由記述モデルという設計そのものが、Offer / PriceSpecificationとして意味的に正確かつ一貫した構造化データを安全に自動生成できる性質を持たないため**、FREE v1では出力しないと判断する。将来、PRO等で構造化された料金モデル（数値専用フィールド等）を採用する場合は、本Decisionとは別の新しいDecisionとして改めて検討する。既存Priceデータモデルへの変更は行わない。
+
+**2. Office Profileの通常週次営業時間について、`openingHoursSpecification`への対応を許可する**
+
+Office Profileの`business_hours.weekly`（通常の曜日別営業時間）は、既存データのみを用いて`schema.org/openingHoursSpecification`へ安全に対応付け可能と判断し、対応を許可する。ただし、`business_hours.exceptions`（臨時休業・年末年始・夏季休業等の期間指定休業）は、通常営業時間とは意味が異なるため、**FREE v1では`openingHoursSpecification`へ変換しない**。通常営業時間と例外休業を意味的に混在させないことを優先する。新規入力項目は追加しない。
+
+**3. SEO Plugin検出の初期対象は限定的な既知シグネチャリストとする**
+
+Decision 018（第三者Plugin共存方針）の「既知Plugin検出・Update時追加式リスト」運用に従い、初期検出対象を以下の主要SEO Pluginに限定する：Yoast SEO、All in One SEO、Rank Math、SEOPress。検出は各Pluginが公開する安全な存在確認手段（例：定数・クラスの存在確認等、Plugin内部の非公開APIに深く依存しない方法）に限定する。巨大な互換表は作らず、未知Pluginは推測で停止しない。本リストは将来Updateで追加可能な構造とする。
+
+**4. FAQPage JSON-LDはFREE v1で実装しない**
+
+FAQ意味データおよび通常HTML表示（Construction Order 004で実装済み）は維持するが、FAQPage構造化データ（JSON-LD）は実装しない。理由：Google検索のFAQ Rich Resultは2026年5月7日付で完全に廃止されており（着工前調査で一次情報確認済み）、唯一の実益が失われているため。将来、検索エンジンやAI検索等で明確な実益が再び確認された場合のみ、その時点の仕様を調査したうえで再検討する。
+
+**5. Office / Professional のSchema.org型対応方針を確定する**
+
+Office Profile → `Organization`。Professional Profile → `Organization.employee`内の`Person`。一般用途の`ProfessionalService`型はSchema.org側で非推奨（deprecated）とされているため採用しない。特定士業へ固定したSchema型への決め打ちは行わない（FREE共通版としての中立性を優先する）。代表者フラグ（`is_representative`）は、対応するSchema.org標準プロパティが存在しないため、JSON-LD上の独自プロパティへ変換しない。複数のProfessional Profile（Decision 022・025）はすべて`employee`配列へ列挙し、並び順は既存の確定表示順（`menu_order`→`title`→`ID`）をそのまま利用する。
+
+### 理由・設計原則
+
+- Construction Order 004の実施時に「Price（自由記述）と構造化データの整合方法」「FAQPage構造化データの実装要否」を、本書「残る確認事項」項目3として意図的に先送りしていた。本Decisionはその正式な回答である。
+- 「データがあるから全部JSON-LDにする」という設計を禁止する指示に基づき、各データについてSchema.orgとしての意味・Google Rich Resultとしての実益・誤用リスクを個別に検討した（詳細は着工前調査資料）。
+- AGENTS.md §13・02仕様書§16・§31が明示する「SEOスコアゲームをしない」「FAQを量産装置にしない」という思想と、実益の失われた機能への投資を避けるという判断は整合する。
+
+### 影響する既存仕様
+
+- **02仕様書 §16（SEO Foundation）を更新する。** 構造化データの対象範囲（Organization/Person/BreadcrumbList、Offer/FAQPageは対象外）を明記する。
+- `05_astrea_free_v1_construction_baseline.md`：既存の変更管理方針に従い、セクション17（実装フェーズへ委ねる技術詳細）項目3への回答として末尾に追記する。
+- `docs/research/2026-08-26_construction_order_004_research.md`§6の要確認事項（Price/Offer整合方法、FAQPage実装要否）を、本Decisionにより**CLOSED**とする。
+- 本書「本書に基づき残る確認事項」項目3を本Decisionにより**CLOSED**とする。
+
+### Theme / Core / WordPress の責任境界
+
+- Core：Organization/Person/BreadcrumbList JSON-LD生成、SEO Plugin既知シグネチャ検出、meta description/OGP/Search Console verification meta出力。
+- Theme：視覚的Breadcrumb表示（Decision 010）。
+- WordPress：title-tag、canonical、robots meta、XML Sitemap（`/wp-sitemap.xml`）、Site Icon、Featured Imageの標準提供（ASTREAはこれらを重複実装しない）。
+
+### 実装時に守るべき事項
+
+- Price/FAQPageの非出力はRegression Testで保証する（将来の実装ミスによる意図しない出力を防ぐ）。
+- `openingHoursSpecification`は`business_hours.weekly`のみを対象とし、`exceptions`を含めない。
+- SEO Plugin検出リストはコードとして保守し、正式仕様の追加変更なしにUpdateで追加できる設計とする（Decision 018と同じ運用）。
+- 将来的にPrice構造化データ・FAQPage・特定士業向けSchemaが必要と判明した場合は、独自判断で追加せず改めて仕様判断を仰ぐ。
+
+---
+
 ## 本書に基づき残る確認事項（新規Decisionではない）
 
 以下は、Decision 001〜024によっておおむね解消されたが、正式仕様の文言として明示的な一文が未整備、または性質上「実装フェーズの技術詳細」に属するため、本書ではこれ以上の判断を追加しない事項である。クロエ独自の判断でこれらを確定させることはしない。
 
 1. ~~ASTREA CoreがFREE v1において「必須」か「任意」かの明文化。~~ **CLOSED（2026-08-26 Decision 021により確定）。** ASTREA Coreは任意Plugin・公式推奨として位置付けることが正式にFIXされ、02仕様書 §3へ反映済み。
 2. **Schema Version / Migrationの具体的な実装機構。** Decision 020で「Versioned Migration方式を採る」という方針は確定したが、バージョン番号の管理場所、Migration実行のタイミング等の詳細設計は実装フェーズで行う。
-3. **Price（自由記述）と構造化データ（schema.org Offer等）の整合方法。** Core側のデータモデル設計時に決定する。
+3. ~~Price（自由記述）と構造化データ（schema.org Offer等）の整合方法。~~ **CLOSED（2026-08-27 Decision 026により確定）。** ASTREA Priceの自由記述モデルはOffer/PriceSpecificationとして意味的に正確な構造化データを安全に自動生成できないため、FREE v1では出力しないことが正式に確定した。
 4. **Pattern と Style Variation（Trust / Natural / Modern）の共有方式。** Design System設計時に決定する。
 5. **Service / FAQ / CASE等が0件のときの空状態UIパターンの統一。** Pattern設計時に決定する。
 6. ~~営業時間・臨時休業データモデルの詳細（将来の予約Pluginとの共有を見据えた設計）。~~ **CLOSED（2026-08-26 Construction Order 002により実装）。** `astrea_core_office_profile`内の`business_hours`（週次の定休日／開始・終了時刻＋臨時休業等の期間リスト）として実装済み。将来の予約Pluginとの共有インターフェースは未設計だが、データモデル自体は確定した。

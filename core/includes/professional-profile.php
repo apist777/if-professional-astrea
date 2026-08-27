@@ -92,6 +92,7 @@ function register_post_type_and_meta() {
 		POST_TYPE,
 		array(
 			'label'        => __( '専門家プロフィール', 'astrea-core' ),
+			'description'  => __( '専門家プロフィールの一覧です。', 'astrea-core' ),
 			'labels'       => array(
 				'name'          => __( '専門家プロフィール', 'astrea-core' ),
 				'singular_name' => __( '専門家プロフィール', 'astrea-core' ),

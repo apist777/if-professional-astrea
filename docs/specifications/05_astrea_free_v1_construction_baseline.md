@@ -346,3 +346,18 @@ CONSTRUCTION ORDER 004着工にあたり、Decision 023で残されていた要�
 - Professional Profileの「代表者」指定（`is_representative`）は、**0〜複数人**を正式に許可する。単一代表者への一意制約は設けない。
 - Construction Order 003A時点の実装（一意制約なし）をそのまま正式仕様として承認する。製品コード変更は不要。
 - `docs/research/2026-08-26_construction_order_003a_report.md`の残存要確認事項、および本書「本書に基づき残る確認事項」旧項目7は、本Decisionにより**CLOSED**となった。
+
+---
+
+## 24. 追記（2026-08-27, Decision 026 — SEO Foundation：構造化データ方針の確定）
+
+CONSTRUCTION ORDER 006着工にあたり、本書セクション17項目3で実装フェーズへ委ねていた事項が以下のとおり正式FIXされた（`04_astrea_free_v1_preconstruction_decisions.md`のDecision 026参照）。既存セクション（セクション5, 7, 17）の本文は書き換えず、末尾への追加として反映する。
+
+- **Price → Offer / PriceSpecification は自動出力しない。** ASTREA Priceの自由記述モデル（固定額／○円〜／月額／時間制／無料／個別見積／自由表記を単一の自由記述フィールドで扱う設計）は、Offer/PriceSpecificationとして意味的に正確かつ一貫した構造化データを安全に自動生成できる性質を持たないため。既存Priceデータモデルへの変更はない。
+- **Office Profileの通常週次営業時間（`business_hours.weekly`）は`openingHoursSpecification`への対応を許可する。** ただし`business_hours.exceptions`（臨時休業等）は変換対象外とする。新規入力項目は追加しない。
+- **SEO Plugin検出の初期対象**をYoast SEO・All in One SEO・Rank Math・SEOPressの既知シグネチャに限定する（Decision 018の運用方針の適用）。
+- **FAQPage JSON-LDはFREE v1で実装しない。** Google検索のFAQ Rich Resultが2026年5月7日付で完全廃止され実益が失われたため。FAQ意味データ・通常HTML表示は維持する。
+- **Office Profile → `Organization`、Professional Profile → `Organization.employee`内の`Person`を基本Schema型とする。** 一般用途の`ProfessionalService`（Schema.org側でdeprecated）は採用せず、特定士業への決め打ちも行わない。代表者フラグはJSON-LD上の独自プロパティへ変換しない。
+- 本書セクション17項目3、`docs/research/2026-08-26_construction_order_004_research.md`§6の要確認事項、`04_astrea_free_v1_preconstruction_decisions.md`「残る確認事項」項目3は、本Decisionにより**CLOSED**となった。
+
+将来SEO Foundationを拡張するConstruction Orderでは、本セクションおよび`04_astrea_free_v1_preconstruction_decisions.md`のDecision 026を基準文書とする。

@@ -350,3 +350,103 @@ Decision 021・024の原則をそのまま適用する。
 1. **Price → Offer/PriceSpecificationを将来的にも一切出力しない方針でよいか。** 本書は「FREE v1では出力しない」を推奨したが、これは新規フィールド追加（案C）を伴わない限りの結論である。将来、税理士報酬規程のように定型的な数値化が可能な士業が現れた場合（Profession PRO側での職種別対応）に再検討する余地があることを明記しておく。
 2. **Office Profileの営業時間（`business_hours`）をSchema.orgの`openingHoursSpecification`へどこまで対応付けるか。** データ自体は存在するが、臨時休業・年末年始等の期間データとschema.orgの`openingHoursSpecification`（曜日ベースの週次繰り返しが基本）との対応関係は本書で詳細設計しておらず、施工時に個別判断が必要（新しいDecisionを要するほどの重大性はないと判断するが、念のため明記する）。
 3. **SEO Plugin検出のシグネチャリストに含める具体的Plugin名（Yoast SEO／All in One SEO／Rank Math／SEOPress等）の初期選定基準。** 本書は「日本語圏で高シェアのもの」という方向性のみ示した。正式なリストは施工時に確定してよいと判断するが、Decision 018の「既知リストへの追加式」という運用方針の範囲内であることは確認済み。
+
+---
+
+## 16. FINAL FIX確定（2026-08-27、Decision 026）
+
+CONSTRUCTION ORDER 006の正式着工にあたり、本書の推奨事項1〜5がユーザーにより確認・FIXされ、`04_astrea_free_v1_preconstruction_decisions.md`のDecision 026として正式に確定した。
+
+- **§5（Price/Offer）**：FREE v1では出力しないことを確定。ただし理由づけを「schema.org priceが数値必須だから」という技術制約のみに帰着させず、「ASTREA Priceの自由記述モデルという設計そのものが、Offer/PriceSpecificationとして意味的に正確な構造化データを安全に自動生成できる性質を持たない」という、より正確な理由へ修正した（Decision 026本文参照）。
+- **§7（Office/Professional Schema）に対する営業時間の追加FIX**：通常週次営業時間（`business_hours.weekly`）のみ`openingHoursSpecification`への対応を許可。臨時休業等（`business_hours.exceptions`）は対象外。新規入力項目は追加しない。
+- **§3（SEO Plugin共存）の初期候補確定**：Yoast SEO・All in One SEO・Rank Math・SEOPressの4製品を初期検出対象として正式に承認。
+- **§6（FAQPage）**：本書の推奨どおり「実装しない」を確定。
+- **§7（Office/Professional Schema）**：本書の推奨どおり、Organization / Organization.employee内のPersonを基本方針として確定。
+
+上記により、本書§15の要確認事項1〜3はDecision 026によりすべて回答済みとなった。詳細な決定文はDecision 026（`04_astrea_free_v1_preconstruction_decisions.md`）を正本とする。
+
+---
+
+## 17. CONSTRUCTION ORDER 006 実施報告
+
+- 実施日: 2026-08-27（JST）
+- 対象: SEO Foundation本体実装（Decision 026承認後の製品コード施工）
+
+### 17.1 Architecture（実装確認済み）
+
+Decision 013「Coreが覚える、Blockがつなぐ、Themeが見せる」をそのまま踏襲した。
+
+- `core/includes/seo-plugin-detection.php`：既知SEO Plugin検出（`active_plugins`オプションのみを参照。Plugin内部APIへの依存なし）。
+- `core/includes/seo-settings.php`：Options API（`astrea_core_seo_settings` = og_image_id, search_console_verification）。
+- `core/includes/seo-admin.php`：設定画面（`astrea-core`配下のサブメニュー、WordPress標準Media Libraryモーダルを使用）。
+- `core/includes/breadcrumb.php`：`get_breadcrumb_items()`（単一の階層解決ロジック）＋ 視覚UI用Dynamic Block（`astrea/breadcrumb`）。
+- `core/includes/seo-meta.php`：meta description / OGP / Search Console verification metaの`wp_head`出力。
+- `core/includes/seo-structured-data.php`：Organization+Person、BreadcrumbListのJSON-LD出力（`get_breadcrumb_items()`を共用し、視覚UIとJSON-LDが構造的に一致することを保証）。
+
+### 17.2 WordPress標準との責任分離（実機確認済み）
+
+実機wp-envで確認した事実（推測ではない）：
+
+- `<title>`：Block Themeは`_add_default_theme_supports()`によりtitle-tagサポートが自動追加されるため、`functions.php`側で明示的に`add_theme_support('title-tag')`を呼ばなくても`<title>if-professional-astrea</title>`が正しく出力されることを実機で確認した。ASTREA側の実装追加は不要と判断し、追加しなかった。
+- canonical：`/sample-page/`で`<link rel="canonical" href=".../sample-page/" />`がWordPress標準機構により出力されることを確認。ASTREA側は一切関与しない。
+- robots meta：`<meta name='robots' content='max-image-preview:large' />`がWordPress標準（`wp_robots()`）により出力されることを確認。
+
+### 17.3 SEO Plugin検出方式（実機で実際にYoast SEOを導入して検証）
+
+WordPress.orgから実際にYoast SEO（28.3）をインストール・有効化し、以下を実機HTTPで確認した。
+
+- 検出方法：`get_option('active_plugins')`にYoastのbasename（`wordpress-seo/wp-seo.php`）が含まれるかのみを見る、WordPress標準API相当の軽量な方法（Plugin内部クラス・関数への依存なし）。
+- Yoast有効化後、ASTREA自身の`og:site_name`・`twitter:card`・Organization JSON-LDは正しく1件も追加出力されず（Yoast自身の出力のみが残った）。
+- Search Console verification metaは、Yoast有効化中も引き続き出力されることを確認（別サービス向けの値であり、他のPluginの出力と衝突しないため意図的に非suppress対象としている）。
+- 検証後、Yoast SEOは`wp plugin uninstall`で完全に削除し、環境をクリーンな状態に戻した。
+
+### 17.4 Meta Description（実機確認済み）
+
+Fallback順序（実装どおりに動作を確認）：①`is_singular()`時は`get_the_excerpt()`（本文からの自動抜粋を含む） ②Taxonomy/CPT Archiveは`term_description`または`register_post_type()`の`description`引数 ③どちらもなければサイトのキャッチフレーズ ④それも空なら**タグ自体を出力しない**（ダミー文言を作らない）。日本語文字数ベースで160文字にトリムする実装とし、英数字と全角文字が混在してもmb関数で安全に扱う。
+
+### 17.5 OGP（実機確認済み）
+
+`og:site_name` / `og:type`（`article`は投稿、それ以外`website`） / `og:title` / `og:url` / `og:description`（設定時のみ） / `og:image`（Featured Image優先、次点でサイト標準OGP画像、どちらもなければ**タグ自体を省略**） / `twitter:card`（`summary_large_image`固定）を実装した。サイト標準OGP画像はWordPress標準Media Libraryモーダル（`wp.media()`）で選択する設定画面を実装し、実際に画像をアップロード・選択・保存し、Home表示に反映されることを実機確認した。
+
+### 17.6 Structured Data（実機確認済み・JSON妥当性を検証）
+
+- Organization（Office Profile）：事務所名が空の場合は出力しない。住所・電話・週次営業時間（`openingHoursSpecification`、通常営業のみ・例外休業は対象外）を、実データを使って実機で正しく生成されることを確認した。
+- `Organization.employee`（Professional Profile）：0/1/複数件すべてで正しく配列生成されることを確認。`is_representative`フラグがJSON-LDへ一切現れないことをPHPUnit・実機の両方で確認した。
+- BreadcrumbList：Service Archive/Single、Professional Archive、FAQ Archive/Taxonomy、通常固定ページ（親子階層含む）のすべてで、**視覚Breadcrumbと完全に一致する内容**が生成されることを実機で確認した（同一の`get_breadcrumb_items()`を共用しているため構造的に保証される）。
+- FAQPage・Offer/PriceSpecificationは実装しておらず、実機でFAQ Archive等に一切出現しないことを確認した。
+
+### 17.7 Breadcrumb（実機確認済み・Accessibility）
+
+視覚UIは`<nav aria-label="パンくずリスト"><ol>...</ol></nav>`というセマンティックHTMLのみで実装し、独自のJavaScript・ARIA拡張は使用していない。現在位置は`<span aria-current="page">`とし、リンクにしていない（キーボード操作上、無意味なリンク先へフォーカスが飛ばない）。フロントページでは何も出力しない（`get_breadcrumb_items()`が空配列を返す設計）。
+
+### 17.8 Search Console（実機確認済み）
+
+管理画面から確認コード（`content="..."`の値のみ）を入力・保存すると、Home等のheadに`<meta name="google-site-verification" content="...">`が出力されることを実機確認した。不正な形式（`<script>`タグ、引用符混入等）を含む入力は保存時に拒否され、既存値に影響を与えず空文字へリセットされることも実機確認した。Search Console API・OAuth・順位取得等は一切実装していない（Decision 009どおり）。
+
+### 17.9 Security（実機・PHPUnit両方で確認）
+
+- Settings APIによるNonce/Capability保護（Office Profile等と同水準）。
+- Sanitization：`sanitize_text_field()` / `sanitize_email()`相当のASTREA既存パターンを踏襲し、OGP画像IDは実在する添付ファイルであることを`get_post_type() === 'attachment'`で確認、Search Console確認コードは許可文字種（英数字と`+/=_-`のみ）の正規表現で検証。
+- JSON-LD Injection対策：`wp_json_encode($data, JSON_UNESCAPED_UNICODE | JSON_HEX_TAG)`を使用し、`<`/`>`をUnicodeエスケープすることで`</script>`によるタグ脱出を構造的に防止。実際に事務所名へ`</script><script>alert(1)</script>`を含む入力を行い、生成されたJSON-LDが依然として有効なJSONであり、生の`</script><script>`文字列がページ中に出現しないことを実機確認した。
+- Contactの非公開データ（`Astrea\Core\Inquiry`名前空間）へは、SEO関連のどのコードからも一切アクセスしていない。
+
+### 17.10 Core無し / Core無効化（実機確認済み）
+
+- Core無し：Theme単体で`<title>`・canonical・robots meta・WordPress標準Sitemapは正常に機能し続けることを確認（そもそもASTREAが関与していないため当然の帰結だが、実機で確認した）。
+- Core無効化：直前まで出ていたOrganization JSON-LD・視覚的Breadcrumbが直ちに消え、Fatal/Warning/Noticeが一切出ないことを確認。
+- Core再有効化：即座に元通り復帰することを確認。
+
+### 17.11 Test / CI結果
+
+- **PHPUnit**：新規40件追加（`SeoPluginDetectionTest`・`SeoStructuredDataTest`・`SeoMetaTest`・`BreadcrumbTest`）、既存147件と合わせて**合計187 tests / 296 assertions、全PASS**。
+- **PHPCS**：エラー・警告0件（実PHP 8.3環境）。
+- **smoke-test.sh**：Part 1〜7（A〜BC）すべてPASS。Part 7（AS〜BC）はHome/Service Archive/Service Single/Professional Archive/FAQ Archiveの実ページ`<head>`検証、Search Console確認コードの実フォーム保存・不正値拒否、XSS/JSON-LD Injection、**実際にYoast SEOをインストールしての共存確認**、Core無効化・再有効化を実機wp-envの本物のHTTPリクエストで検証。ローカルで2回連続実行し冪等性を確認済み。
+- 実施中に発見したテスト側の不具合（製品コードのバグではない）：
+  1. 既存のProfessional Profile/Service表示順チェック（Construction 003/004由来）が、ページ全体に対する単純な文字列grepであったため、Construction 006で追加したサイト全体共通のOrganization JSON-LD（各Professionalの氏名を含む）と二重にマッチしてしまっていた。JSON-LDを含む`<script>`ブロックを除外してから表示順を検証する`visible_content_only()`ヘルパーを追加し解消した。
+  2. `grep -c`が0件ヒット時に非ゼロ終了コードを返すため、`set -e`下でスクリプトが早期終了する箇所が新規チェックに2箇所あった。既存の確立済みパターン（`|| true`）を適用して解消した。
+  3. Rate Limitテスト（Construction 005由来）が、本セッション中の一時的なネットワーク遅延（`wp-env`の内部HTTPクライアントの断続的なタイムアウト。本セッションの他の作業でも複数回観測済みで、環境要因と判断）により、20秒の最小間隔を超過してしまい偶発的に失敗したことがあった。再実行で再現しないことを確認し、コード自体の修正は行っていない。
+- **GitHub Actions**：push後に確認（最終報告参照）。
+
+### 17.12 発見した仕様上の要確認事項（追加分）
+
+着工前調査§15の3件（Price/Offer将来方針、openingHoursSpecification対応範囲、SEO Plugin検出リスト初期選定）はDecision 026・FINAL FIXによりすべて解消済み。実装中に新たな要確認事項は発見しなかった。
