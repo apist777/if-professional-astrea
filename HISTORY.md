@@ -1,21 +1,25 @@
 # If Professional ASTREA — Development History
 
-このファイルは、ASTREA開発の**施工台帳（Development Ledger）**である。
+**施工台帳（Development Ledger）の正本は [`HISTORY.csv`](HISTORY.csv) である。**
 
-「いつ・誰が・何を・どれくらいの時間で施工したか」を時系列で一覧できるIndexとしてのみ機能し、調査・設計・実装・検証の詳細はここには書かない。
+「いつ・誰が・何を・どれくらいの時間で施工したか」を1工程1レコードで追跡するための時系列Indexは、Excel等の表計算ソフトへ直接取り込めるCSV形式で管理する。本ファイル（`HISTORY.md`）は、その運用ルールの説明と、CSV移行前の過去記録（Legacy History / Notes）の保全のみを目的とする。
 
 ## 責任分離
 
 | 領域 | 正本 |
 |---|---|
-| 施工台帳・時系列Index | `HISTORY.md`（本ファイル） |
+| 施工台帳・時系列Index（1工程1レコード） | [`HISTORY.csv`](HISTORY.csv) |
 | 調査・施工・検証の詳細 | `docs/research/` |
 | 正式仕様・Decision | `docs/specifications/` |
 | 実際の変更履歴 | Git |
 | CI実行記録 | GitHub Actions |
+| 運用ルールの説明・過去記録の保全 | `HISTORY.md`（本ファイル） |
 
-## 記録ルール（2026-08-27改訂）
+## HISTORY.csv 記録ルール（2026-08-27改訂）
 
+**列構成：** `Date,Order,Who,Status,Start,End,Duration,Commit,Tests,Summary`
+
+- RFC 4180を意識した正しいCSV形式とし、UTF-8（BOM付き、Excel互換）で保存する。値にカンマ・ダブルクォート・改行が含まれる場合は必ず適切にクォート・エスケープする。
 - 日時は日本時間（JST）で記録する。
 - `Who`（担当）は、Repository・報告書・実際の作業記録等から確認できる事実のみを記録する。確認できない場合は推測せず `-` とする。
 - `Start` / `End` は、作業開始・終了時に明示的に記録した時刻のみを使用する。Git commitのタイムスタンプから逆算した推定値は使用しない。確認できない場合は `-` とする。
@@ -23,30 +27,9 @@
 - `Commit` は、その工程を代表する最終Commit hashを記録する。Commitが存在しない作業は `-` とする。
 - `Tests` は代表的な最終Test結果を簡潔に記録する。Test対象外の場合は `-` とする。
 - `Summary` は1行で簡潔に記録し、詳細説明は書かない。詳細は `docs/research/` または `docs/specifications/` を参照する。
-- 新しい行を表の先頭（最新）に追記する。
+- 1工程1レコードとし、最新工程を先頭（ヘッダーの直後）に追加する。
 
----
-
-## Development Ledger
-
-| Date | Order | Who | Status | Start | End | Duration | Commit | Tests | Summary |
-|---|---|---|---|---|---|---|---|---|---|
-| 2026-08-27 | 006 | Chloe | COMPLETE | - | 2026-08-27 06:20 JST | - | `987414e` | PHPUnit 187/296; PHPCS PASS; smoke Part7 PASS ×2; CI Green | Decision 026 FIX＋SEO Foundation実装（meta description/OGP/Organization+Person+BreadcrumbList JSON-LD/Search Console/SEO Plugin共存）。詳細: [research](docs/research/2026-08-27_construction_order_006_research.md) |
-| 2026-08-27 | 006 RESEARCH | Chloe | RESEARCH COMPLETE | - | 2026-08-27 03:30 JST | - | `50eb3c2` | - | SEO Foundation着工前調査・施工計画。Price/Offer非出力・FAQPage非実装等を推奨。詳細: [research](docs/research/2026-08-27_construction_order_006_research.md) |
-| 2026-08-27 | 005 | Chloe | COMPLETE | - | 2026-08-27 00:40 JST | - | `7de9f95` | PHPUnit 147/229; PHPCS PASS; smoke Part6 PASS ×2; CI Green | Contact / 問い合わせ基盤実装（CPT `astrea_inquiry`、Retention、Token確認、Rate Limit、CSV Export）。詳細: [research](docs/research/2026-08-27_construction_order_005_research.md) |
-| 2026-08-26 | 004 | Chloe | COMPLETE | - | 2026-08-26 23:55 JST | - | `b013dd1` | PHPUnit 100/149; PHPCS PASS; smoke Part5 PASS; CI Green | Decision 025 FIX（代表者0〜複数許可）＋Service/Price/FAQ意味データ基盤実装。詳細: [research](docs/research/2026-08-26_construction_order_004_research.md) |
-| 2026-08-26 | 003A | Chloe | COMPLETE | - | 2026-08-26 23:40 JST | - | `c5915b7` | PHPUnit 54/82; PHPCS PASS; smoke Part4 PASS; CI Green | GitHub Actions最終Green確認。smoke-test.sh自身のbash pipe/SIGPIPEバグを特定・修正。詳細: [report](docs/research/2026-08-26_construction_order_003a_report.md) |
-| 2026-08-26 | 003A | Chloe | - | - | 2026-08-26 22:15 JST | - | `5496bde` | PHPUnit 54/82 | Decision 023/024 FIX（代表者情報の正本移行、Core無効時URL保証範囲）＋是正施工。詳細: [report](docs/research/2026-08-26_construction_order_003a_report.md) |
-| 2026-08-26 | 003 | Chloe | - | - | 2026-08-26 20:10 JST | - | `4b62d42` | PHPUnit 39/64 | Professional Profile実装（CPT + Post Meta、Media Library連携、0〜複数人対応）。詳細: [report](docs/research/2026-08-26_construction_order_003_report.md) |
-| 2026-08-26 | SPEC UPDATE | Chloe | SPEC UPDATE | - | 2026-08-26 18:20 JST | - | `c1d56c1` | - | Decision 022 FIX（士業法人・複数専門家対応、Office/Professional Profile責任境界）。詳細: [Decision統合](docs/specifications/04_astrea_free_v1_preconstruction_decisions.md) |
-| 2026-08-26 | 002 | Chloe | COMPLETE | - | 2026-08-26 17:05 JST | - | `2664a59` | PHPUnit 20/40; CI Green | Office Profile実装（Options API + Settings API、Block Bindings）。詳細: [report](docs/research/2026-08-26_construction_order_002_report.md) |
-| 2026-08-26 | 001 | Chloe | VERIFIED | - | 2026-08-26 14:35 JST | - | `d100a09` | PHPCS PASS; smoke PASS; CI Green | 環境ブロッカー解除後の最終検収完了。CI初回失敗2件を修正しGreen化。詳細: [report](docs/research/2026-08-26_construction_order_001_report.md) |
-| 2026-08-26 | 001 | Chloe | - | - | 2026-08-26 12:30 JST | - | `ffcae35` | - | Git初期化・開発基盤・Theme/Core最小骨格構築（wp-env未実施のため検証は次工程へ）。詳細: [report](docs/research/2026-08-26_construction_order_001_report.md) |
-| 2026-08-26 | BASELINE | Chloe | BASELINE READY | - | 2026-08-26 10:40 JST | - | - | - | Decision 021 FIX（Core任意・公式推奨）＋Construction Baseline確定。詳細: [Baseline](docs/specifications/05_astrea_free_v1_construction_baseline.md) |
-| 2026-08-26 | SPEC UPDATE | Chloe | GO | - | 2026-08-26 09:10 JST | - | - | - | Decision 001〜020正式文書化＋最終着工前監査。詳細: [Decision統合](docs/specifications/04_astrea_free_v1_preconstruction_decisions.md) |
-| 2026-08-25 | AUDIT | Chloe | CONDITIONAL GO | - | 2026-08-25 17:20 JST | - | - | - | ASTREA FREE v1 着工前監査。詳細: [audit](docs/research/2026-08-25_astrea_free_v1_pre_construction_audit.md) |
-| 2026-08-25 | TECH RESEARCH | Codemi | RESEARCH COMPLETE | - | 2026-08-25 17:01 JST | - | - | - | WordPress標準・Block Theme/FSE・Theme/Core分離等の技術基盤調査。詳細: [research](docs/research/2026-08-25_astrea_technical_foundation_research.md) |
-| 2026-08-25 | - | Chloe | - | - | - | - | - | - | ASTREA開発参加 |
+今後の主要工程（Construction Order / Research / Audit / Spec Update等）は、`HISTORY.md`ではなく`HISTORY.csv`へ直接1行追加する。
 
 ---
 
