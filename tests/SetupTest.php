@@ -118,12 +118,38 @@ class SetupTest extends WP_UnitTestCase {
 		$this->assertFalse( Setup\is_contact_reachable() );
 	}
 
-	public function test_has_any_navigation_is_false_by_default_and_true_after_creating_one() {
-		$this->assertFalse( Setup\has_any_navigation() );
+	public function test_has_meaningful_navigation_is_false_by_default_and_true_after_creating_one() {
+		$this->assertFalse( Setup\has_meaningful_navigation() );
 
 		self::factory()->post->create( array( 'post_type' => 'wp_navigation', 'post_status' => 'draft' ) );
 
-		$this->assertTrue( Setup\has_any_navigation() );
+		$this->assertTrue( Setup\has_meaningful_navigation() );
+	}
+
+	public function test_has_meaningful_navigation_ignores_the_wordpress_page_list_fallback() {
+		self::factory()->post->create(
+			array(
+				'post_type'    => 'wp_navigation',
+				'post_status'  => 'publish',
+				'post_name'    => 'navigation',
+				'post_content' => '<!-- wp:page-list /-->',
+			)
+		);
+
+		$this->assertFalse( Setup\has_meaningful_navigation(), 'WordPress\'s own auto-created Page List fallback must not count as a meaningful Navigation.' );
+	}
+
+	public function test_has_meaningful_navigation_true_once_the_fallback_is_edited() {
+		self::factory()->post->create(
+			array(
+				'post_type'    => 'wp_navigation',
+				'post_status'  => 'publish',
+				'post_name'    => 'navigation',
+				'post_content' => '<!-- wp:page-list /--><!-- wp:navigation-link {"label":"料金","url":"https://example.com/price/"} /-->',
+			)
+		);
+
+		$this->assertTrue( Setup\has_meaningful_navigation() );
 	}
 
 	// -- Page generation ------------------------------------------------------

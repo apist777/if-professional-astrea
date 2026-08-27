@@ -3,7 +3,7 @@
  * Plugin Name: ASTREA Core
  * Plugin URI: https://project-if.com/astrea
  * Description: If Professional ASTREA — テーマを変更しても保持すべき情報とサイト共通機能を担当する、ASTREA Themeの公式推奨Plugin（任意）。「Coreは推奨する。しかしThemeを人質にしない。」（Decision 021）。
- * Version: 0.8.0
+ * Version: 0.9.0
  * Requires at least: 7.0
  * Requires PHP: 8.3
  * Author: Project-if
@@ -22,7 +22,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit; // Disallow direct access.
 }
 
-define( 'ASTREA_CORE_VERSION', '0.8.0' );
+define( 'ASTREA_CORE_VERSION', '0.9.0' );
 define( 'ASTREA_CORE_FILE', __FILE__ );
 define( 'ASTREA_CORE_DIR', plugin_dir_path( __FILE__ ) );
 
@@ -51,10 +51,13 @@ require ASTREA_CORE_DIR . 'includes/seo-admin.php';
 require ASTREA_CORE_DIR . 'includes/breadcrumb.php';
 require ASTREA_CORE_DIR . 'includes/seo-meta.php';
 require ASTREA_CORE_DIR . 'includes/seo-structured-data.php';
+require ASTREA_CORE_DIR . 'includes/ga4.php';
 require ASTREA_CORE_DIR . 'includes/setup-checklist.php';
 require ASTREA_CORE_DIR . 'includes/setup-pages.php';
+require ASTREA_CORE_DIR . 'includes/setup-home.php';
 require ASTREA_CORE_DIR . 'includes/setup-navigation.php';
 require ASTREA_CORE_DIR . 'includes/setup-admin.php';
+require ASTREA_CORE_DIR . 'includes/data-deletion.php';
 
 add_action( 'plugins_loaded', __NAMESPACE__ . '\\load_textdomain' );
 

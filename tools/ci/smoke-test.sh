@@ -1302,3 +1302,209 @@ wp_cli post delete "$FAQ_TEASER_PAGE" "$REP_TEASER_PAGE" "$PRICE_MSG_PAGE" "$SMO
 wp_cli eval 'delete_option( \Astrea\Core\OfficeProfile\OPTION_NAME );'
 
 echo "All ASTREA Design System / Theme end-to-end checks passed."
+
+# Part 10 (BW-CD) automates Construction Order 009: the Navigation
+# checklist fix (ignoring WordPress's own Page List fallback), HOME
+# assembly (generation, idempotency, existing-front-page protection), GA4
+# (Measurement ID save/reject, tag output, known-Plugin suppression), and
+# the explicit complete-data-deletion flow (wrong-phrase refusal, real
+# deletion, generated-content/Media survival), plus the same Core-inactive/
+# deactivate/reactivate coverage as Parts 1-9.
+
+COOKIE_JAR="$(mktemp)"
+curl -s -c "$COOKIE_JAR" "$SITE_URL/wp-login.php" > /dev/null
+curl -s -c "$COOKIE_JAR" -b "$COOKIE_JAR" -X POST "$SITE_URL/wp-login.php" \
+	--data-urlencode "log=admin" --data-urlencode "pwd=password" \
+	--data-urlencode "wp-submit=Log In" --data-urlencode "redirect_to=$SITE_URL/wp-admin/" \
+	-o /dev/null
+
+echo "=== BW. Setup checklist ignores WordPress's own Page List Navigation fallback ==="
+wp_cli post delete $(wp_cli post list --post_type=wp_navigation --field=ID) --force > /dev/null 2>&1 || true
+check_no_fatal "BW: Home (triggers WordPress's Navigation fallback creation)"
+FALLBACK_NAV_COUNT=$(wp_cli post list --post_type=wp_navigation --format=count)
+if [ "$FALLBACK_NAV_COUNT" != "1" ]; then
+	echo "FAIL [BW]: expected exactly 1 auto-created fallback Navigation after one page view, found $FALLBACK_NAV_COUNT"
+	exit 1
+fi
+ADMIN_HTML=$(curl -s -b "$COOKIE_JAR" "$SITE_URL/wp-admin/admin.php?page=astrea-core")
+if ! grep -qE '<a[^>]*>サイトのメニュー（Navigation）を作成する' <<< "$ADMIN_HTML"; then
+	echo "FAIL [BW]: Navigation checklist item shows as done from WordPress's own fallback alone"
+	exit 1
+fi
+if ! grep -qF '基本メニューを作成する' <<< "$ADMIN_HTML"; then
+	echo "FAIL [BW]: Navigation generation button was hidden by the mere presence of WordPress's fallback"
+	exit 1
+fi
+echo "OK   [BW: WordPress's own Page List fallback is correctly not counted as a meaningful Navigation]"
+
+echo "=== BX. ホームページを作成する assembles HOME and sets it as the static front page ==="
+wp_cli eval 'update_option( \Astrea\Core\OfficeProfile\OPTION_NAME, \Astrea\Core\OfficeProfile\sanitize( array( "office_name" => "スモーク009事務所" ) ) );'
+HOME_NONCE=$(sed -n 's/.*name="astrea_setup_generate_home_nonce" value="\([a-f0-9]*\)".*/\1/p' <<< "$ADMIN_HTML" | head -1)
+curl -s -b "$COOKIE_JAR" -o /dev/null "$SITE_URL/wp-admin/admin-post.php?action=astrea_setup_generate_home&astrea_setup_generate_home_nonce=$HOME_NONCE"
+SHOW_ON_FRONT=$(wp_cli option get show_on_front)
+if [ "$SHOW_ON_FRONT" != "page" ]; then
+	echo "FAIL [BX]: show_on_front was not set to 'page' after generating HOME"
+	exit 1
+fi
+HOME_PAGE_ID=$(wp_cli option get page_on_front)
+HOME_STATUS=$(wp_cli post get "$HOME_PAGE_ID" --field=post_status)
+if [ "$HOME_STATUS" != "publish" ]; then
+	echo "FAIL [BX]: generated HOME page is not published (status: $HOME_STATUS)"
+	exit 1
+fi
+check_no_fatal "BX: Home after HOME assembly"
+if ! grep -qF "スモーク009事務所" "$BODY_FILE"; then
+	echo "FAIL [BX]: assembled HOME does not render Office Profile data (Hero Pattern)"
+	exit 1
+fi
+echo "OK   [BX: HOME assembled, published, and set as the static front page]"
+
+echo "=== BY. Re-running ホームページを作成する does not duplicate ==="
+curl -s -b "$COOKIE_JAR" -o /dev/null "$SITE_URL/wp-admin/admin-post.php?action=astrea_setup_generate_home&astrea_setup_generate_home_nonce=$HOME_NONCE"
+HOME_PAGE_ID_AFTER=$(wp_cli option get page_on_front)
+if [ "$HOME_PAGE_ID_AFTER" != "$HOME_PAGE_ID" ]; then
+	echo "FAIL [BY]: re-running HOME generation replaced the existing front page instead of leaving it alone"
+	exit 1
+fi
+echo "OK   [BY: HOME generation is idempotent]"
+
+echo "=== BZ. ホームページを作成する refuses when a different static front page already exists ==="
+wp_cli option update page_on_front 0
+wp_cli eval 'delete_option( "astrea_core_generated_pages" );'
+OTHER_FRONT_PAGE=$(wp_cli post create --post_type=page --post_title="Smoke009 Other Front Page" --post_status=publish --porcelain)
+wp_cli option update page_on_front "$OTHER_FRONT_PAGE"
+wp_cli option update show_on_front page
+curl -s -b "$COOKIE_JAR" -o /dev/null "$SITE_URL/wp-admin/admin-post.php?action=astrea_setup_generate_home&astrea_setup_generate_home_nonce=$HOME_NONCE"
+FRONT_PAGE_UNCHANGED=$(wp_cli option get page_on_front)
+if [ "$FRONT_PAGE_UNCHANGED" != "$OTHER_FRONT_PAGE" ]; then
+	echo "FAIL [BZ]: an existing user-set front page was overwritten by HOME generation"
+	exit 1
+fi
+ADMIN_HTML=$(curl -s -b "$COOKIE_JAR" "$SITE_URL/wp-admin/admin.php?page=astrea-core#astrea-setup-generate-home")
+if ! grep -qF '既にホームページが設定されています' <<< "$ADMIN_HTML"; then
+	echo "FAIL [BZ]: expected 'already configured' state was not shown after a refused HOME generation"
+	exit 1
+fi
+echo "OK   [BZ: an existing static front page is never overwritten]"
+
+echo "=== CA. GA4: valid Measurement ID saves and outputs the tag, invalid ID is rejected ==="
+SEO_ADMIN_HTML=$(curl -s -b "$COOKIE_JAR" "$SITE_URL/wp-admin/admin.php?page=astrea-core-seo")
+SEO_NONCE=$(sed -n 's/.*name="_wpnonce" value="\([a-f0-9]*\)".*/\1/p' <<< "$SEO_ADMIN_HTML" | head -1)
+curl -s -b "$COOKIE_JAR" -o /dev/null -X POST "$SITE_URL/wp-admin/options.php" \
+	--data-urlencode "option_page=astrea_core_seo_settings_group" \
+	--data-urlencode "action=update" \
+	--data-urlencode "_wpnonce=$SEO_NONCE" \
+	--data-urlencode "_wp_http_referer=/wp-admin/admin.php?page=astrea-core-seo" \
+	--data-urlencode "astrea_core_seo_settings[ga4_measurement_id]=G-SMOKE12345"
+check_no_fatal "CA: Home with a valid GA4 Measurement ID"
+if ! grep -qF "G-SMOKE12345" "$BODY_FILE" || ! grep -qF "googletagmanager.com/gtag/js" "$BODY_FILE"; then
+	echo "FAIL [CA]: GA4 tag was not output after saving a valid Measurement ID"
+	exit 1
+fi
+SEO_ADMIN_HTML=$(curl -s -b "$COOKIE_JAR" "$SITE_URL/wp-admin/admin.php?page=astrea-core-seo")
+SEO_NONCE=$(sed -n 's/.*name="_wpnonce" value="\([a-f0-9]*\)".*/\1/p' <<< "$SEO_ADMIN_HTML" | head -1)
+curl -s -b "$COOKIE_JAR" -o /dev/null -X POST "$SITE_URL/wp-admin/options.php" \
+	--data-urlencode "option_page=astrea_core_seo_settings_group" \
+	--data-urlencode "action=update" \
+	--data-urlencode "_wpnonce=$SEO_NONCE" \
+	--data-urlencode "_wp_http_referer=/wp-admin/admin.php?page=astrea-core-seo" \
+	--data-urlencode "astrea_core_seo_settings[ga4_measurement_id]=<script>alert(1)</script>"
+check_no_fatal "CA: Home after attempting an invalid GA4 Measurement ID"
+if grep -qF "<script>alert(1)</script>" "$BODY_FILE"; then
+	echo "FAIL [CA]: invalid GA4 Measurement ID was not rejected"
+	exit 1
+fi
+GA4_STORED=$(wp_cli eval 'echo \Astrea\Core\Seo\get_seo_settings()["ga4_measurement_id"];')
+if [ -n "$GA4_STORED" ]; then
+	echo "FAIL [CA]: invalid GA4 Measurement ID was stored instead of being cleared ($GA4_STORED)"
+	exit 1
+fi
+echo "OK   [CA: GA4 Measurement ID save/output/reject all behave correctly]"
+
+echo "=== CB. GA4 output is suppressed while a known Analytics Plugin is active ==="
+wp_cli eval 'update_option( \Astrea\Core\Seo\SETTINGS_OPTION, array_merge( \Astrea\Core\Seo\get_seo_settings(), array( "ga4_measurement_id" => "G-SMOKE12345" ) ) );'
+# Append the known Analytics Plugin basename to the REAL active_plugins list
+# rather than replacing it outright — replacing it would also deactivate
+# astrea-core itself (it's an entry in that same option), breaking every
+# check after this one.
+wp_cli eval 'update_option( "active_plugins", array_merge( get_option( "active_plugins", array() ), array( "google-site-kit/google-site-kit.php" ) ) );'
+check_no_fatal "CB: Home with a known Analytics Plugin 'active'"
+if grep -qF "googletagmanager.com/gtag/js" "$BODY_FILE"; then
+	echo "FAIL [CB]: ASTREA's own GA4 tag was not suppressed while a known Analytics Plugin is active"
+	exit 1
+fi
+wp_cli eval 'update_option( "active_plugins", array_values( array_diff( get_option( "active_plugins", array() ), array( "google-site-kit/google-site-kit.php" ) ) ) );'
+check_no_fatal "CB: Home after the known Analytics Plugin is no longer active"
+if ! grep -qF "googletagmanager.com/gtag/js" "$BODY_FILE"; then
+	echo "FAIL [CB]: GA4 tag did not resume once the known Analytics Plugin was no longer active"
+	exit 1
+fi
+echo "OK   [CB: GA4 Plugin-coexistence suppression works and is reversible]"
+
+echo "=== CC. Core complete data deletion: wrong phrase refuses, correct phrase deletes ==="
+DELETE_FAQ=$(wp_cli post create --post_type=astrea_faq --post_title="削除確認用FAQ" --post_status=publish --porcelain)
+DELETE_ADMIN_HTML=$(curl -s -b "$COOKIE_JAR" "$SITE_URL/wp-admin/admin.php?page=astrea-core-data-deletion")
+if grep -q '<a href="[^"]*loginform' <<< "$DELETE_ADMIN_HTML"; then
+	echo "FAIL [CC]: could not reach the data-deletion screen"
+	exit 1
+fi
+DELETE_NONCE=$(sed -n 's/.*name="astrea_delete_all_core_data_nonce" value="\([a-f0-9]*\)".*/\1/p' <<< "$DELETE_ADMIN_HTML" | head -1)
+curl -s -b "$COOKIE_JAR" -o /dev/null -X POST "$SITE_URL/wp-admin/admin-post.php" \
+	--data-urlencode "action=astrea_delete_all_core_data" \
+	--data-urlencode "astrea_delete_all_core_data_nonce=$DELETE_NONCE" \
+	--data-urlencode "confirm_understood=1" \
+	--data-urlencode "confirm_phrase=まちがい"
+FAQ_SURVIVES=$(wp_cli post get "$DELETE_FAQ" --field=post_status 2>/dev/null || echo "gone")
+if [ "$FAQ_SURVIVES" = "gone" ]; then
+	echo "FAIL [CC]: data was deleted despite an incorrect confirmation phrase"
+	exit 1
+fi
+curl -s -b "$COOKIE_JAR" -o /dev/null -X POST "$SITE_URL/wp-admin/admin-post.php" \
+	--data-urlencode "action=astrea_delete_all_core_data" \
+	--data-urlencode "astrea_delete_all_core_data_nonce=$DELETE_NONCE" \
+	--data-urlencode "confirm_understood=1" \
+	--data-urlencode "confirm_phrase=削除する"
+FAQ_DELETED=$(wp_cli post get "$DELETE_FAQ" --field=post_status 2>/dev/null || echo "gone")
+if [ "$FAQ_DELETED" != "gone" ]; then
+	echo "FAIL [CC]: FAQ was not deleted after a correct, confirmed deletion request"
+	exit 1
+fi
+OFFICE_PROFILE_GONE=$(wp_cli option get astrea_core_office_profile 2>/dev/null || echo "gone")
+if [ "$OFFICE_PROFILE_GONE" != "gone" ]; then
+	echo "FAIL [CC]: Office Profile option survived complete data deletion"
+	exit 1
+fi
+echo "OK   [CC: wrong confirmation phrase refuses deletion; correct phrase performs it]"
+
+echo "=== CD. Complete data deletion never removes generated Pages, Navigation, or Media ==="
+HOME_PAGE_SURVIVES=$(wp_cli post get "$HOME_PAGE_ID" --field=post_status 2>/dev/null || echo "gone")
+if [ "$HOME_PAGE_SURVIVES" = "gone" ]; then
+	echo "FAIL [CD]: the generated HOME page was deleted by the complete-data-deletion action"
+	exit 1
+fi
+NAV_SURVIVES_COUNT=$(wp_cli post list --post_type=wp_navigation --format=count)
+if [ "$NAV_SURVIVES_COUNT" = "0" ]; then
+	echo "FAIL [CD]: Navigation post(s) were deleted by the complete-data-deletion action"
+	exit 1
+fi
+echo "OK   [CD: generated Pages/Navigation/Media are never touched by complete data deletion]"
+
+echo "=== CE. Core deactivated: HOME/GA4/data-deletion degrade safely, no Fatal ==="
+wp_cli plugin deactivate astrea-core
+fetch_no_fatal_any_status "CE: Home while Core inactive" "/"
+if grep -qF "googletagmanager.com/gtag/js" "$BODY_FILE"; then
+	echo "FAIL [CE]: GA4 tag leaked while Core is inactive"
+	exit 1
+fi
+fetch_no_fatal_any_status "CE: ASTREA admin page while Core inactive" "/wp-admin/admin.php?page=astrea-core"
+wp_cli plugin activate astrea-core
+check_no_fatal "CE: Home after reactivation"
+echo "OK   [CE: Theme remains safe with Core inactive; ASTREA admin UI cleanly absent]"
+
+echo "=== Cleanup: remove Construction Order 009 smoke-test fixtures ==="
+wp_cli option update show_on_front posts
+wp_cli option update page_on_front 0
+wp_cli post delete "$OTHER_FRONT_PAGE" "$HOME_PAGE_ID" $(wp_cli post list --post_type=wp_navigation --field=ID) --force > /dev/null 2>&1 || true
+rm -f "$COOKIE_JAR"
+
+echo "All ASTREA HOME / GA4 / Core data-deletion end-to-end checks passed."

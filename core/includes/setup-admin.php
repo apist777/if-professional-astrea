@@ -14,11 +14,14 @@
 namespace Astrea\Core\Setup\Admin;
 
 use function Astrea\Core\Setup\get_checklist_items;
-use function Astrea\Core\Setup\has_any_navigation;
+use function Astrea\Core\Setup\has_meaningful_navigation;
+use function Astrea\Core\Setup\is_home_configured;
 use const Astrea\Core\Setup\GENERATE_PAGES_ACTION;
 use const Astrea\Core\Setup\GENERATE_PAGES_NONCE;
 use const Astrea\Core\Setup\GENERATE_NAVIGATION_ACTION;
 use const Astrea\Core\Setup\GENERATE_NAVIGATION_NONCE;
+use const Astrea\Core\Setup\GENERATE_HOME_ACTION;
+use const Astrea\Core\Setup\GENERATE_HOME_NONCE;
 
 if ( ! defined( 'ABSPATH' ) ) {
 	exit; // Disallow direct access.
@@ -69,6 +72,31 @@ function render_checklist() {
 			<?php endforeach; ?>
 		</ul>
 
+		<h3 id="astrea-setup-generate-home"><?php esc_html_e( 'ホームページの作成', 'astrea-core' ); ?></h3>
+		<?php if ( isset( $_GET['astrea_setup_home_error'] ) ) : // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- read-only display of a message already produced by a nonce-verified admin-post handler. ?>
+			<div class="notice notice-warning inline">
+				<p><?php echo esc_html( rawurldecode( wp_unslash( (string) $_GET['astrea_setup_home_error'] ) ) ); // phpcs:ignore WordPress.Security.NonceVerification.Recommended, WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- escaped on output immediately above; source is our own handler's fixed, translated error strings, not free-form user input. ?></p>
+			</div>
+		<?php elseif ( isset( $_GET['astrea_setup_home_generated'] ) ) : // phpcs:ignore WordPress.Security.NonceVerification.Recommended ?>
+			<div class="notice notice-success inline">
+				<p><?php esc_html_e( 'ホームページを作成し、固定フロントページとして設定しました。', 'astrea-core' ); ?></p>
+			</div>
+		<?php endif; ?>
+		<?php if ( is_home_configured() ) : ?>
+			<p class="description">
+				<?php esc_html_e( '既にホームページが設定されています。', 'astrea-core' ); ?>
+			</p>
+		<?php else : ?>
+			<p class="description">
+				<?php esc_html_e( 'Hero・取扱業務・専門家紹介・料金・FAQ・ご相談の流れ・CTAを組み合わせたホームページを作成し、サイトの固定フロントページとして設定します。既にホームページ（固定フロントページ）が設定されている場合は作成しません。', 'astrea-core' ); ?>
+			</p>
+			<form method="post" action="<?php echo esc_url( admin_url( 'admin-post.php' ) ); ?>">
+				<input type="hidden" name="action" value="<?php echo esc_attr( GENERATE_HOME_ACTION ); ?>" />
+				<?php wp_nonce_field( GENERATE_HOME_ACTION, GENERATE_HOME_NONCE ); ?>
+				<?php submit_button( __( 'ホームページを作成する', 'astrea-core' ), 'primary', 'submit', false ); ?>
+			</form>
+		<?php endif; ?>
+
 		<h3 id="astrea-setup-generate-pages"><?php esc_html_e( '基本ページの作成', 'astrea-core' ); ?></h3>
 		<p class="description">
 			<?php esc_html_e( '「事務所概要」「料金」「お問い合わせ」の下書きページをまとめて作成します。取扱業務・専門家紹介・FAQは既に一覧ページがあるため対象に含みません。既に作成済みの場合、再度実行しても重複作成や上書きはしません。', 'astrea-core' ); ?>
@@ -80,7 +108,7 @@ function render_checklist() {
 		</form>
 
 		<h3 id="astrea-setup-generate-navigation"><?php esc_html_e( 'メニュー（Navigation）の作成', 'astrea-core' ); ?></h3>
-		<?php if ( has_any_navigation() ) : ?>
+		<?php if ( has_meaningful_navigation() ) : ?>
 			<p class="description">
 				<?php esc_html_e( '既にNavigationが存在するため、この機能は表示されません。', 'astrea-core' ); ?>
 			</p>

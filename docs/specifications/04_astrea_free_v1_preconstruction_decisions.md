@@ -1084,3 +1084,61 @@ Block Bindings Source拡張とDynamic Blockのどちらを採用するかは、D
 7. ~~複数のProfessional Profileを「代表者」として同時に指定できることの是非。~~ **CLOSED（2026-08-26 Decision 025により確定）。** 0〜複数人を正式に許可し、一意制約は設けないことが正式仕様として確定した。
 
 これらは最終監査（`docs/research/`配下の最終監査資料を参照）においてP0（着工前必須）ではなく、各設計フェーズでの決定事項として扱う。
+
+---
+
+## Decision 029 — Remaining Work Auditに基づく5件の確定（Construction Order 009着工前FIX）
+
+**Status:** FIXED
+**決定日:** 2026-08-27
+
+### 決定内容
+
+`docs/research/2026-08-27_remaining_work_audit.md`で提起された要確認事項について、以下を正式に確定する。
+
+**1. Navigation自動構築とFREE / PRO境界**
+
+Construction Order 007で実装済みの「基本メニューを作成する」（`core/includes/setup-navigation.php`）はFREE v1に維持する。以下のとおり責任境界を明確化する。
+
+- **FREE：** ユーザーの明示操作による、職種非依存の基本Navigation生成。ASTREA内の既存ページ・Archive等を利用した汎用的な初期メニュー構築に限る。
+- **PRO：** 士業・職種固有知識を利用したNavigation自動設計、専門業務構成に応じたページ階層・導線の自動最適化、職種固有のサイト構成自動生成。
+
+02仕様書§31・AGENTS.md§6の「Navigation自動構築→PRO」という記述は、**職種固有知識を用いた高度な自動設計**を指すものであり、Construction 007が実装した汎用的・明示操作型の基本メニュー生成とは性質が異なる。両者は矛盾しない。
+
+**2. CASE / RESULTS / VOICE**
+
+FREE v1 Release Blockingとして扱う。Construction Order 010で実装する（009では実装しない）。VOICEの掲載許可確認専用UIはPost v1とする。
+
+**3. ACCESS固有情報**
+
+最寄駅・徒歩時間・駐車場・地図選択等はPost v1とする。既存Office Profile（住所・営業時間等）でFREE v1の最低限のAccess表現は成立するものとする。
+
+**4. WordPress.org**
+
+v1.0 Releaseと正式提出を分離する。v1.0では将来提出可能な品質・Package・readme等の準備までを行う。WordPress.orgへの正式提出行為自体はv1.0 Release Blockingとしない。
+
+**5. Release Candidate**
+
+基本工程はRC1のみとする。RC1で重大な問題が発見された場合のみRC2を追加する可変ステップとし、あらかじめ固定工程にはしない。
+
+### 理由・設計原則
+
+- `docs/research/2026-08-27_remaining_work_audit.md`§18-1・§5・§6・§14・§18で提起した要確認事項への正式な回答である。
+- 03仕様書（ユーザージャーニー）に「メニューを構築」という独立したFREEステップが存在することは、項目1の判断（FREEに汎用Navigation生成を残す）を裏付ける。
+- CASE/RESULTS/VOICEは、02仕様書§12の文体がService（§7）・FAQ（§11）と同格（個々のコンテンツは任意、機能自体は提供する）であることを根拠に、Release Blockingとする。
+
+### 影響する既存仕様
+
+- 02仕様書§31・AGENTS.md§6の「Navigation自動構築」の記述自体は変更しない。本Decisionは、FREEに現存する機能との関係を明確化する解釈確定であり、既存文言の修正ではない。
+- `docs/research/2026-08-27_remaining_work_audit.md`§18-1・§5・§6・§14・§18の要確認事項を、本Decisionにより**CLOSED**とする。
+
+### Theme / Core / WordPress の責任境界
+
+変更なし（本Decisionは既存責任分離の解釈確定であり、新たな境界変更を伴わない）。
+
+### 実装時に守るべき事項
+
+- Construction Order 010（CASE/RESULTS/VOICE）着工時、Service/FAQと同型のCPT実装パターンを踏襲する。
+- WordPress.org提出準備（readme.txt/screenshot.png/LICENSE等）は、提出タイミングの決定を待たずv1.0 Release準備の一部として進めてよい。
+
+---

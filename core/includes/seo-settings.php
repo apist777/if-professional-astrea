@@ -30,6 +30,7 @@ function get_seo_settings(): array {
 	$defaults = array(
 		'og_image_id'                 => 0,
 		'search_console_verification' => '',
+		'ga4_measurement_id'          => '',
 	);
 
 	$stored = get_option( SETTINGS_OPTION, array() );
@@ -70,8 +71,22 @@ function sanitize_settings( $input ): array {
 		$verification = '';
 	}
 
+	$ga4_measurement_id = isset( $input['ga4_measurement_id'] ) ? strtoupper( sanitize_text_field( $input['ga4_measurement_id'] ) ) : '';
+
+	// GA4 Measurement IDs are always "G-" followed by 10 alphanumeric characters.
+	// Reject anything else rather than guessing at a malformed value.
+	if ( '' !== $ga4_measurement_id && ! preg_match( '/^G-[A-Z0-9]{4,}$/', $ga4_measurement_id ) ) {
+		add_settings_error(
+			SETTINGS_OPTION,
+			'astrea_seo_invalid_ga4_measurement_id',
+			__( 'GA4 測定IDの形式が正しくありません。Googleアナリティクスの「データストリーム」画面に表示される G- から始まる測定ID（例：G-XXXXXXXXXX）をそのまま貼り付けてください。', 'astrea-core' )
+		);
+		$ga4_measurement_id = '';
+	}
+
 	return array(
 		'og_image_id'                 => $og_image_id,
 		'search_console_verification' => $verification,
+		'ga4_measurement_id'          => $ga4_measurement_id,
 	);
 }

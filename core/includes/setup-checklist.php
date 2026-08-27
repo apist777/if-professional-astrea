@@ -55,6 +55,13 @@ function get_checklist_items(): array {
 
 	return array(
 		array(
+			'key'      => 'home',
+			'label'    => __( 'ホームページを公開する', 'astrea-core' ),
+			'priority' => 'recommended',
+			'done'     => is_home_configured(),
+			'url'      => admin_url( 'admin.php?page=astrea-core#astrea-setup-generate-home' ),
+		),
+		array(
 			'key'      => 'office_profile',
 			'label'    => __( '事務所情報（事務所名）を入力する', 'astrea-core' ),
 			'priority' => 'recommended',
@@ -111,13 +118,44 @@ function get_checklist_items(): array {
 			'url'      => admin_url( 'admin.php?page=astrea-core-seo' ),
 		),
 		array(
+			'key'      => 'ga4',
+			'label'    => __( 'GA4測定IDを設定する', 'astrea-core' ),
+			'priority' => 'optional',
+			'done'     => '' !== get_seo_settings()['ga4_measurement_id'],
+			'url'      => admin_url( 'admin.php?page=astrea-core-seo' ),
+		),
+		array(
 			'key'      => 'navigation',
 			'label'    => __( 'サイトのメニュー（Navigation）を作成する', 'astrea-core' ),
 			'priority' => 'optional',
-			'done'     => has_any_navigation(),
+			'done'     => has_meaningful_navigation(),
 			'url'      => admin_url( 'admin.php?page=astrea-core#astrea-setup-generate-navigation' ),
 		),
 	);
+}
+
+/**
+ * Whether the site currently shows a real, published static Page as its
+ * front page — regardless of whether ASTREA's Setup generated it or the
+ * site owner built their own (Construction Order 009 §3: judged from real
+ * WordPress state, not a tracked "we generated one" flag, so a site owner
+ * who assembled their own HOME manually is correctly credited too).
+ *
+ * @return bool
+ */
+function is_home_configured(): bool {
+	if ( 'page' !== get_option( 'show_on_front' ) ) {
+		return false;
+	}
+
+	$front_page_id = (int) get_option( 'page_on_front' );
+	if ( $front_page_id <= 0 ) {
+		return false;
+	}
+
+	$front_page = get_post( $front_page_id );
+
+	return $front_page instanceof \WP_Post && 'page' === $front_page->post_type && 'publish' === $front_page->post_status;
 }
 
 /**
@@ -159,25 +197,62 @@ function is_contact_reachable(): bool {
 }
 
 /**
- * Whether the site has at least one Navigation (wp_navigation post),
- * regardless of status — an existing draft Navigation still means "the
- * user already has one", which is what gates whether ASTREA should ever
- * offer to generate one (see includes/setup-navigation.php).
+ * The exact post_name/post_content WordPress core itself uses when it
+ * auto-creates a fallback Navigation the first time a bare `core/navigation`
+ * block (no `ref`) is rendered on the front end and no Navigation exists yet
+ * (`WP_Navigation_Fallback::create_default_fallback()`, core since WP 6.3 —
+ * verified against the wp-includes source: post_name 'navigation',
+ * post_content '<!-- wp:page-list /-->'). Construction Order 008 gave the
+ * Header/Footer a bare Navigation block, so this fallback is created
+ * automatically on the very first page view — Construction Order 009
+ * confirmed via real-machine testing that a single homepage request is
+ * enough to turn has_meaningful_navigation()'s old zero-item state into a false
+ * "done" before the site owner has done anything at all.
+ */
+const WP_FALLBACK_NAVIGATION_SLUG    = 'navigation';
+const WP_FALLBACK_NAVIGATION_CONTENT = '<!-- wp:page-list /-->';
+
+/**
+ * Whether a wp_navigation post is WordPress's own untouched auto-generated
+ * fallback (a plain Page List), as opposed to something the site owner or
+ * ASTREA's Setup deliberately built. Editing the fallback at all (even
+ * adding one link) changes its content and correctly stops it matching.
+ *
+ * @param \WP_Post $navigation A wp_navigation post.
+ * @return bool
+ */
+function is_wordpress_fallback_navigation( \WP_Post $navigation ): bool {
+	return WP_FALLBACK_NAVIGATION_SLUG === $navigation->post_name
+		&& WP_FALLBACK_NAVIGATION_CONTENT === trim( $navigation->post_content );
+}
+
+/**
+ * Whether the site has at least one *meaningful* Navigation — i.e. one
+ * that isn't just WordPress's own auto-created Page List fallback (see
+ * is_wordpress_fallback_navigation()). This is what gates both the setup
+ * checklist's "done" state and whether ASTREA should ever offer to
+ * generate one (see includes/setup-navigation.php) — a bare fallback that
+ * nobody deliberately built must not read as "Setup complete".
  *
  * @return bool
  */
-function has_any_navigation(): bool {
+function has_meaningful_navigation(): bool {
 	$navigations = get_posts(
 		array(
 			'post_type'      => 'wp_navigation',
 			'post_status'    => array( 'publish', 'draft' ),
-			'posts_per_page' => 1,
-			'fields'         => 'ids',
+			'posts_per_page' => -1,
 			'no_found_rows'  => true,
 		)
 	);
 
-	return ! empty( $navigations );
+	foreach ( $navigations as $navigation ) {
+		if ( ! is_wordpress_fallback_navigation( $navigation ) ) {
+			return true;
+		}
+	}
+
+	return false;
 }
 
 add_action( 'save_post_page', __NAMESPACE__ . '\\clear_contact_reachable_cache' );

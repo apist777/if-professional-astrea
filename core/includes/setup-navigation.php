@@ -98,7 +98,7 @@ function navigation_links(): array {
 
 /**
  * Creates a single `wp_navigation` post from navigation_links(), but only
- * when the site has no Navigation at all yet (has_any_navigation() in
+ * when the site has no Navigation at all yet (has_meaningful_navigation() in
  * includes/setup-checklist.php gates this). Saved as draft, like the
  * generated Pages, so the site owner reviews it before it can appear
  * anywhere (a Navigation only renders once referenced from a Template/
@@ -107,7 +107,7 @@ function navigation_links(): array {
  * @return int|\WP_Error New wp_navigation post ID, or WP_Error on failure.
  */
 function generate_navigation() {
-	if ( has_any_navigation() ) {
+	if ( has_meaningful_navigation() ) {
 		return new \WP_Error( 'astrea_navigation_exists', __( '既にNavigationが存在するため生成しません。', 'astrea-core' ) );
 	}
 

@@ -388,3 +388,17 @@ CONSTRUCTION ORDER 008着工にあたり、本書セクション17項目4・5で
 - 本書セクション17項目4・5、`04_astrea_free_v1_preconstruction_decisions.md`「残る確認事項」項目4・5は、本Decisionにより**CLOSED**となった。
 
 将来Design System / Theme表示基盤を拡張するConstruction Orderでは、本セクションおよび`04_astrea_free_v1_preconstruction_decisions.md`のDecision 028を基準文書とする。
+
+---
+
+## 27. 追記（2026-08-27, Decision 029 — Remaining Work Auditに基づく5件の確定）
+
+CONSTRUCTION ORDER 009着工にあたり、`docs/research/2026-08-27_remaining_work_audit.md`で提起された要確認事項が以下のとおり正式FIXされた（`04_astrea_free_v1_preconstruction_decisions.md`のDecision 029参照）。既存セクションの本文は書き換えず、末尾への追加として反映する。
+
+- **Navigation自動構築とFREE/PRO境界：** Construction 007の「基本メニューを作成する」（職種非依存の汎用的な明示操作型生成）はFREEに維持。職種固有知識を用いた高度なNavigation自動設計・自動最適化はPROの領域と明確化した。
+- **CASE/RESULTS/VOICE：** FREE v1 Release Blockingとし、Construction Order 010で実装する。VOICEの掲載許可確認専用UIはPost v1とする。
+- **ACCESS固有情報：** Post v1とする。既存Office Profileの住所・営業時間でFREE v1の最低限のAccess表現は成立するものとする。
+- **WordPress.org：** v1.0 Releaseと正式提出を分離。提出可否・時期は別途の事業判断とする。
+- **Release Candidate：** 基本工程はRC1のみとし、RC2は重大な問題が発見された場合のみ追加する可変ステップとする。
+
+将来Release工程を進めるConstruction Orderでは、本セクションおよび`04_astrea_free_v1_preconstruction_decisions.md`のDecision 029を基準文書とする。

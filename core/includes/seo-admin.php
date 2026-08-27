@@ -185,6 +185,26 @@ function render_page() {
 						</p>
 					</td>
 				</tr>
+				<tr>
+					<th scope="row"><label for="astrea_seo_ga4_measurement_id"><?php esc_html_e( 'GA4 測定ID', 'astrea-core' ); ?></label></th>
+					<td>
+						<input
+							type="text"
+							id="astrea_seo_ga4_measurement_id"
+							name="<?php echo esc_attr( SETTINGS_OPTION ); ?>[ga4_measurement_id]"
+							value="<?php echo esc_attr( $settings['ga4_measurement_id'] ); ?>"
+							class="regular-text"
+							placeholder="G-XXXXXXXXXX"
+						/>
+						<p class="description">
+							<?php esc_html_e( 'Googleアナリティクス（GA4）の測定ID（G-から始まる文字列）を入力すると、サイトの各ページにアクセス計測タグを出力します。空欄のままにすると何も出力しません。', 'astrea-core' ); ?>
+						</p>
+						<p class="description">
+							<strong><?php esc_html_e( '注意：', 'astrea-core' ); ?></strong>
+							<?php esc_html_e( 'この項目を設定すると、サイト訪問者の情報がGoogleへ送信されるようになります（Googleアナリティクスの標準的な仕組みによるものです）。設定する前に、必要に応じてプライバシーポリシー等への記載をご確認ください。', 'astrea-core' ); ?>
+						</p>
+					</td>
+				</tr>
 			</table>
 			<?php submit_button( __( '設定を保存', 'astrea-core' ) ); ?>
 		</form>

@@ -59,10 +59,15 @@
  * freely edit or delete, exactly like Decision 016 requires; only this
  * index option is Core's own bookkeeping.
  *
- * A future Construction Order will add an explicit, confirmed "delete all
- * ASTREA Core data" admin action — this file will call into it only when
- * the user has affirmatively chosen full deletion, not automatically on
- * every plugin removal.
+ * As of Construction Order 009, the explicit, confirmed "delete all ASTREA
+ * Core data" admin action anticipated above has been implemented — see
+ * includes/data-deletion.php ("データ削除" under the ASTREA admin menu).
+ * This file remains a permanent no-op regardless: that action is reached
+ * only through its own deliberate confirmation flow (capability, Nonce,
+ * a checkbox, and an exact typed confirmation phrase), never merely by
+ * deleting the plugin from the Plugins screen. Its own deletion inventory
+ * mirrors this file's history exactly, and likewise never touches
+ * Media Library attachments or Setup-generated Pages/Navigation.
  *
  * @package Astrea\Core
  */
@@ -76,7 +81,7 @@ if ( ! defined( 'WP_UNINSTALL_PLUGIN' ) ) {
 // posts/postmeta/taxonomy terms, `astrea_core_contact_settings`,
 // `astrea_core_seo_settings`, `astrea_core_generated_pages`, and their
 // featured-image / OGP-image attachments must all survive a plain
-// "Delete" from the Plugins screen. Only a future, explicit,
-// user-confirmed deletion flow may remove them — and that flow must never
-// delete Media Library attachments or Setup-generated Pages/Navigation
-// (those are user content per Decision 016).
+// "Delete" from the Plugins screen. Only includes/data-deletion.php's own
+// explicit, user-confirmed flow may remove them — and that flow must
+// never delete Media Library attachments or Setup-generated Pages/
+// Navigation (those are user content per Decision 016).

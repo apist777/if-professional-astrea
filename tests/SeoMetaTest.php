@@ -9,6 +9,7 @@
 use Astrea\Core\Seo;
 use Astrea\Core\Service;
 use Astrea\Core\Faq;
+use Astrea\Core\Ga4;
 
 /**
  * @covers \Astrea\Core\Seo
@@ -150,5 +151,63 @@ class SeoMetaTest extends WP_UnitTestCase {
 		$sanitized = Seo\sanitize_settings( array( 'search_console_verification' => 'abc" onmouseover="alert(1)' ) );
 
 		$this->assertSame( '', $sanitized['search_console_verification'] );
+	}
+
+	// -- GA4 measurement ID (Construction Order 009) --------------------------
+
+	public function test_sanitize_settings_accepts_valid_ga4_measurement_id() {
+		$sanitized = Seo\sanitize_settings( array( 'ga4_measurement_id' => 'G-ABCD123456' ) );
+
+		$this->assertSame( 'G-ABCD123456', $sanitized['ga4_measurement_id'] );
+	}
+
+	public function test_sanitize_settings_uppercases_ga4_measurement_id() {
+		$sanitized = Seo\sanitize_settings( array( 'ga4_measurement_id' => 'g-abcd123456' ) );
+
+		$this->assertSame( 'G-ABCD123456', $sanitized['ga4_measurement_id'] );
+	}
+
+	public function test_sanitize_settings_rejects_malformed_ga4_measurement_id() {
+		$sanitized = Seo\sanitize_settings( array( 'ga4_measurement_id' => 'UA-12345-1' ) );
+
+		$this->assertSame( '', $sanitized['ga4_measurement_id'] );
+	}
+
+	public function test_sanitize_settings_rejects_ga4_measurement_id_with_script_injection() {
+		$sanitized = Seo\sanitize_settings( array( 'ga4_measurement_id' => 'G-ABC"><script>alert(1)</script>' ) );
+
+		$this->assertSame( '', $sanitized['ga4_measurement_id'] );
+	}
+
+	public function test_ga4_tag_is_not_output_when_measurement_id_is_empty() {
+		ob_start();
+		Ga4\output_ga4_tag();
+		$output = ob_get_clean();
+
+		$this->assertSame( '', $output );
+	}
+
+	public function test_ga4_tag_is_output_when_measurement_id_is_set() {
+		update_option( Seo\SETTINGS_OPTION, array( 'ga4_measurement_id' => 'G-ABCD123456' ) );
+
+		ob_start();
+		Ga4\output_ga4_tag();
+		$output = ob_get_clean();
+
+		$this->assertStringContainsString( 'G-ABCD123456', $output );
+		$this->assertStringContainsString( 'googletagmanager.com/gtag/js', $output );
+	}
+
+	public function test_ga4_tag_is_suppressed_when_known_analytics_plugin_active() {
+		update_option( Seo\SETTINGS_OPTION, array( 'ga4_measurement_id' => 'G-ABCD123456' ) );
+		update_option( 'active_plugins', array( 'google-site-kit/google-site-kit.php' ) );
+
+		ob_start();
+		Ga4\output_ga4_tag();
+		$output = ob_get_clean();
+
+		$this->assertSame( '', $output );
+
+		update_option( 'active_plugins', array() );
 	}
 }
