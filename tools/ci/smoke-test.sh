@@ -1100,6 +1100,20 @@ fi
 echo "OK   [BH: notification-confirmed checklist item reflects the confirmed address]"
 
 echo "=== BI. 基本メニューを作成する generates a draft Navigation with links to real content ==="
+# Construction Order 008 gave the Header/Footer a bare core/navigation
+# block; WordPress core itself (block_core_navigation_get_fallback_blocks(),
+# WP_Navigation_Fallback) auto-creates and publishes a real wp_navigation
+# post as a side effect of rendering it on any front-end page view once no
+# Navigation exists yet — this is standard WordPress behavior on every
+# block theme, not something ASTREA generates. Since Parts 1-8 have
+# already rendered many pages by this point, that auto-fallback almost
+# certainly exists now; clear it so this test can verify the "0
+# Navigation -> button offered -> generates the real one" flow this step
+# actually targets, without disturbing the has_any_navigation() guard
+# itself (which correctly treats ANY existing Navigation, auto-created or
+# not, as "one already exists" — see BJ below).
+wp_cli post delete $(wp_cli post list --post_type=wp_navigation --field=ID) --force > /dev/null 2>&1 || true
+ADMIN_HTML=$(curl -s -b "$COOKIE_JAR" "$SITE_URL/wp-admin/admin.php?page=astrea-core")
 if ! grep -qF '基本メニューを作成する' <<< "$ADMIN_HTML"; then
 	echo "FAIL [BI]: Navigation generation button did not render (no Navigation should exist yet)"
 	exit 1
