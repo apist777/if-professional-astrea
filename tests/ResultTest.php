@@ -91,6 +91,15 @@ class ResultTest extends WP_UnitTestCase {
 		$this->assertFalse( $post_type_object->publicly_queryable );
 	}
 
+	public function test_is_not_exposed_via_rest() {
+		// Construction Order 011 Security Audit (MEDIUM finding): same
+		// REST-exposure contradiction as astrea_price — see PriceTest.php's
+		// equivalent test for the full explanation.
+		$post_type_object = get_post_type_object( Result\POST_TYPE );
+
+		$this->assertFalse( $post_type_object->show_in_rest );
+	}
+
 	public function test_save_meta_writes_value_for_capable_user() {
 		$admin_id = self::factory()->user->create( array( 'role' => 'administrator' ) );
 		wp_set_current_user( $admin_id );

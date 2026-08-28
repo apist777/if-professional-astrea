@@ -44,6 +44,19 @@
 # injection safety, real coexistence with an installed SEO Plugin (Yoast),
 # and the same Core-inactive/deactivate/reactivate coverage as Parts 1-6.
 #
+#
+# Part 12 (CN-CV) automates Construction Order 011 (Theme Display
+# Completion / Security Hardening): the new single-astrea_professional.html
+# Template and astrea/professional-field Dynamic Block (including the
+# empty-meta "<p></p>" fix on the Professional Archive), the new
+# astrea/office-hours and astrea/office-sns Dynamic Blocks, the new
+# astrea/service-list Dynamic Block replacing home-services-teaser.php's
+# old Query Loop (closing Decision 028's one remaining non-self-hiding HOME
+# Teaser), the HOME H1 fix, the VOICE Archive heading-level fix, the
+# astrea_price/astrea_result REST-exposure Security fix, the Contact Form
+# submit button's Style Variation integration, and the same Core-inactive
+# coverage as every earlier Part.
+#
 # Requires a running `wp-env` environment (see package.json `env:start`).
 
 set -euo pipefail
@@ -1697,3 +1710,157 @@ wp_cli post delete "$CASE_B" "$CASE_SVC" "$CASE_TEASER_PAGE" "$RESULTS_TEASER_PA
 rm -f "$COOKIE_JAR"
 
 echo "All ASTREA CASE / RESULTS / VOICE end-to-end checks passed."
+
+# Part 12 (CN-CU) automates Construction Order 011 — see the file docblock
+# above for the full list of what this covers.
+
+COOKIE_JAR="$(mktemp)"
+curl -s -c "$COOKIE_JAR" "$SITE_URL/wp-login.php" > /dev/null
+curl -s -c "$COOKIE_JAR" -b "$COOKIE_JAR" -X POST "$SITE_URL/wp-login.php" \
+	--data-urlencode "log=admin" --data-urlencode "pwd=password" \
+	--data-urlencode "wp-submit=Log In" --data-urlencode "redirect_to=$SITE_URL/wp-admin/" \
+	-o /dev/null
+
+echo "=== CN. Professional Archive: 空metaで空<p></p>を残さず、値がある場合のみ表示される ==="
+PROF_EMPTY=$(wp_cli post create --post_type=astrea_professional --post_title="スモーク011空専門家" --post_status=publish --porcelain)
+PROF_FULL=$(wp_cli post create --post_type=astrea_professional --post_title="スモーク011専門家" --post_status=publish --porcelain)
+wp_cli post meta update "$PROF_FULL" astrea_professional_qualification "行政書士"
+wp_cli post meta update "$PROF_FULL" astrea_professional_career "10年の実務経験"
+wp_cli post meta update "$PROF_FULL" astrea_professional_education "○○大学卒業"
+wp_cli post meta update "$PROF_FULL" astrea_professional_affiliation "○○士会"
+wp_cli post meta update "$PROF_FULL" astrea_professional_registration_info "登録番号：第1号"
+check_no_fatal "CN: Professional archive with an empty-meta and a full-meta profile" "/professionals/"
+if grep -qF "<p></p>" "$BODY_FILE"; then
+	echo "FAIL [CN]: an empty <p></p> is still present on the Professional Archive"
+	exit 1
+fi
+if ! grep -qF "行政書士" "$BODY_FILE"; then
+	echo "FAIL [CN]: qualification did not render for the fully-populated profile"
+	exit 1
+fi
+echo "OK   [CN: Professional Archive never leaves a blank <p></p>, shows qualification when present]"
+
+echo "=== CO. Professional Single: 全項目が表示順どおり表示され、空項目のProfileは空見出しを残さない ==="
+PROF_FULL_SLUG=$(wp_cli post get "$PROF_FULL" --field=post_name)
+check_no_fatal "CO: Professional Single (full data)" "/professionals/$PROF_FULL_SLUG/"
+for expected in "行政書士" "10年の実務経験" "○○大学卒業" "○○士会" "登録番号：第1号" "経歴" "学歴" "所属" "登録情報"; do
+	if ! grep -qF "$expected" "$BODY_FILE"; then
+		echo "FAIL [CO]: expected '$expected' on the full-data Professional Single"
+		exit 1
+	fi
+done
+PROF_EMPTY_SLUG=$(wp_cli post get "$PROF_EMPTY" --field=post_name)
+check_no_fatal "CO: Professional Single (empty optional fields)" "/professionals/$PROF_EMPTY_SLUG/"
+for absent in "経歴" "学歴" "所属" "登録情報" "wp-block-astrea-professional-field"; do
+	if grep -qF "$absent" "$BODY_FILE"; then
+		echo "FAIL [CO]: '$absent' must not appear when the underlying field is empty (no label-only sections)"
+		exit 1
+	fi
+done
+echo "OK   [CO: Professional Single shows every populated field, never a blank labelled section]"
+
+echo "=== CP. astrea/office-hours + astrea/office-sns: 0件で完全非表示、設定後に表示される ==="
+OFFICE_BLOCKS_PAGE=$(wp_cli post create --post_type=page --post_title="Smoke011 Office Blocks" --post_status=publish --post_content='<!-- wp:astrea/office-hours {"heading":"営業時間"} /--><!-- wp:astrea/office-sns {"heading":"SNS"} /-->' --porcelain)
+OFFICE_BLOCKS_PATH="/$(wp_cli post get "$OFFICE_BLOCKS_PAGE" --field=post_name)/"
+check_no_fatal "CP: Office Hours/SNS page with nothing configured" "$OFFICE_BLOCKS_PATH"
+if grep -qF "営業時間" "$BODY_FILE" || grep -qF "SNS" "$BODY_FILE"; then
+	echo "FAIL [CP]: heading appeared even though no business hours/SNS links are configured"
+	exit 1
+fi
+wp_cli eval '
+	$profile = \Astrea\Core\OfficeProfile\get_office_profile();
+	$profile["business_hours"]["weekly"]["mon"] = array( "closed" => false, "open" => "09:00", "close" => "18:00" );
+	$profile["sns_links"] = array( array( "label" => "X", "url" => "https://x.com/example" ) );
+	update_option( \Astrea\Core\OfficeProfile\OPTION_NAME, $profile );
+'
+check_no_fatal "CP: Office Hours/SNS page once configured" "$OFFICE_BLOCKS_PATH"
+if ! grep -qF "月曜日" "$BODY_FILE" || ! grep -qF "09:00" "$BODY_FILE"; then
+	echo "FAIL [CP]: configured business hours did not render"
+	exit 1
+fi
+if ! grep -qF 'href="https://x.com/example"' "$BODY_FILE"; then
+	echo "FAIL [CP]: configured SNS link did not render"
+	exit 1
+fi
+echo "OK   [CP: astrea/office-hours and astrea/office-sns self-hide at zero config, render once configured]"
+
+echo "=== CQ. HOME: H1がちょうど1個、取扱業務Teaserが0/1件で正しく自己非表示・表示される ==="
+wp_cli option update page_on_front 0
+wp_cli option update show_on_front posts
+wp_cli eval 'delete_option( "astrea_core_generated_pages" );'
+ADMIN_HTML=$(curl -s -b "$COOKIE_JAR" "$SITE_URL/wp-admin/admin.php?page=astrea-core")
+HOME_NONCE=$(sed -n 's/.*name="astrea_setup_generate_home_nonce" value="\([a-f0-9]*\)".*/\1/p' <<< "$ADMIN_HTML" | head -1)
+curl -s -b "$COOKIE_JAR" -o /dev/null "$SITE_URL/wp-admin/admin-post.php?action=astrea_setup_generate_home&astrea_setup_generate_home_nonce=$HOME_NONCE"
+SMOKE011_HOME_PAGE=$(wp_cli option get page_on_front)
+check_no_fatal "CQ: Home after HOME assembly (zero Services)"
+H1_COUNT=$(grep -o "<h1[ >]" "$BODY_FILE" | wc -l)
+if [ "$H1_COUNT" != "1" ]; then
+	echo "FAIL [CQ]: expected exactly one <h1> on HOME, found $H1_COUNT"
+	exit 1
+fi
+if grep -qF "取扱業務" "$BODY_FILE"; then
+	echo "FAIL [CQ]: Services Teaser heading appeared on HOME with zero Services (Decision 028 whole-section self-hide)"
+	exit 1
+fi
+SMOKE011_SVC=$(wp_cli post create --post_type=astrea_service --post_title="スモーク011業務" --post_status=publish --post_content="スモーク011業務の説明です。" --porcelain)
+check_no_fatal "CQ: Home after HOME assembly (one Service)"
+if ! grep -qF "取扱業務" "$BODY_FILE" || ! grep -qF "スモーク011業務" "$BODY_FILE"; then
+	echo "FAIL [CQ]: Services Teaser did not render heading+content once a Service exists"
+	exit 1
+fi
+echo "OK   [CQ: HOME has exactly one H1, Services Teaser fully self-hides at zero items and renders once populated]"
+
+echo "=== CR. VOICE Archive: 項目見出しがH2で出力される（H1からのレベル飛びが無い） ==="
+SMOKE011_VOICE=$(wp_cli post create --post_type=astrea_voice --post_title="スモーク011の声" --post_status=publish --post_content="大変助かりました。" --porcelain)
+check_no_fatal "CR: VOICE archive with one item" "/voices/"
+if ! grep -qF '<h2 class="wp-block-post-title">スモーク011の声</h2>' "$BODY_FILE"; then
+	echo "FAIL [CR]: VOICE archive item title did not render as an H2"
+	exit 1
+fi
+echo "OK   [CR: VOICE Archive item title is an H2, matching every other Archive]"
+
+echo "=== CS. astrea_price / astrea_result: REST APIから匿名で読み取れない ==="
+REST_PRICE_STATUS=$(curl -s -o /dev/null -w '%{http_code}' "$SITE_URL/wp-json/wp/v2/astrea_price")
+if [ "$REST_PRICE_STATUS" = "200" ]; then
+	echo "FAIL [CS]: /wp-json/wp/v2/astrea_price is anonymously readable — Security Audit MEDIUM finding not fixed"
+	exit 1
+fi
+REST_RESULT_STATUS=$(curl -s -o /dev/null -w '%{http_code}' "$SITE_URL/wp-json/wp/v2/astrea_result")
+if [ "$REST_RESULT_STATUS" = "200" ]; then
+	echo "FAIL [CS]: /wp-json/wp/v2/astrea_result is anonymously readable — Security Audit MEDIUM finding not fixed"
+	exit 1
+fi
+echo "OK   [CS: astrea_price/astrea_result are not exposed via the REST API]"
+
+echo "=== CT. Contact Form: 送信ButtonがStyle Variationのボタン装飾を継承するclassを持つ ==="
+CONTACT_PAGE=$(wp_cli post create --post_type=page --post_title="Smoke011 Contact" --post_status=publish --post_content='<!-- wp:astrea/contact-form /-->' --porcelain)
+CONTACT_PATH="/$(wp_cli post get "$CONTACT_PAGE" --field=post_name)/"
+check_no_fatal "CT: Contact Form page" "$CONTACT_PATH"
+if ! grep -qE '<button type="submit" class="wp-element-button">' "$BODY_FILE"; then
+	echo "FAIL [CT]: Contact Form submit button is missing the wp-element-button class"
+	exit 1
+fi
+echo "OK   [CT: Contact Form submit button carries wp-element-button]"
+
+echo "=== CU. Core deactivated: Professional Single / Office Blocks / Service List degrade safely ==="
+wp_cli plugin deactivate astrea-core
+fetch_no_fatal_any_status "CU: Professional Single while Core inactive" "/professionals/$PROF_FULL_SLUG/"
+fetch_no_fatal_any_status "CU: Office Blocks page while Core inactive" "$OFFICE_BLOCKS_PATH"
+fetch_no_fatal_any_status "CU: Home while Core inactive" "/"
+wp_cli plugin activate astrea-core
+check_no_fatal "CU: Professional Single after reactivation" "/professionals/$PROF_FULL_SLUG/"
+if ! grep -qF "行政書士" "$BODY_FILE"; then
+	echo "FAIL [CU]: Professional Single data not restored after Core reactivation"
+	exit 1
+fi
+echo "OK   [CU: Core deactivate/reactivate leaves the new 011 features safe and restores data]"
+
+echo "=== Cleanup: remove Construction Order 011 smoke-test fixtures ==="
+wp_cli option update page_on_front 0
+wp_cli option update show_on_front posts
+wp_cli eval 'delete_option( "astrea_core_generated_pages" );'
+STRAY_NAV_IDS=$(wp_cli post list --post_type=wp_navigation --field=ID)
+wp_cli post delete "$PROF_EMPTY" "$PROF_FULL" "$OFFICE_BLOCKS_PAGE" "$SMOKE011_SVC" "$CONTACT_PAGE" "$SMOKE011_VOICE" "$SMOKE011_HOME_PAGE" $STRAY_NAV_IDS --force > /dev/null 2>&1 || true
+rm -f "$COOKIE_JAR"
+
+echo "All ASTREA Theme Display Completion / Security Hardening end-to-end checks passed."

@@ -120,6 +120,17 @@ class PriceTest extends WP_UnitTestCase {
 		$this->assertFalse( $post_type->publicly_queryable );
 	}
 
+	public function test_is_not_exposed_via_rest() {
+		// Construction Order 011 Security Audit (MEDIUM finding): the REST
+		// API gates a post type's controller on show_in_rest alone, not
+		// `public` — this must stay false so /wp-json/wp/v2/astrea_price
+		// cannot be read anonymously, matching this post type's "not
+		// publicly queryable" design intent.
+		$post_type = get_post_type_object( Price\POST_TYPE );
+
+		$this->assertFalse( $post_type->show_in_rest );
+	}
+
 	public function test_all_meta_sanitizers_strip_tags() {
 		$id = $this->create_price();
 

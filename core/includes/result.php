@@ -57,7 +57,10 @@ function register_post_type_and_meta() {
 			'exclude_from_search' => true,
 			'show_ui'             => true,
 			'show_in_menu'        => 'astrea-core',
-			'show_in_rest'        => true,
+			// Construction Order 011 Security Audit (MEDIUM finding): same
+			// REST-exposure contradiction as astrea_price (see price.php's
+			// comment on this same key for the full explanation).
+			'show_in_rest'        => false,
 			'hierarchical'        => false,
 			'supports'            => array( 'title', 'page-attributes' ),
 			'menu_icon'           => 'dashicons-chart-bar',

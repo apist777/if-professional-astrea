@@ -252,7 +252,7 @@ function render_form( array $values, array $errors ): string {
 		<?php endif; ?>
 
 		<p>
-			<button type="submit"><?php esc_html_e( '送信する', 'astrea-core' ); ?></button>
+			<button type="submit" class="wp-element-button"><?php esc_html_e( '送信する', 'astrea-core' ); ?></button>
 		</p>
 	</form>
 	<?php

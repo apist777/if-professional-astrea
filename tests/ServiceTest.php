@@ -130,4 +130,63 @@ class ServiceTest extends WP_UnitTestCase {
 		$this->assertNotNull( get_post( $id ), 'Decision 019: deactivation must never delete Core-owned data.' );
 		$this->assertSame( '削除されないはずの業務', get_post( $id )->post_title );
 	}
+
+	// -- astrea/service-list Dynamic Block (Construction Order 011, Decision 028) --
+
+	public function test_service_list_block_self_hides_with_zero_items_by_default() {
+		$this->assertSame( '', Service\render_service_list_block() );
+	}
+
+	public function test_service_list_block_shows_empty_message_when_set() {
+		$html = Service\render_service_list_block( array( 'emptyMessage' => '現在、取扱業務の情報は準備中です。' ) );
+
+		$this->assertStringContainsString( '現在、取扱業務の情報は準備中です。', $html );
+	}
+
+	public function test_service_list_block_heading_only_appears_alongside_content() {
+		$this->create_service( array( 'post_title' => '契約書作成' ) );
+
+		$with_content = Service\render_service_list_block( array( 'heading' => '取扱業務' ) );
+		$this->assertStringContainsString( '<h2>取扱業務</h2>', $with_content );
+	}
+
+	public function test_service_list_block_heading_is_not_emitted_alone_with_zero_items() {
+		$html = Service\render_service_list_block( array( 'heading' => '取扱業務' ) );
+
+		$this->assertSame( '', $html, 'A heading must never be emitted alone when there are zero Service posts (Decision 028).' );
+	}
+
+	public function test_service_list_block_links_title_to_permalink() {
+		$id = $this->create_service( array( 'post_title' => '契約書作成' ) );
+
+		$html = Service\render_service_list_block();
+
+		$this->assertStringContainsString( '<a href="' . esc_url( get_permalink( $id ) ) . '">契約書作成</a>', $html );
+	}
+
+	public function test_service_list_block_respects_limit() {
+		$this->create_service( array( 'post_title' => '業務1' ) );
+		$this->create_service( array( 'post_title' => '業務2' ) );
+		$this->create_service( array( 'post_title' => '業務3' ) );
+
+		$html = Service\render_service_list_block( array( 'limit' => 2 ) );
+
+		$this->assertStringContainsString( '業務1', $html );
+		$this->assertStringContainsString( '業務2', $html );
+		$this->assertStringNotContainsString( '業務3', $html );
+	}
+
+	public function test_service_list_block_escapes_description_excerpt() {
+		$this->create_service(
+			array(
+				'post_title'   => '危険業務',
+				'post_content' => '<script>alert(1)</script>安全な説明文です。',
+			)
+		);
+
+		$html = Service\render_service_list_block();
+
+		$this->assertStringNotContainsString( '<script>', $html );
+		$this->assertStringContainsString( '安全な説明文です。', $html );
+	}
 }

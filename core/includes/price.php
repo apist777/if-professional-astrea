@@ -83,7 +83,18 @@ function register_post_type_and_meta() {
 			'exclude_from_search' => true,
 			'show_ui'             => true,
 			'show_in_menu'        => 'astrea-core',
-			'show_in_rest'        => true,
+			// Construction Order 011 Security Audit (MEDIUM finding): the
+			// REST API only gates a post type's own controller on
+			// `show_in_rest`, not `public` — leaving this `true` let an
+			// anonymous request read every published Price title/ID/slug
+			// via /wp-json/wp/v2/astrea_price, contradicting this post
+			// type's own "not publicly queryable" design intent. `meta`
+			// was never exposed either way (the REST meta field only
+			// appears when a post type declares 'custom-fields' support,
+			// which this one does not), so this only closes the
+			// post-object route itself. The classic meta box admin UI
+			// (price-admin.php) does not depend on REST.
+			'show_in_rest'        => false,
 			'hierarchical'        => false,
 			'supports'            => array( 'title', 'page-attributes' ),
 			'menu_icon'           => 'dashicons-money-alt',

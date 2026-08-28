@@ -369,4 +369,91 @@ class ProfessionalProfileTest extends WP_UnitTestCase {
 
 		$this->assertSame( '', $html, 'A heading must never be emitted alone when there is no representative.' );
 	}
+
+	// -- astrea/professional-field Dynamic Block (Construction Order 011) --
+
+	/**
+	 * Renders the block with a given post set as the "current" post, the
+	 * same context render_field_block() relies on (get_the_ID()) whether
+	 * invoked from a Query Loop's Post Template (Archive) or a Singular
+	 * template (Single) — both set up global $post before rendering inner
+	 * blocks.
+	 */
+	private function render_field_as_current_post( int $post_id, array $attributes ): string {
+		global $post;
+		$original = $post;
+		$post     = get_post( $post_id ); // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
+		$html     = ProfessionalProfile\render_field_block( $attributes );
+		$post     = $original; // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
+		return $html;
+	}
+
+	public function test_field_block_renders_nothing_for_unknown_field() {
+		$id = $this->create_professional();
+
+		$this->assertSame( '', $this->render_field_as_current_post( $id, array( 'field' => 'not_a_real_field' ) ) );
+	}
+
+	public function test_field_block_renders_nothing_without_a_current_post() {
+		global $post;
+		$original = $post;
+		$post     = null; // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
+
+		$this->assertSame( '', ProfessionalProfile\render_field_block( array( 'field' => 'qualification' ) ) );
+
+		$post = $original; // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
+	}
+
+	public function test_field_block_renders_nothing_when_value_is_empty() {
+		$id = $this->create_professional();
+
+		$this->assertSame( '', $this->render_field_as_current_post( $id, array( 'field' => 'career' ) ), 'An empty field must render nothing at all — not an empty labelled section (02仕様書§8).' );
+	}
+
+	public function test_field_block_renders_nothing_when_value_is_empty_even_with_a_label() {
+		$id = $this->create_professional();
+
+		$html = $this->render_field_as_current_post( $id, array( 'field' => 'career', 'label' => '経歴' ) );
+
+		$this->assertSame( '', $html, 'A label must never be emitted alone when the underlying field is empty.' );
+	}
+
+	public function test_field_block_renders_value_without_label() {
+		$id = $this->create_professional();
+		update_post_meta( $id, ProfessionalProfile\META_QUALIFICATION, '行政書士' );
+
+		$html = $this->render_field_as_current_post( $id, array( 'field' => 'qualification' ) );
+
+		$this->assertStringContainsString( '行政書士', $html );
+		$this->assertStringNotContainsString( '<h2>', $html );
+	}
+
+	public function test_field_block_renders_value_with_label() {
+		$id = $this->create_professional();
+		update_post_meta( $id, ProfessionalProfile\META_CAREER, '10年の実務経験' );
+
+		$html = $this->render_field_as_current_post( $id, array( 'field' => 'career', 'label' => '経歴' ) );
+
+		$this->assertStringContainsString( '<h2>経歴</h2>', $html );
+		$this->assertStringContainsString( '10年の実務経験', $html );
+	}
+
+	public function test_field_block_escapes_value() {
+		$id = $this->create_professional();
+		update_post_meta( $id, ProfessionalProfile\META_CAREER, "<script>alert(1)</script>\n安全なテキスト" );
+
+		$html = $this->render_field_as_current_post( $id, array( 'field' => 'career', 'label' => '経歴' ) );
+
+		$this->assertStringNotContainsString( '<script>', $html );
+		$this->assertStringContainsString( '安全なテキスト', $html );
+	}
+
+	public function test_field_block_preserves_line_breaks() {
+		$id = $this->create_professional();
+		update_post_meta( $id, ProfessionalProfile\META_CAREER, "1行目\n2行目" );
+
+		$html = $this->render_field_as_current_post( $id, array( 'field' => 'career' ) );
+
+		$this->assertStringContainsString( '<br />', $html );
+	}
 }

@@ -3,7 +3,7 @@
  * Plugin Name: ASTREA Core
  * Plugin URI: https://project-if.com/astrea
  * Description: If Professional ASTREA — テーマを変更しても保持すべき情報とサイト共通機能を担当する、ASTREA Themeの公式推奨Plugin（任意）。「Coreは推奨する。しかしThemeを人質にしない。」（Decision 021）。
- * Version: 0.10.0
+ * Version: 0.11.0
  * Requires at least: 7.0
  * Requires PHP: 8.3
  * Author: Project-if
@@ -22,18 +22,22 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit; // Disallow direct access.
 }
 
-define( 'ASTREA_CORE_VERSION', '0.10.0' );
+define( 'ASTREA_CORE_VERSION', '0.11.0' );
 define( 'ASTREA_CORE_FILE', __FILE__ );
 define( 'ASTREA_CORE_DIR', plugin_dir_path( __FILE__ ) );
 
 require ASTREA_CORE_DIR . 'includes/shared.php';
 require ASTREA_CORE_DIR . 'includes/office-profile.php';
 require ASTREA_CORE_DIR . 'includes/office-profile-admin.php';
+require ASTREA_CORE_DIR . 'includes/office-hours-block.php';
+require ASTREA_CORE_DIR . 'includes/office-sns-block.php';
 require ASTREA_CORE_DIR . 'includes/block-bindings.php';
 require ASTREA_CORE_DIR . 'includes/professional-profile.php';
 require ASTREA_CORE_DIR . 'includes/professional-profile-admin.php';
 require ASTREA_CORE_DIR . 'includes/professional-profile-block.php';
+require ASTREA_CORE_DIR . 'includes/professional-field-block.php';
 require ASTREA_CORE_DIR . 'includes/service.php';
+require ASTREA_CORE_DIR . 'includes/service-list-block.php';
 require ASTREA_CORE_DIR . 'includes/price.php';
 require ASTREA_CORE_DIR . 'includes/price-admin.php';
 require ASTREA_CORE_DIR . 'includes/price-list-block.php';

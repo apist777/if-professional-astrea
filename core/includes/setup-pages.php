@@ -45,6 +45,17 @@ const GENERATE_PAGES_NONCE  = 'astrea_setup_generate_pages_nonce';
  * placeholder paragraph the site owner is expected to rewrite (事務所概要 —
  * never fabricated business content, see 07 research §10).
  *
+ * Construction Order 011 appended the same real Office Profile display
+ * blocks used by the `astrea/office-info` Pattern (office_name/address/
+ * phone Bindings + astrea/office-hours + astrea/office-sns) below the
+ * placeholder paragraph — this is genuine data (or a self-hiding empty
+ * state), never fabricated content, so it is safe to publish immediately.
+ * Per the established Construction Order 009 HOME precedent,
+ * generate_pages() below only ever inserts this for a page it is creating
+ * for the first time — an already-generated (or user-edited) 事務所概要
+ * page is never rewritten, regardless of this function's return value
+ * changing over time.
+ *
  * @return array<string, array{title: string, content: string}>
  */
 function page_definitions(): array {
@@ -53,7 +64,12 @@ function page_definitions(): array {
 			'title'   => __( '事務所概要', 'astrea-core' ),
 			'content' => "<!-- wp:paragraph -->\n<p>" .
 				esc_html__( 'ここに事務所の紹介文を入力してください。', 'astrea-core' ) .
-				"</p>\n<!-- /wp:paragraph -->",
+				"</p>\n<!-- /wp:paragraph -->\n\n" .
+				'<!-- wp:paragraph {"metadata":{"bindings":{"content":{"source":"astrea-core/office-profile","args":{"key":"office_name"}}}}} -->' . "\n<p></p>\n<!-- /wp:paragraph -->\n\n" .
+				'<!-- wp:paragraph {"metadata":{"bindings":{"content":{"source":"astrea-core/office-profile","args":{"key":"address"}}}}} -->' . "\n<p></p>\n<!-- /wp:paragraph -->\n\n" .
+				'<!-- wp:paragraph {"metadata":{"bindings":{"content":{"source":"astrea-core/office-profile","args":{"key":"phone"}}}}} -->' . "\n<p></p>\n<!-- /wp:paragraph -->\n\n" .
+				'<!-- wp:astrea/office-hours {"heading":"' . esc_html__( '営業時間', 'astrea-core' ) . '"} /-->' . "\n\n" .
+				'<!-- wp:astrea/office-sns {"heading":"' . esc_html__( 'SNS', 'astrea-core' ) . '"} /-->',
 		),
 		'price'   => array(
 			'title'   => __( '料金', 'astrea-core' ),
