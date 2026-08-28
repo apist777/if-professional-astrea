@@ -49,8 +49,9 @@ function register_field_block() {
 	register_block_type(
 		'astrea/professional-field',
 		array(
-			'render_callback' => __NAMESPACE__ . '\\render_field_block',
-			'attributes'      => array(
+			'render_callback'       => __NAMESPACE__ . '\\render_field_block',
+			'editor_script_handles' => array( \Astrea\Core\EditorBlocks\SCRIPT_HANDLE ),
+			'attributes'            => array(
 				'field' => array(
 					'type'    => 'string',
 					'default' => '',

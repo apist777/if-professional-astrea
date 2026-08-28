@@ -108,19 +108,90 @@ function render_checklist() {
 		</form>
 
 		<h3 id="astrea-setup-generate-navigation"><?php esc_html_e( 'メニュー（Navigation）の作成', 'astrea-core' ); ?></h3>
+		<?php render_navigation_result_notice(); ?>
 		<?php if ( has_meaningful_navigation() ) : ?>
 			<p class="description">
 				<?php esc_html_e( '既にNavigationが存在するため、この機能は表示されません。', 'astrea-core' ); ?>
 			</p>
 		<?php else : ?>
 			<p class="description">
-				<?php esc_html_e( '取扱業務・専門家紹介・FAQ・作成済みの基本ページへのリンクを含む、下書きのNavigationを1件作成します。既にNavigationがある場合は作成しません。', 'astrea-core' ); ?>
+				<?php esc_html_e( '取扱業務・専門家紹介・FAQ・作成済みの基本ページへのリンクを含むNavigationを1件作成し、ヘッダー・フッターが未編集であればそのまま反映します。既にNavigationがある場合は作成しません。', 'astrea-core' ); ?>
 			</p>
 			<form method="post" action="<?php echo esc_url( admin_url( 'admin-post.php' ) ); ?>">
 				<input type="hidden" name="action" value="<?php echo esc_attr( GENERATE_NAVIGATION_ACTION ); ?>" />
 				<?php wp_nonce_field( GENERATE_NAVIGATION_ACTION, GENERATE_NAVIGATION_NONCE ); ?>
 				<?php submit_button( __( '基本メニューを作成する', 'astrea-core' ), 'secondary', 'submit', false ); ?>
 			</form>
+		<?php endif; ?>
+	</div>
+	<?php
+}
+
+/**
+ * Renders the result of the last "基本メニューを作成する" submission
+ * (Construction Order 013): whether the Navigation was generated, and —
+ * separately, per Header/Footer — whether it was actually connected or
+ * left alone because that Template Part is already customized. Never
+ * describes a site owner's own customization as an error.
+ *
+ * @return void
+ */
+function render_navigation_result_notice() {
+	if ( isset( $_GET['astrea_setup_navigation_exists'] ) ) { // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- read-only display of a message already produced by a nonce-verified admin-post handler.
+		?>
+		<div class="notice notice-warning inline">
+			<p><?php esc_html_e( '既にNavigationが存在するため、新しく作成しませんでした。', 'astrea-core' ); ?></p>
+		</div>
+		<?php
+		return;
+	}
+
+	if ( ! isset( $_GET['astrea_setup_navigation_generated'] ) ) { // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+		return;
+	}
+
+	$slot_labels = array(
+		'header' => __( 'ヘッダー', 'astrea-core' ),
+		'footer' => __( 'フッター', 'astrea-core' ),
+	);
+
+	$connected_slots = array();
+	$custom_slots    = array();
+
+	foreach ( $slot_labels as $slot => $label ) {
+		$query_key = 'astrea_setup_navigation_' . $slot;
+		$result    = isset( $_GET[ $query_key ] ) ? sanitize_key( wp_unslash( (string) $_GET[ $query_key ] ) ) : ''; // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- read-only display of a message already produced by a nonce-verified admin-post handler.
+
+		if ( 'connected' === $result ) {
+			$connected_slots[] = $label;
+		} elseif ( 'skipped_custom' === $result ) {
+			$custom_slots[] = $label;
+		}
+	}
+	?>
+	<div class="notice notice-success inline">
+		<p><?php esc_html_e( 'Navigationを作成しました。', 'astrea-core' ); ?></p>
+		<?php if ( ! empty( $connected_slots ) ) : ?>
+			<p>
+				<?php
+				printf(
+					/* translators: %s: comma-separated list of "ヘッダー"/"フッター" */
+					esc_html__( '%sに反映しました。', 'astrea-core' ),
+					esc_html( implode( '・', $connected_slots ) )
+				);
+				?>
+			</p>
+		<?php endif; ?>
+		<?php if ( ! empty( $custom_slots ) ) : ?>
+			<p>
+				<?php
+				printf(
+					/* translators: %s: comma-separated list of "ヘッダー"/"フッター" */
+					esc_html__( '%sは既にカスタマイズされているため、自動では反映しませんでした。サイトエディターでNavigationブロックに手動で割り当ててください。', 'astrea-core' ),
+					esc_html( implode( '・', $custom_slots ) )
+				);
+				?>
+			</p>
 		<?php endif; ?>
 	</div>
 	<?php

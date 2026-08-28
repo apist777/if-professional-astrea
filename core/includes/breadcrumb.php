@@ -153,8 +153,9 @@ function register_breadcrumb_block() {
 	register_block_type(
 		'astrea/breadcrumb',
 		array(
-			'render_callback' => __NAMESPACE__ . '\\render_breadcrumb_block',
-			'attributes'      => array(),
+			'render_callback'       => __NAMESPACE__ . '\\render_breadcrumb_block',
+			'editor_script_handles' => array( \Astrea\Core\EditorBlocks\SCRIPT_HANDLE ),
+			'attributes'            => array(),
 		)
 	);
 }

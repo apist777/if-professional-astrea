@@ -41,8 +41,9 @@ function register_sns_block() {
 	register_block_type(
 		'astrea/office-sns',
 		array(
-			'render_callback' => __NAMESPACE__ . '\\render_sns_block',
-			'attributes'      => array(
+			'render_callback'       => __NAMESPACE__ . '\\render_sns_block',
+			'editor_script_handles' => array( \Astrea\Core\EditorBlocks\SCRIPT_HANDLE ),
+			'attributes'            => array(
 				'heading'      => array(
 					'type'    => 'string',
 					'default' => '',

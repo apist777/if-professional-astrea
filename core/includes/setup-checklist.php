@@ -131,7 +131,30 @@ function get_checklist_items(): array {
 			'done'     => has_meaningful_navigation(),
 			'url'      => admin_url( 'admin.php?page=astrea-core#astrea-setup-generate-navigation' ),
 		),
+		array(
+			'key'      => 'site_title',
+			'label'    => __( 'サイトのタイトルを設定する', 'astrea-core' ),
+			'priority' => 'optional',
+			'done'     => is_site_title_configured(),
+			'url'      => admin_url( 'options-general.php' ),
+		),
 	);
+}
+
+/**
+ * Whether WordPress's own Site Title (`blogname`, Settings > General) is
+ * set to anything at all. Construction Order 013: Office Profile's
+ * `office_name` and WordPress's Site Title are deliberately independent —
+ * ASTREA never reads or auto-copies `office_name` into `blogname` (Site
+ * Title is a standard WordPress setting the site owner, not Core, owns) —
+ * this only checks the clear, safe, already-existing WordPress state ("is
+ * it blank"), never attempting to guess whether a non-blank value is
+ * still some generic/default placeholder.
+ *
+ * @return bool
+ */
+function is_site_title_configured(): bool {
+	return '' !== trim( (string) get_bloginfo( 'name' ) );
 }
 
 /**

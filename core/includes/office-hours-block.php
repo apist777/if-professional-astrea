@@ -40,8 +40,9 @@ function register_hours_block() {
 	register_block_type(
 		'astrea/office-hours',
 		array(
-			'render_callback' => __NAMESPACE__ . '\\render_hours_block',
-			'attributes'      => array(
+			'render_callback'       => __NAMESPACE__ . '\\render_hours_block',
+			'editor_script_handles' => array( \Astrea\Core\EditorBlocks\SCRIPT_HANDLE ),
+			'attributes'            => array(
 				'heading'      => array(
 					'type'    => 'string',
 					'default' => '',

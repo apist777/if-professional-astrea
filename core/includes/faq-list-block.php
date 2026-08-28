@@ -39,8 +39,9 @@ function register_list_block() {
 	register_block_type(
 		'astrea/faq-list',
 		array(
-			'render_callback' => __NAMESPACE__ . '\\render_faq_list_block',
-			'attributes'      => array(
+			'render_callback'       => __NAMESPACE__ . '\\render_faq_list_block',
+			'editor_script_handles' => array( \Astrea\Core\EditorBlocks\SCRIPT_HANDLE ),
+			'attributes'            => array(
 				'mode'         => array(
 					'type'    => 'string',
 					'default' => 'important',

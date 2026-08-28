@@ -30,6 +30,8 @@ class SetupTest extends WP_UnitTestCase {
 		delete_option( Inquiry\SETTINGS_OPTION );
 		delete_option( Seo\SETTINGS_OPTION );
 		delete_option( Setup\GENERATED_PAGES_OPTION );
+		delete_option( Setup\GENERATED_NAVIGATION_OPTION );
+		delete_option( Setup\GENERATED_TEMPLATE_PARTS_OPTION );
 		delete_transient( Setup\CONTACT_REACHABLE_TRANSIENT );
 		parent::tear_down();
 	}
@@ -86,6 +88,25 @@ class SetupTest extends WP_UnitTestCase {
 		update_option( Seo\SETTINGS_OPTION, array( 'og_image_id' => $attachment_id ) );
 
 		$this->assertTrue( $this->find_item( Setup\get_checklist_items(), 'seo_og_image' )['done'] );
+	}
+
+	public function test_checklist_site_title_item_reflects_blogname() {
+		update_option( 'blogname', '' );
+		$this->assertFalse( $this->find_item( Setup\get_checklist_items(), 'site_title' )['done'] );
+
+		update_option( 'blogname', 'テスト事務所' );
+		$this->assertTrue( $this->find_item( Setup\get_checklist_items(), 'site_title' )['done'] );
+	}
+
+	public function test_checklist_site_title_item_never_touches_office_profile() {
+		// Construction Order 013: office_name and blogname are deliberately
+		// independent — Setup must never auto-copy one into the other.
+		update_option( OfficeProfile\OPTION_NAME, OfficeProfile\sanitize( array( 'office_name' => '架空事務所' ) ) );
+		update_option( 'blogname', '' );
+
+		Setup\get_checklist_items();
+
+		$this->assertSame( '', get_option( 'blogname' ), 'Reading the checklist must never write to blogname.' );
 	}
 
 	public function test_contact_reachable_is_false_without_any_contact_form_page() {
@@ -217,7 +238,7 @@ class SetupTest extends WP_UnitTestCase {
 		$this->assertWPError( $result );
 	}
 
-	public function test_generate_navigation_creates_a_draft_navigation_with_links_for_existing_content() {
+	public function test_generate_navigation_creates_a_published_navigation_with_links_for_existing_content() {
 		self::factory()->post->create( array( 'post_type' => Service\POST_TYPE, 'post_status' => 'publish' ) );
 		Setup\generate_pages();
 
@@ -225,7 +246,13 @@ class SetupTest extends WP_UnitTestCase {
 
 		$this->assertIsInt( $nav_id );
 		$this->assertSame( 'wp_navigation', get_post_type( $nav_id ) );
-		$this->assertSame( 'draft', get_post_status( $nav_id ) );
+		// Construction Order 013: must be 'publish', not 'draft' — WordPress
+		// core's render_block_core_navigation() requires publish status
+		// even when a Template Part explicitly binds it via `ref` (see
+		// docs/research/2026-08-28_construction_order_013_research.md
+		// §B-1) — a draft Navigation can never actually render anywhere,
+		// `ref` or not.
+		$this->assertSame( 'publish', get_post_status( $nav_id ) );
 
 		$content = get_post( $nav_id )->post_content;
 		$this->assertStringContainsString( 'wp:navigation-link', $content );
@@ -242,6 +269,80 @@ class SetupTest extends WP_UnitTestCase {
 		$links = Setup\navigation_links();
 
 		$this->assertSame( array(), $links );
+	}
+
+	public function test_generate_navigation_is_idempotent_returns_the_same_tracked_id() {
+		$first  = Setup\generate_navigation();
+		$second = Setup\generate_navigation();
+
+		$this->assertSame( $first, $second, 'Re-running generate_navigation() must reuse the already-generated Navigation, not create a duplicate.' );
+		$this->assertCount( 1, get_posts( array( 'post_type' => 'wp_navigation', 'post_status' => 'publish', 'posts_per_page' => -1 ) ) );
+	}
+
+	public function test_generate_navigation_recreates_when_the_tracked_one_was_trashed() {
+		$first = Setup\generate_navigation();
+		wp_trash_post( $first );
+
+		$second = Setup\generate_navigation();
+
+		$this->assertNotSame( $first, $second, 'A trashed generated Navigation must be treated as gone, not "already generated".' );
+		$this->assertSame( 'wp_navigation', get_post_type( $second ) );
+	}
+
+	public function test_navigation_still_exists_is_true_for_a_real_navigation() {
+		$id = self::factory()->post->create( array( 'post_type' => 'wp_navigation', 'post_status' => 'publish' ) );
+
+		$this->assertTrue( Setup\navigation_still_exists( $id ) );
+	}
+
+	public function test_navigation_still_exists_is_false_once_trashed() {
+		$id = self::factory()->post->create( array( 'post_type' => 'wp_navigation', 'post_status' => 'publish' ) );
+		wp_trash_post( $id );
+
+		$this->assertFalse( Setup\navigation_still_exists( $id ) );
+	}
+
+	public function test_navigation_still_exists_is_false_for_a_nonexistent_id() {
+		$this->assertFalse( Setup\navigation_still_exists( 999999 ) );
+	}
+
+	// -- Navigation ref injection (pure block-parsing logic, no Theme dependency) --
+
+	public function test_inject_navigation_ref_sets_ref_on_a_bare_navigation_block() {
+		$content = '<!-- wp:navigation {"overlayMenu":"mobile"} /-->';
+
+		$result = Setup\inject_navigation_ref( $content, 42 );
+
+		$this->assertStringContainsString( '"ref":42', $result );
+		$this->assertStringContainsString( '"overlayMenu":"mobile"', $result, 'Existing attributes must be preserved alongside the new ref.' );
+	}
+
+	public function test_inject_navigation_ref_finds_navigation_nested_inside_a_group() {
+		$content = '<!-- wp:group --><div class="wp-block-group"><!-- wp:navigation /--></div><!-- /wp:group -->';
+
+		$result = Setup\inject_navigation_ref( $content, 7 );
+
+		$this->assertStringContainsString( '"ref":7', $result );
+	}
+
+	public function test_inject_navigation_ref_is_a_noop_when_no_navigation_block_present() {
+		$content = '<!-- wp:paragraph --><p>Hello</p><!-- /wp:paragraph -->';
+
+		$result = Setup\inject_navigation_ref( $content, 1 );
+
+		$this->assertStringNotContainsString( 'ref', $result );
+	}
+
+	public function test_connect_navigation_to_template_part_returns_error_for_a_nonexistent_slug() {
+		// No Theme is loaded in this PHPUnit environment (see this file's
+		// docblock precedent for OfficeProfileTest/ProfessionalProfileTest
+		// — real Theme/Core Template Part integration is verified via
+		// tools/ci/smoke-test.sh against a real running site instead), so
+		// get_block_template() can never resolve a real 'header'/'footer'
+		// here. This only confirms the graceful-failure path.
+		$result = Setup\connect_navigation_to_template_part( 'not-a-real-slug', 1 );
+
+		$this->assertSame( 'error', $result );
 	}
 
 	/**

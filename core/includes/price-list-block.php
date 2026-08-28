@@ -49,10 +49,12 @@ if ( ! defined( 'ABSPATH' ) ) {
 add_action( 'init', __NAMESPACE__ . '\\register_block' );
 
 /**
- * Registers the astrea/price-list Dynamic Block (server-rendered only, no
- * editor script — Decision 012's Block namespace `astrea/*` applies
- * regardless of which of Theme/Core registers the block; Decision 013
- * assigns Dynamic Block server-side rendering to Core).
+ * Registers the astrea/price-list Dynamic Block — server-rendered
+ * (Decision 013 assigns Dynamic Block server-side rendering to Core;
+ * Decision 012's Block namespace `astrea/*` applies regardless of which
+ * of Theme/Core registers the block). Since Construction Order 013 this
+ * also attaches a minimal Editor-only client registration (see
+ * includes/editor-blocks.php) so the Block/Site Editor recognizes it.
  *
  * @return void
  */
@@ -60,8 +62,9 @@ function register_block() {
 	register_block_type(
 		'astrea/price-list',
 		array(
-			'render_callback' => __NAMESPACE__ . '\\render_price_list_block',
-			'attributes'      => array(
+			'render_callback'       => __NAMESPACE__ . '\\render_price_list_block',
+			'editor_script_handles' => array( \Astrea\Core\EditorBlocks\SCRIPT_HANDLE ),
+			'attributes'            => array(
 				'heading'      => array(
 					'type'    => 'string',
 					'default' => '',

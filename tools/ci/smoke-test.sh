@@ -57,6 +57,16 @@
 # submit button's Style Variation integration, and the same Core-inactive
 # coverage as every earlier Part.
 #
+# Part 13 (CV-DA) automates Construction Order 013 (Release Quality
+# Fixes): the Header office-name font-size reduction (Finding 1), the
+# Navigation `ref` auto-connection into Header/Footer Template Parts —
+# with idempotency and user-customization protection — and its permanent
+# regression guard (Finding 2: a `wp_navigation` post existing must never
+# again be mistaken for it actually being visible in Header/Footer, which
+# is exactly the gap Construction 012 found), the Dynamic Block Editor
+# script staying Editor-only (Finding 5), and the Site Title Setup
+# Checklist item (Finding 3).
+#
 # Requires a running `wp-env` environment (see package.json `env:start`).
 
 set -euo pipefail
@@ -1332,7 +1342,22 @@ curl -s -c "$COOKIE_JAR" -b "$COOKIE_JAR" -X POST "$SITE_URL/wp-login.php" \
 	-o /dev/null
 
 echo "=== BW. Setup checklist ignores WordPress's own Page List Navigation fallback ==="
-wp_cli post delete $(wp_cli post list --post_type=wp_navigation --field=ID) --force > /dev/null 2>&1 || true
+# Construction Order 013: BI (above) already exercised the real
+# "基本メニューを作成する" button, which now also binds Header/Footer to
+# it via a `ref` on a Setup-owned wp_template_part (see
+# includes/setup-navigation.php connect_navigation_to_template_part()).
+# A Navigation block with a `ref` — even one pointing at a since-deleted
+# post — renders empty rather than falling through to
+# WP_Navigation_Fallback (confirmed by reading
+# get_inner_blocks_from_navigation_post() in wp-includes/blocks/
+# navigation.php: it returns an empty WP_Block_List as soon as `ref` is
+# set at all, regardless of whether the referenced post still exists).
+# This step must reset Header/Footer back to their original bare-block
+# state first, or WordPress's own fallback-creation this test targets
+# will never fire and this becomes a false failure, not a real one.
+wp_cli eval 'delete_option( "astrea_core_generated_navigation" ); delete_option( "astrea_core_generated_template_parts" );'
+BW_STALE_IDS=$(wp_cli post list --post_type=wp_navigation,wp_template_part --field=ID)
+if [ -n "$BW_STALE_IDS" ]; then wp_cli post delete $BW_STALE_IDS --force > /dev/null 2>&1 || true; fi
 check_no_fatal "BW: Home (triggers WordPress's Navigation fallback creation)"
 FALLBACK_NAV_COUNT=$(wp_cli post list --post_type=wp_navigation --format=count)
 if [ "$FALLBACK_NAV_COUNT" != "1" ]; then
@@ -1864,3 +1889,149 @@ wp_cli post delete "$PROF_EMPTY" "$PROF_FULL" "$OFFICE_BLOCKS_PAGE" "$SMOKE011_S
 rm -f "$COOKIE_JAR"
 
 echo "All ASTREA Theme Display Completion / Security Hardening end-to-end checks passed."
+
+# Part 13 (CV-DA) automates Construction Order 013 — see the file docblock
+# above for the full list of what this covers.
+
+COOKIE_JAR="$(mktemp)"
+curl -s -c "$COOKIE_JAR" "$SITE_URL/wp-login.php" > /dev/null
+curl -s -c "$COOKIE_JAR" -b "$COOKIE_JAR" -X POST "$SITE_URL/wp-login.php" \
+	--data-urlencode "log=admin" --data-urlencode "pwd=password" \
+	--data-urlencode "wp-submit=Log In" --data-urlencode "redirect_to=$SITE_URL/wp-admin/" \
+	-o /dev/null
+
+echo "=== CV. Header: 事務所名Paragraphがmedium fontSizeへ縮小されている ==="
+check_no_fatal "CV: Home (Header markup)"
+if ! grep -qF 'has-medium-font-size' "$BODY_FILE"; then
+	echo "FAIL [CV]: Header's office-name paragraph is not using the reduced medium fontSize"
+	exit 1
+fi
+echo "OK   [CV: Header office-name uses medium fontSize]"
+
+echo "=== CW. Navigation: 生成後、Frontend Header/FooterにPage List fallbackではなく実際のNavigation Linkが表示される ==="
+wp_cli option update page_on_front 0
+wp_cli option update show_on_front posts
+wp_cli eval 'delete_option( "astrea_core_generated_pages" ); delete_option( "astrea_core_generated_navigation" ); delete_option( "astrea_core_generated_template_parts" );'
+NAV_STRAY_IDS=$(wp_cli post list --post_type=wp_navigation,wp_template_part --field=ID)
+if [ -n "$NAV_STRAY_IDS" ]; then wp_cli post delete $NAV_STRAY_IDS --force > /dev/null; fi
+
+wp_cli eval 'update_option( \Astrea\Core\OfficeProfile\OPTION_NAME, \Astrea\Core\OfficeProfile\sanitize( array( "office_name" => "スモーク013事務所" ) ) );'
+CV_SVC=$(wp_cli post create --post_type=astrea_service --post_title="スモーク013業務" --post_status=publish --porcelain)
+wp_cli eval '\Astrea\Core\Setup\generate_pages();'
+
+ADMIN_HTML=$(curl -s -b "$COOKIE_JAR" "$SITE_URL/wp-admin/admin.php?page=astrea-core")
+NAV_NONCE=$(sed -n 's/.*name="astrea_setup_generate_navigation_nonce" value="\([a-f0-9]*\)".*/\1/p' <<< "$ADMIN_HTML" | head -1)
+curl -s -b "$COOKIE_JAR" -o /dev/null "$SITE_URL/wp-admin/admin-post.php?action=astrea_setup_generate_navigation&astrea_setup_generate_navigation_nonce=$NAV_NONCE"
+
+check_no_fatal "CW: Home after Navigation generation"
+if grep -qF 'wp-block-page-list' "$BODY_FILE"; then
+	echo "FAIL [CW]: WordPress's own Page List fallback is still showing — 'a wp_navigation post was created' must never be mistaken for 'it is actually visible' (Construction 012 regression)"
+	exit 1
+fi
+if ! grep -qF '取扱業務' "$BODY_FILE"; then
+	echo "FAIL [CW]: Generated Navigation's real link did not appear on the front end Header/Footer"
+	exit 1
+fi
+NAV_LINK_COUNT=$(grep -o '取扱業務' "$BODY_FILE" | wc -l)
+if [ "$NAV_LINK_COUNT" -lt 2 ]; then
+	echo "FAIL [CW]: expected the generated Navigation link in both Header and Footer, found $NAV_LINK_COUNT occurrence(s)"
+	exit 1
+fi
+echo "OK   [CW: Generated Navigation is actually visible in both Header and Footer, no Page List fallback]"
+
+echo "=== CX. Navigation: 再実行しても重複作成されない（冪等性） ==="
+NAV_COUNT_BEFORE=$(wp_cli post list --post_type=wp_navigation --post_status=publish --format=count)
+curl -s -b "$COOKIE_JAR" -o /dev/null "$SITE_URL/wp-admin/admin-post.php?action=astrea_setup_generate_navigation&astrea_setup_generate_navigation_nonce=$NAV_NONCE"
+NAV_COUNT_AFTER=$(wp_cli post list --post_type=wp_navigation --post_status=publish --format=count)
+if [ "$NAV_COUNT_BEFORE" != "$NAV_COUNT_AFTER" ]; then
+	echo "FAIL [CX]: re-running Navigation generation changed the published wp_navigation count ($NAV_COUNT_BEFORE -> $NAV_COUNT_AFTER)"
+	exit 1
+fi
+echo "OK   [CX: Navigation generation is idempotent]"
+
+echo "=== CY. Navigation: ユーザーがカスタマイズ済みのHeaderは上書きされず、Footerのみ接続される ==="
+wp_cli option update page_on_front 0
+wp_cli option update show_on_front posts
+wp_cli eval 'delete_option( "astrea_core_generated_pages" ); delete_option( "astrea_core_generated_navigation" ); delete_option( "astrea_core_generated_template_parts" );'
+NAV_STRAY_IDS=$(wp_cli post list --post_type=wp_navigation,wp_template_part --field=ID)
+if [ -n "$NAV_STRAY_IDS" ]; then wp_cli post delete $NAV_STRAY_IDS --force > /dev/null; fi
+
+CUSTOM_HEADER_ID=$(wp_cli eval '
+	// wp_insert_post()'"'"'s tax_input is gated by current_user_can( assign_terms ),
+	// which is false in a bare wp-cli eval context (no logged-in user) —
+	// impersonate the admin so this fixture ends up with a real wp_theme
+	// term, exactly like the authenticated admin-post.php flow
+	// connect_navigation_to_template_part() actually runs under in production.
+	$admin = get_user_by( "login", "admin" );
+	if ( $admin ) {
+		wp_set_current_user( $admin->ID );
+	}
+	$id = wp_insert_post( array(
+		"post_type"    => "wp_template_part",
+		"post_status"  => "publish",
+		"post_name"    => "header",
+		"post_title"   => "Header",
+		"post_content" => "<!-- wp:paragraph --><p>スモーク013カスタムヘッダー</p><!-- /wp:paragraph -->\n<!-- wp:navigation {\"overlayMenu\":\"mobile\"} /-->",
+		"tax_input"    => array( "wp_theme" => "astrea", "wp_template_part_area" => "header" ),
+		"meta_input"   => array( "origin" => "theme" ),
+	), true );
+	echo is_wp_error( $id ) ? $id->get_error_message() : $id;
+')
+wp_cli eval '\Astrea\Core\Setup\generate_pages();'
+
+curl -s -b "$COOKIE_JAR" -o /dev/null "$SITE_URL/wp-admin/admin-post.php?action=astrea_setup_generate_navigation&astrea_setup_generate_navigation_nonce=$NAV_NONCE"
+
+check_no_fatal "CY: Home after Navigation generation with a customized Header"
+if ! grep -qF 'スモーク013カスタムヘッダー' "$BODY_FILE"; then
+	echo "FAIL [CY]: the site owner's own customized Header content was lost — must never be overwritten"
+	exit 1
+fi
+HEADER_CONTENT_AFTER=$(wp_cli post get "$CUSTOM_HEADER_ID" --field=post_content)
+if ! grep -qF 'スモーク013カスタムヘッダー' <<< "$HEADER_CONTENT_AFTER" || grep -qF '"ref"' <<< "$HEADER_CONTENT_AFTER"; then
+	echo "FAIL [CY]: the customized Header's stored content was modified (a ref must never be injected into it)"
+	exit 1
+fi
+if ! grep -qF '取扱業務' "$BODY_FILE"; then
+	echo "FAIL [CY]: Footer (still untouched) should still have been connected to the real Navigation"
+	exit 1
+fi
+echo "OK   [CY: customized Header protected verbatim, untouched Footer still connected]"
+
+echo "=== CZ. Dynamic Block Editor script: Editor画面でのみ読み込まれ、公開ページには出力されない ==="
+check_no_fatal "CZ: Home (front end, no editor script)"
+if grep -qF 'astrea-core-editor-blocks' "$BODY_FILE"; then
+	echo "FAIL [CZ]: the Editor-only script was enqueued on the public front end"
+	exit 1
+fi
+# page_on_front is 0 at this point (CY's cleanup reset it) — target a page
+# known to exist and contain an astrea/* block instead: the "about" page
+# generate_pages() created earlier in this Part.
+CZ_ABOUT_ID=$(wp_cli eval 'echo (int) ( get_option( "astrea_core_generated_pages", array() )["about"] ?? 0 );')
+if [ "$CZ_ABOUT_ID" = "0" ]; then
+	echo "FAIL [CZ]: no generated 事務所概要 page found to check the Editor against"
+	exit 1
+fi
+EDITOR_HTML=$(curl -s -b "$COOKIE_JAR" "$SITE_URL/wp-admin/post.php?post=$CZ_ABOUT_ID&action=edit")
+if ! grep -qF 'editor-blocks.js' <<< "$EDITOR_HTML"; then
+	echo "FAIL [CZ]: the Editor-only script was NOT enqueued on the Block Editor screen"
+	exit 1
+fi
+echo "OK   [CZ: Editor-only Dynamic Block script loads only in the Editor, never on the front end]"
+
+echo "=== DA. Setup Checklist: 「サイトのタイトルを設定する」項目が表示される ==="
+ADMIN_HTML=$(curl -s -b "$COOKIE_JAR" "$SITE_URL/wp-admin/admin.php?page=astrea-core")
+if ! grep -qF 'サイトのタイトルを設定する' <<< "$ADMIN_HTML"; then
+	echo "FAIL [DA]: Setup Checklist is missing the Site Title item"
+	exit 1
+fi
+echo "OK   [DA: Setup Checklist shows the Site Title guidance item]"
+
+echo "=== Cleanup: remove Construction Order 013 smoke-test fixtures ==="
+wp_cli option update page_on_front 0
+wp_cli option update show_on_front posts
+wp_cli eval 'delete_option( "astrea_core_generated_pages" ); delete_option( "astrea_core_generated_navigation" ); delete_option( "astrea_core_generated_template_parts" );'
+NAV_CLEANUP_IDS=$(wp_cli post list --post_type=wp_navigation,wp_template_part --field=ID)
+wp_cli post delete "$CV_SVC" $NAV_CLEANUP_IDS --force > /dev/null 2>&1 || true
+rm -f "$COOKIE_JAR"
+
+echo "All ASTREA Release Quality Fixes end-to-end checks passed."

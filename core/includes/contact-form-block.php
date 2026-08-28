@@ -48,8 +48,9 @@ function register_block() {
 	register_block_type(
 		'astrea/contact-form',
 		array(
-			'render_callback' => __NAMESPACE__ . '\\render_contact_form_block',
-			'attributes'      => array(),
+			'render_callback'       => __NAMESPACE__ . '\\render_contact_form_block',
+			'editor_script_handles' => array( \Astrea\Core\EditorBlocks\SCRIPT_HANDLE ),
+			'attributes'            => array(),
 		)
 	);
 }

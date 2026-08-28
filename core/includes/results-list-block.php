@@ -30,8 +30,9 @@ function register_list_block() {
 	register_block_type(
 		'astrea/results-list',
 		array(
-			'render_callback' => __NAMESPACE__ . '\\render_results_list_block',
-			'attributes'      => array(
+			'render_callback'       => __NAMESPACE__ . '\\render_results_list_block',
+			'editor_script_handles' => array( \Astrea\Core\EditorBlocks\SCRIPT_HANDLE ),
+			'attributes'            => array(
 				'heading'      => array(
 					'type'    => 'string',
 					'default' => '',
