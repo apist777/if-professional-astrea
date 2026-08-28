@@ -1,0 +1,1233 @@
+# Copyright (C) 2026 Project-if
+# This file is distributed under the GPL v2 or later.
+msgid ""
+msgstr ""
+"Project-Id-Version: ASTREA Core 0.12.0\n"
+"Report-Msgid-Bugs-To: https://wordpress.org/support/plugin/astrea-core\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"POT-Creation-Date: 2026-08-28T08:51:08+00:00\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"X-Generator: WP-CLI 2.12.0\n"
+"X-Domain: astrea-core\n"
+
+#. Plugin Name of the plugin
+#: astrea-core.php
+msgid "ASTREA Core"
+msgstr ""
+
+#. Plugin URI of the plugin
+#: astrea-core.php
+msgid "https://project-if.com/astrea"
+msgstr ""
+
+#. Description of the plugin
+#: astrea-core.php
+msgid "If Professional ASTREA — テーマを変更しても保持すべき情報とサイト共通機能を担当する、ASTREA Themeの公式推奨Plugin（任意）。「Coreは推奨する。しかしThemeを人質にしない。」（Decision 021）。"
+msgstr ""
+
+#. Author of the plugin
+#: astrea-core.php
+msgid "Project-if"
+msgstr ""
+
+#. Author URI of the plugin
+#: astrea-core.php
+msgid "https://project-if.com/"
+msgstr ""
+
+#: includes/block-bindings.php:58
+msgid "ASTREA — 事務所情報"
+msgstr ""
+
+#: includes/breadcrumb.php:61
+#: includes/faq.php:56
+#: includes/faq.php:59
+#: includes/faq.php:60
+#: includes/setup-navigation.php:119
+msgid "FAQ"
+msgstr ""
+
+#: includes/breadcrumb.php:190
+#: assets/js/editor-blocks.js:180
+msgid "パンくずリスト"
+msgstr ""
+
+#: includes/case-admin.php:38
+#: includes/faq-admin.php:74
+msgid "関連する取扱業務"
+msgstr ""
+
+#: includes/case-admin.php:60
+#: includes/faq-admin.php:76
+msgid "公開済みの取扱業務がまだありません。"
+msgstr ""
+
+#: includes/case-admin.php:75
+msgid "任意です。未選択のまま公開しても問題ありません。"
+msgstr ""
+
+#: includes/case.php:58
+#: includes/case.php:61
+#: includes/case.php:62
+msgid "対応事例"
+msgstr ""
+
+#: includes/case.php:59
+msgid "対応事例の一覧です。"
+msgstr ""
+
+#: includes/case.php:63
+msgid "対応事例を追加"
+msgstr ""
+
+#: includes/case.php:64
+msgid "対応事例を編集"
+msgstr ""
+
+#: includes/case.php:65
+#: assets/js/editor-blocks.js:121
+msgid "対応事例一覧"
+msgstr ""
+
+#: includes/contact-form-block.php:68
+msgid "お問い合わせいただきありがとうございます。内容を確認のうえ、ご連絡いたします。"
+msgstr ""
+
+#: includes/contact-form-block.php:127
+msgid "入力内容をご確認ください。"
+msgstr ""
+
+#: includes/contact-form-block.php:138
+msgid "ウェブサイト（入力しないでください）"
+msgstr ""
+
+#: includes/contact-form-block.php:143
+#: includes/inquiry-admin.php:277
+#: includes/inquiry-admin.php:393
+#: includes/inquiry-notifications.php:64
+msgid "お名前"
+msgstr ""
+
+#: includes/contact-form-block.php:159
+msgid "メールアドレス"
+msgstr ""
+
+#: includes/contact-form-block.php:177
+#: includes/office-profile-admin.php:85
+msgid "電話番号"
+msgstr ""
+
+#: includes/contact-form-block.php:178
+#: includes/contact-form-block.php:198
+#: includes/setup-admin.php:61
+msgid "任意"
+msgstr ""
+
+#: includes/contact-form-block.php:197
+#: includes/inquiry-admin.php:396
+msgid "件名"
+msgstr ""
+
+#: includes/contact-form-block.php:215
+msgid "お問い合わせ内容"
+msgstr ""
+
+#. translators: %s: Privacy Policy page URL
+#: includes/contact-form-block.php:244
+#, php-format
+msgid "%sに同意する"
+msgstr ""
+
+#: includes/contact-form-block.php:245
+msgid "プライバシーポリシー"
+msgstr ""
+
+#: includes/contact-form-block.php:256
+msgid "送信する"
+msgstr ""
+
+#: includes/contact-form-block.php:275
+msgid "フォームの有効期限が切れました。もう一度お試しください。"
+msgstr ""
+
+#: includes/contact-form-block.php:292
+msgid "送信回数が多すぎます。しばらくしてから再度お試しください。"
+msgstr ""
+
+#: includes/contact-form-block.php:344
+msgid "お名前を入力してください。"
+msgstr ""
+
+#: includes/contact-form-block.php:348
+msgid "メールアドレスを入力してください。"
+msgstr ""
+
+#: includes/contact-form-block.php:350
+msgid "正しいメールアドレスを入力してください。"
+msgstr ""
+
+#: includes/contact-form-block.php:354
+msgid "電話番号を入力してください。"
+msgstr ""
+
+#: includes/contact-form-block.php:358
+msgid "件名を入力してください。"
+msgstr ""
+
+#: includes/contact-form-block.php:362
+msgid "お問い合わせ内容を入力してください。"
+msgstr ""
+
+#. translators: %d: maximum character count
+#: includes/contact-form-block.php:366
+#, php-format
+msgid "お問い合わせ内容は%d文字以内で入力してください。"
+msgstr ""
+
+#: includes/contact-form-block.php:372
+msgid "プライバシーポリシーへの同意が必要です。"
+msgstr ""
+
+#: includes/data-deletion.php:79
+#: includes/data-deletion.php:80
+msgid "データ削除"
+msgstr ""
+
+#: includes/data-deletion.php:98
+#: includes/inquiry-admin.php:107
+#: includes/office-profile-admin.php:137
+#: includes/seo-admin.php:129
+msgid "この画面を表示する権限がありません。"
+msgstr ""
+
+#: includes/data-deletion.php:102
+msgid "データの完全削除"
+msgstr ""
+
+#: includes/data-deletion.php:107
+msgid "この操作は元に戻せません。"
+msgstr ""
+
+#: includes/data-deletion.php:108
+msgid "以下のASTREA Coreが保有するデータを完全に削除します。"
+msgstr ""
+
+#: includes/data-deletion.php:110
+msgid "事務所情報（Office Profile）"
+msgstr ""
+
+#: includes/data-deletion.php:111
+msgid "専門家プロフィール（Professional Profile）の全件"
+msgstr ""
+
+#: includes/data-deletion.php:112
+msgid "取扱業務（Service）の全件"
+msgstr ""
+
+#: includes/data-deletion.php:113
+msgid "料金（Price）の全件"
+msgstr ""
+
+#: includes/data-deletion.php:114
+msgid "FAQ の全件とFAQカテゴリ"
+msgstr ""
+
+#: includes/data-deletion.php:115
+msgid "対応事例（CASE）の全件"
+msgstr ""
+
+#: includes/data-deletion.php:116
+msgid "実績（RESULTS）の全件"
+msgstr ""
+
+#: includes/data-deletion.php:117
+msgid "お客様の声（VOICE）の全件"
+msgstr ""
+
+#: includes/data-deletion.php:118
+msgid "保存済みの問い合わせデータの全件"
+msgstr ""
+
+#: includes/data-deletion.php:119
+msgid "問い合わせ・SEO・GA4の設定"
+msgstr ""
+
+#: includes/data-deletion.php:121
+msgid "以下は削除しません（通常のWordPressコンテンツとして残ります）。"
+msgstr ""
+
+#: includes/data-deletion.php:123
+msgid "Setupで作成した固定ページ（事務所概要・料金・お問い合わせ・ホーム等）"
+msgstr ""
+
+#: includes/data-deletion.php:124
+msgid "作成したNavigation（メニュー）"
+msgstr ""
+
+#: includes/data-deletion.php:125
+msgid "メディアライブラリの画像（専門家の写真、OGP画像等）"
+msgstr ""
+
+#: includes/data-deletion.php:134
+msgid "確認"
+msgstr ""
+
+#: includes/data-deletion.php:138
+msgid "上記の内容を理解し、元に戻せないことに同意します。"
+msgstr ""
+
+#. translators: %s: the literal confirmation phrase the user must type
+#: includes/data-deletion.php:148
+#, php-format
+msgid "確認のため「%s」と入力してください"
+msgstr ""
+
+#: includes/data-deletion.php:159
+msgid "ASTREA Coreのデータを完全に削除する"
+msgstr ""
+
+#: includes/data-deletion.php:176
+#: includes/inquiry-admin.php:326
+#: includes/inquiry-admin.php:351
+#: includes/inquiry-admin.php:375
+#: includes/setup-home.php:173
+#: includes/setup-navigation.php:366
+#: includes/setup-pages.php:146
+msgid "この操作を行う権限がありません。"
+msgstr ""
+
+#: includes/data-deletion.php:188
+msgid "確認内容が一致しないため、削除は行われませんでした。"
+msgstr ""
+
+#. translators: %d: number of deleted posts across all Core post types
+#: includes/data-deletion.php:205
+#, php-format
+msgid "ASTREA Coreのデータを削除しました（投稿 %d件、設定・一時データを含む）。"
+msgstr ""
+
+#: includes/faq-admin.php:40
+msgid "FAQ設定（重要FAQ・関連する取扱業務）"
+msgstr ""
+
+#: includes/faq-admin.php:71
+msgid "重要FAQとして扱う"
+msgstr ""
+
+#: includes/faq-admin.php:91
+#: includes/price-admin.php:92
+#: includes/professional-profile-admin.php:132
+msgid "すべての項目は任意です。未入力のまま公開しても問題ありません。"
+msgstr ""
+
+#: includes/faq.php:57
+msgid "よくある質問の一覧です。"
+msgstr ""
+
+#: includes/faq.php:61
+msgid "FAQを追加"
+msgstr ""
+
+#: includes/faq.php:62
+msgid "FAQを編集"
+msgstr ""
+
+#: includes/faq.php:63
+#: assets/js/editor-blocks.js:102
+msgid "FAQ一覧"
+msgstr ""
+
+#: includes/faq.php:81
+#: includes/faq.php:83
+#: includes/faq.php:84
+msgid "FAQカテゴリ"
+msgstr ""
+
+#: includes/inquiry-admin.php:49
+#: includes/inquiry-admin.php:57
+#: includes/inquiry-admin.php:130
+#: includes/inquiry.php:79
+msgid "問い合わせ"
+msgstr ""
+
+#: includes/inquiry-admin.php:119
+msgid "通知先メールアドレスを確認しました。"
+msgstr ""
+
+#: includes/inquiry-admin.php:120
+msgid "確認リンクが無効か、有効期限が切れています。もう一度お試しください。"
+msgstr ""
+
+#: includes/inquiry-admin.php:125
+msgid "確認メールを送信しました。"
+msgstr ""
+
+#: includes/inquiry-admin.php:132
+msgid "設定"
+msgstr ""
+
+#: includes/inquiry-admin.php:138
+msgid "保存期間"
+msgstr ""
+
+#. translators: %d: number of days
+#: includes/inquiry-admin.php:146
+#, php-format
+msgid "%d日"
+msgstr ""
+
+#: includes/inquiry-admin.php:153
+msgid "この期間を過ぎた問い合わせは自動的に削除されます。"
+msgstr ""
+
+#: includes/inquiry-admin.php:157
+msgid "通知タイミング"
+msgstr ""
+
+#: includes/inquiry-admin.php:162
+msgid "即時通知"
+msgstr ""
+
+#: includes/inquiry-admin.php:167
+msgid "指定時刻にまとめて通知"
+msgstr ""
+
+#: includes/inquiry-admin.php:174
+msgid "電話番号欄"
+msgstr ""
+
+#: includes/inquiry-admin.php:178
+#: includes/inquiry-admin.php:191
+msgid "フォームに表示する"
+msgstr ""
+
+#: includes/inquiry-admin.php:182
+#: includes/inquiry-admin.php:195
+msgid "必須にする"
+msgstr ""
+
+#: includes/inquiry-admin.php:187
+msgid "件名欄"
+msgstr ""
+
+#: includes/inquiry-admin.php:200
+#: includes/seo-admin.php:209
+msgid "設定を保存"
+msgstr ""
+
+#: includes/inquiry-admin.php:203
+msgid "通知先メールアドレス"
+msgstr ""
+
+#. translators: %s: confirmed email address
+#: includes/inquiry-admin.php:209
+#, php-format
+msgid "現在の通知先: %s（確認済み）"
+msgstr ""
+
+#: includes/inquiry-admin.php:214
+msgid "通知先メールアドレスは未設定です。"
+msgstr ""
+
+#. translators: %s: pending email address
+#: includes/inquiry-admin.php:222
+#, php-format
+msgid "確認待ち: %s（メール内のリンクをクリックすると切り替わります）"
+msgstr ""
+
+#: includes/inquiry-admin.php:232
+msgid "新しい通知先メールアドレス"
+msgstr ""
+
+#: includes/inquiry-admin.php:234
+msgid "確認メールを送信"
+msgstr ""
+
+#. translators: %d: number of stored inquiries
+#: includes/inquiry-admin.php:242
+#, php-format
+msgid "問い合わせ一覧（%d件）"
+msgstr ""
+
+#: includes/inquiry-admin.php:249
+msgid "CSVをダウンロード"
+msgstr ""
+
+#: includes/inquiry-admin.php:268
+msgid "問い合わせはまだありません。"
+msgstr ""
+
+#: includes/inquiry-admin.php:275
+msgid "状態"
+msgstr ""
+
+#: includes/inquiry-admin.php:276
+#: includes/inquiry-admin.php:392
+msgid "受信日時"
+msgstr ""
+
+#: includes/inquiry-admin.php:278
+#: includes/inquiry-admin.php:394
+#: includes/inquiry-notifications.php:66
+msgid "メール"
+msgstr ""
+
+#: includes/inquiry-admin.php:279
+msgid "件名 / 内容"
+msgstr ""
+
+#: includes/inquiry-admin.php:280
+msgid "操作"
+msgstr ""
+
+#: includes/inquiry-admin.php:286
+msgid "既読"
+msgstr ""
+
+#: includes/inquiry-admin.php:286
+msgid "未読"
+msgstr ""
+
+#. translators: %s: phone number
+#: includes/inquiry-admin.php:295
+#, php-format
+msgid "電話: %s"
+msgstr ""
+
+#: includes/inquiry-admin.php:306
+msgid "未読に戻す"
+msgstr ""
+
+#: includes/inquiry-admin.php:306
+msgid "既読にする"
+msgstr ""
+
+#: includes/inquiry-admin.php:395
+#: includes/inquiry-notifications.php:68
+msgid "電話"
+msgstr ""
+
+#: includes/inquiry-admin.php:397
+#: includes/inquiry-notifications.php:70
+msgid "内容"
+msgstr ""
+
+#: includes/inquiry-email-confirmation.php:72
+msgid "【ASTREA】通知先メールアドレスの確認"
+msgstr ""
+
+#. translators: 1: confirmation URL
+#: includes/inquiry-email-confirmation.php:75
+#, php-format
+msgid ""
+"以下のURLにアクセスして、問い合わせ通知の送信先メールアドレスを確認してください。\n"
+"\n"
+"%1$s\n"
+"\n"
+"このURLは24時間有効です。心当たりがない場合はこのメールを無視してください。"
+msgstr ""
+
+#. translators: %s: inquiry subject
+#: includes/inquiry-notifications.php:48
+#, php-format
+msgid "【ASTREA】新しい問い合わせ: %s"
+msgstr ""
+
+#. translators: %d: number of inquiries in the digest
+#: includes/inquiry-notifications.php:107
+#, php-format
+msgid "【ASTREA】問い合わせまとめ通知（%d件）"
+msgstr ""
+
+#: includes/inquiry.php:186
+msgid "(件名なし)"
+msgstr ""
+
+#: includes/office-hours-block.php:138
+msgid "休業"
+msgstr ""
+
+#: includes/office-profile-admin.php:42
+#: includes/office-profile-admin.php:43
+msgid "ASTREA"
+msgstr ""
+
+#: includes/office-profile-admin.php:62
+msgid "事務所基本情報"
+msgstr ""
+
+#: includes/office-profile-admin.php:69
+msgid "事務所名"
+msgstr ""
+
+#: includes/office-profile-admin.php:77
+msgid "所在地"
+msgstr ""
+
+#: includes/office-profile-admin.php:93
+#: includes/setup-pages.php:71
+#: assets/js/editor-blocks.js:164
+msgid "営業時間"
+msgstr ""
+
+#: includes/office-profile-admin.php:100
+msgid "通常の営業時間"
+msgstr ""
+
+#: includes/office-profile-admin.php:108
+msgid "臨時休業・年末年始・夏季休業など"
+msgstr ""
+
+#: includes/office-profile-admin.php:116
+#: includes/setup-pages.php:72
+msgid "SNS"
+msgstr ""
+
+#: includes/office-profile-admin.php:123
+#: assets/js/editor-blocks.js:172
+msgid "SNSリンク"
+msgstr ""
+
+#: includes/office-profile-admin.php:141
+msgid "事務所情報"
+msgstr ""
+
+#: includes/office-profile-admin.php:143
+msgid "ここで入力した情報は、テーマの表示（ヘッダー・フッター等）から共通で利用されます。すべての項目は任意です。未入力のまま公開しても問題ありません。"
+msgstr ""
+
+#: includes/office-profile-admin.php:159
+msgid "事務所情報を保存"
+msgstr ""
+
+#: includes/office-profile-admin.php:218
+msgid "例: 03-1234-5678"
+msgstr ""
+
+#: includes/office-profile-admin.php:234
+msgid "曜日"
+msgstr ""
+
+#: includes/office-profile-admin.php:235
+msgid "定休日"
+msgstr ""
+
+#: includes/office-profile-admin.php:236
+msgid "開始"
+msgstr ""
+
+#: includes/office-profile-admin.php:237
+msgid "終了"
+msgstr ""
+
+#. translators: %s: weekday label
+#: includes/office-profile-admin.php:250
+#, php-format
+msgid "%sを定休日にする"
+msgstr ""
+
+#. translators: %s: weekday label
+#: includes/office-profile-admin.php:268
+#, php-format
+msgid "%sの開始時刻"
+msgstr ""
+
+#. translators: %s: weekday label
+#: includes/office-profile-admin.php:285
+#, php-format
+msgid "%sの終了時刻"
+msgstr ""
+
+#: includes/office-profile-admin.php:316
+msgid "名称（例：年末年始）"
+msgstr ""
+
+#: includes/office-profile-admin.php:317
+#: includes/office-profile-admin.php:345
+msgid "開始日"
+msgstr ""
+
+#: includes/office-profile-admin.php:318
+#: includes/office-profile-admin.php:356
+msgid "終了日"
+msgstr ""
+
+#: includes/office-profile-admin.php:333
+msgid "休業名称"
+msgstr ""
+
+#: includes/office-profile-admin.php:369
+#: includes/office-profile-admin.php:426
+msgid "使わない行は空欄のままで構いません。"
+msgstr ""
+
+#: includes/office-profile-admin.php:385
+msgid "名称（例：X、Instagram）"
+msgstr ""
+
+#: includes/office-profile-admin.php:386
+msgid "URL"
+msgstr ""
+
+#: includes/office-profile-admin.php:400
+msgid "SNS名称"
+msgstr ""
+
+#: includes/office-profile-admin.php:412
+msgid "SNS URL"
+msgstr ""
+
+#. translators: 1: the previously entered representative name, 2: URL to add a new Professional Profile
+#: includes/office-profile-admin.php:469
+#, php-format
+msgid "以前入力されていた代表者名「%1$s」があります。この情報は現在、事務所情報ではなく専門家プロフィールで管理します。<a href=\"%2$s\">専門家プロフィールを追加</a>し、「代表者として表示」にチェックを入れてください。"
+msgstr ""
+
+#: includes/office-profile.php:325
+msgid "電話番号の形式が正しくありません。数字・ハイフン・カッコ・スペースのみ使用できます。変更前の値を保持しました。"
+msgstr ""
+
+#. translators: %s: weekday label
+#: includes/office-profile.php:361
+#, php-format
+msgid "営業時間（%s）の時刻形式が正しくありません。HH:MM形式で入力してください。変更前の値を保持しました。"
+msgstr ""
+
+#. translators: %s: the label the admin entered for this closure row
+#: includes/office-profile.php:419
+#, php-format
+msgid "休業期間「%s」の日付が正しくありません（YYYY-MM-DD形式）。この行は保存されませんでした。"
+msgstr ""
+
+#: includes/office-profile.php:420
+#: includes/office-profile.php:433
+#: includes/office-profile.php:482
+msgid "（無題）"
+msgstr ""
+
+#. translators: %s: the label the admin entered for this closure row
+#: includes/office-profile.php:432
+#, php-format
+msgid "休業期間「%s」の終了日は開始日より後にしてください。この行は保存されませんでした。"
+msgstr ""
+
+#. translators: %s: the label the admin entered for this SNS row
+#: includes/office-profile.php:481
+#, php-format
+msgid "SNSリンク「%s」のURLが正しくありません（http/httpsのみ使用できます）。この行は保存されませんでした。"
+msgstr ""
+
+#: includes/office-profile.php:505
+msgid "月曜日"
+msgstr ""
+
+#: includes/office-profile.php:506
+msgid "火曜日"
+msgstr ""
+
+#: includes/office-profile.php:507
+msgid "水曜日"
+msgstr ""
+
+#: includes/office-profile.php:508
+msgid "木曜日"
+msgstr ""
+
+#: includes/office-profile.php:509
+msgid "金曜日"
+msgstr ""
+
+#: includes/office-profile.php:510
+msgid "土曜日"
+msgstr ""
+
+#: includes/office-profile.php:511
+msgid "日曜日"
+msgstr ""
+
+#: includes/price-admin.php:39
+msgid "料金情報"
+msgstr ""
+
+#: includes/price-admin.php:61
+msgid "金額"
+msgstr ""
+
+#: includes/price-admin.php:69
+msgid "例：3万円〜／月額5,000円／初回相談無料／個別見積 等、自由に記述してください。"
+msgstr ""
+
+#: includes/price-admin.php:73
+msgid "補足（実費・追加費用等）"
+msgstr ""
+
+#: includes/price-admin.php:82
+msgid "料金グループ"
+msgstr ""
+
+#: includes/price.php:73
+#: includes/price.php:75
+#: includes/price.php:76
+#: includes/setup-navigation.php:110
+#: includes/setup-pages.php:75
+msgid "料金"
+msgstr ""
+
+#: includes/price.php:77
+msgid "料金を追加"
+msgstr ""
+
+#: includes/price.php:78
+msgid "料金を編集"
+msgstr ""
+
+#: includes/price.php:79
+#: assets/js/editor-blocks.js:94
+msgid "料金一覧"
+msgstr ""
+
+#: includes/professional-profile-admin.php:44
+msgid "専門家情報（資格・経歴等）"
+msgstr ""
+
+#: includes/professional-profile-admin.php:77
+msgid "代表者として表示する"
+msgstr ""
+
+#: includes/professional-profile-admin.php:80
+msgid "複数人を代表者として指定することもできます。具体的な肩書（代表社員・所長など）は下の「資格・肩書」欄に入力してください。"
+msgstr ""
+
+#: includes/professional-profile-admin.php:84
+msgid "資格・肩書"
+msgstr ""
+
+#: includes/professional-profile-admin.php:94
+msgid "経歴"
+msgstr ""
+
+#: includes/professional-profile-admin.php:103
+msgid "学歴"
+msgstr ""
+
+#: includes/professional-profile-admin.php:112
+msgid "所属"
+msgstr ""
+
+#: includes/professional-profile-admin.php:122
+msgid "登録情報"
+msgstr ""
+
+#: includes/professional-profile.php:94
+#: includes/professional-profile.php:97
+#: includes/professional-profile.php:98
+msgid "専門家プロフィール"
+msgstr ""
+
+#: includes/professional-profile.php:95
+msgid "専門家プロフィールの一覧です。"
+msgstr ""
+
+#: includes/professional-profile.php:99
+msgid "専門家プロフィールを追加"
+msgstr ""
+
+#: includes/professional-profile.php:100
+msgid "専門家プロフィールを編集"
+msgstr ""
+
+#: includes/professional-profile.php:101
+msgid "専門家プロフィール一覧"
+msgstr ""
+
+#: includes/result-admin.php:34
+msgid "実績情報"
+msgstr ""
+
+#: includes/result-admin.php:54
+msgid "実績値"
+msgstr ""
+
+#: includes/result-admin.php:63
+msgid "例：1,000件以上／2015年／全国対応／多数 等、数値でなくても自由に記述してください。「実績ラベル」（上部のタイトル欄）には「相談実績」「開業年」等を入力します。"
+msgstr ""
+
+#: includes/result.php:47
+#: includes/result.php:49
+#: includes/result.php:50
+msgid "実績"
+msgstr ""
+
+#: includes/result.php:51
+msgid "実績を追加"
+msgstr ""
+
+#: includes/result.php:52
+msgid "実績を編集"
+msgstr ""
+
+#: includes/result.php:53
+#: assets/js/editor-blocks.js:129
+msgid "実績一覧"
+msgstr ""
+
+#: includes/seo-admin.php:34
+#: includes/seo-admin.php:35
+#: includes/seo-admin.php:136
+msgid "SEO"
+msgstr ""
+
+#: includes/seo-admin.php:141
+msgid "既知のSEO Pluginを検出しました。重複を避けるため、ASTREA自身のmeta description・OGP・構造化データの出力は自動的に停止されています（Search Console確認用タグは引き続き出力されます）。"
+msgstr ""
+
+#: includes/seo-admin.php:151
+msgid "サイト標準OGP画像"
+msgstr ""
+
+#: includes/seo-admin.php:159
+msgid "サイト標準OGP画像を選択"
+msgstr ""
+
+#: includes/seo-admin.php:160
+msgid "画像を選択"
+msgstr ""
+
+#: includes/seo-admin.php:163
+msgid "ページ個別の画像（アイキャッチ画像）が無い場合に、SNS等でシェアされた際のフォールバック画像として使用します。推奨サイズ: 1200×630px程度。"
+msgstr ""
+
+#: includes/seo-admin.php:168
+msgid "Search Console 確認コード"
+msgstr ""
+
+#. translators: %s: example meta tag
+#: includes/seo-admin.php:181
+#, php-format
+msgid "Google Search Consoleの「所有権の確認」で「HTMLタグ」方式を選ぶと表示される %s の content の値だけを貼り付けてください。"
+msgstr ""
+
+#: includes/seo-admin.php:189
+msgid "GA4 測定ID"
+msgstr ""
+
+#: includes/seo-admin.php:200
+msgid "Googleアナリティクス（GA4）の測定ID（G-から始まる文字列）を入力すると、サイトの各ページにアクセス計測タグを出力します。空欄のままにすると何も出力しません。"
+msgstr ""
+
+#: includes/seo-admin.php:203
+msgid "注意："
+msgstr ""
+
+#: includes/seo-admin.php:204
+msgid "この項目を設定すると、サイト訪問者の情報がGoogleへ送信されるようになります（Googleアナリティクスの標準的な仕組みによるものです）。設定する前に、必要に応じてプライバシーポリシー等への記載をご確認ください。"
+msgstr ""
+
+#: includes/seo-settings.php:69
+msgid "Search Consoleの確認コードの形式が正しくありません。Google Search Consoleの「HTMLタグ」確認方法で表示される content=\"...\" の値のみを貼り付けてください。"
+msgstr ""
+
+#: includes/seo-settings.php:82
+msgid "GA4 測定IDの形式が正しくありません。Googleアナリティクスの「データストリーム」画面に表示される G- から始まる測定ID（例：G-XXXXXXXXXX）をそのまま貼り付けてください。"
+msgstr ""
+
+#: includes/service.php:46
+#: includes/service.php:49
+#: includes/service.php:50
+#: includes/setup-navigation.php:91
+msgid "取扱業務"
+msgstr ""
+
+#: includes/service.php:47
+msgid "取扱業務の一覧です。"
+msgstr ""
+
+#: includes/service.php:51
+msgid "取扱業務を追加"
+msgstr ""
+
+#: includes/service.php:52
+msgid "取扱業務を編集"
+msgstr ""
+
+#: includes/service.php:53
+#: assets/js/editor-blocks.js:145
+msgid "取扱業務一覧"
+msgstr ""
+
+#: includes/setup-admin.php:45
+msgid "セットアップ状況"
+msgstr ""
+
+#: includes/setup-admin.php:47
+msgid "すべて埋める必要はありません。「推奨」は集客サイトとして機能するために特に有用な項目、「任意」はサイトによって使わなくても問題ない項目です。"
+msgstr ""
+
+#: includes/setup-admin.php:54
+msgid "完了"
+msgstr ""
+
+#: includes/setup-admin.php:60
+msgid "推奨"
+msgstr ""
+
+#: includes/setup-admin.php:75
+msgid "ホームページの作成"
+msgstr ""
+
+#: includes/setup-admin.php:82
+msgid "ホームページを作成し、固定フロントページとして設定しました。"
+msgstr ""
+
+#: includes/setup-admin.php:87
+msgid "既にホームページが設定されています。"
+msgstr ""
+
+#: includes/setup-admin.php:91
+msgid "Hero・取扱業務・専門家紹介・料金・FAQ・ご相談の流れ・CTAを組み合わせたホームページを作成し、サイトの固定フロントページとして設定します。既にホームページ（固定フロントページ）が設定されている場合は作成しません。"
+msgstr ""
+
+#: includes/setup-admin.php:96
+msgid "ホームページを作成する"
+msgstr ""
+
+#: includes/setup-admin.php:100
+msgid "基本ページの作成"
+msgstr ""
+
+#: includes/setup-admin.php:102
+msgid "「事務所概要」「料金」「お問い合わせ」の下書きページをまとめて作成します。取扱業務・専門家紹介・FAQは既に一覧ページがあるため対象に含みません。既に作成済みの場合、再度実行しても重複作成や上書きはしません。"
+msgstr ""
+
+#: includes/setup-admin.php:107
+msgid "基本ページを作成する"
+msgstr ""
+
+#: includes/setup-admin.php:110
+msgid "メニュー（Navigation）の作成"
+msgstr ""
+
+#: includes/setup-admin.php:114
+msgid "既にNavigationが存在するため、この機能は表示されません。"
+msgstr ""
+
+#: includes/setup-admin.php:118
+msgid "取扱業務・専門家紹介・FAQ・作成済みの基本ページへのリンクを含むNavigationを1件作成し、ヘッダー・フッターが未編集であればそのまま反映します。既にNavigationがある場合は作成しません。"
+msgstr ""
+
+#: includes/setup-admin.php:123
+msgid "基本メニューを作成する"
+msgstr ""
+
+#: includes/setup-admin.php:143
+msgid "既にNavigationが存在するため、新しく作成しませんでした。"
+msgstr ""
+
+#: includes/setup-admin.php:154
+msgid "ヘッダー"
+msgstr ""
+
+#: includes/setup-admin.php:155
+msgid "フッター"
+msgstr ""
+
+#: includes/setup-admin.php:173
+msgid "Navigationを作成しました。"
+msgstr ""
+
+#. translators: %s: comma-separated list of "ヘッダー"/"フッター"
+#: includes/setup-admin.php:179
+#, php-format
+msgid "%sに反映しました。"
+msgstr ""
+
+#. translators: %s: comma-separated list of "ヘッダー"/"フッター"
+#: includes/setup-admin.php:190
+#, php-format
+msgid "%sは既にカスタマイズされているため、自動では反映しませんでした。サイトエディターでNavigationブロックに手動で割り当ててください。"
+msgstr ""
+
+#: includes/setup-checklist.php:59
+msgid "ホームページを公開する"
+msgstr ""
+
+#: includes/setup-checklist.php:66
+msgid "事務所情報（事務所名）を入力する"
+msgstr ""
+
+#: includes/setup-checklist.php:73
+msgid "取扱業務を1件以上登録する"
+msgstr ""
+
+#: includes/setup-checklist.php:80
+msgid "問い合わせフォームを設置したページを公開する"
+msgstr ""
+
+#: includes/setup-checklist.php:87
+msgid "問い合わせの通知先メールアドレスを確認する"
+msgstr ""
+
+#: includes/setup-checklist.php:94
+msgid "専門家プロフィールを登録する"
+msgstr ""
+
+#: includes/setup-checklist.php:101
+msgid "料金を登録する"
+msgstr ""
+
+#: includes/setup-checklist.php:108
+msgid "FAQを登録する"
+msgstr ""
+
+#: includes/setup-checklist.php:115
+msgid "SEO：SNSシェア用の画像を設定する"
+msgstr ""
+
+#: includes/setup-checklist.php:122
+msgid "GA4測定IDを設定する"
+msgstr ""
+
+#: includes/setup-checklist.php:129
+msgid "サイトのメニュー（Navigation）を作成する"
+msgstr ""
+
+#: includes/setup-checklist.php:136
+msgid "サイトのタイトルを設定する"
+msgstr ""
+
+#: includes/setup-home.php:101
+msgid "ホームページは既に作成済みです。"
+msgstr ""
+
+#: includes/setup-home.php:106
+msgid "既にホームページ（固定フロントページ）が設定されています。"
+msgstr ""
+
+#: includes/setup-home.php:111
+msgid "HOME用のPatternが見つからないため、ホームページを作成できませんでした。ASTREA Themeが有効化されていることを確認してください。"
+msgstr ""
+
+#: includes/setup-home.php:118
+msgid "ホーム"
+msgstr ""
+
+#: includes/setup-navigation.php:82
+#: includes/setup-pages.php:64
+msgid "事務所概要"
+msgstr ""
+
+#: includes/setup-navigation.php:101
+msgid "専門家紹介"
+msgstr ""
+
+#: includes/setup-navigation.php:128
+#: includes/setup-pages.php:79
+msgid "お問い合わせ"
+msgstr ""
+
+#: includes/setup-navigation.php:178
+msgid "既にNavigationが存在するため生成しません。"
+msgstr ""
+
+#: includes/setup-navigation.php:200
+msgid "ASTREA 基本メニュー"
+msgstr ""
+
+#: includes/setup-pages.php:66
+msgid "ここに事務所の紹介文を入力してください。"
+msgstr ""
+
+#: includes/voice.php:51
+#: includes/voice.php:54
+#: includes/voice.php:55
+msgid "お客様の声"
+msgstr ""
+
+#: includes/voice.php:52
+msgid "お客様の声の一覧です。"
+msgstr ""
+
+#: includes/voice.php:56
+msgid "お客様の声を追加"
+msgstr ""
+
+#: includes/voice.php:57
+msgid "お客様の声を編集"
+msgstr ""
+
+#: includes/voice.php:58
+#: assets/js/editor-blocks.js:137
+msgid "お客様の声一覧"
+msgstr ""
+
+#: includes/voice.php:89
+msgid "表示名（例：40代・会社経営者様。実名は入力しないでください）"
+msgstr ""
+
+#: assets/js/editor-blocks.js:54
+msgid "ASTREA Coreが公開ページで実際のデータを表示します。編集画面では内容は表示されません。"
+msgstr ""
+
+#: assets/js/editor-blocks.js:97
+msgid "ASTREA Core — 料金の一覧を表示します。"
+msgstr ""
+
+#: assets/js/editor-blocks.js:105
+msgid "ASTREA Core — よくある質問の一覧を表示します。"
+msgstr ""
+
+#: assets/js/editor-blocks.js:113
+msgid "代表者紹介"
+msgstr ""
+
+#: assets/js/editor-blocks.js:116
+msgid "ASTREA Core — 代表者として指定された専門家プロフィールを1名表示します。"
+msgstr ""
+
+#: assets/js/editor-blocks.js:124
+msgid "ASTREA Core — 対応事例の一覧を表示します。"
+msgstr ""
+
+#: assets/js/editor-blocks.js:132
+msgid "ASTREA Core — 実績の一覧を表示します。"
+msgstr ""
+
+#: assets/js/editor-blocks.js:140
+msgid "ASTREA Core — お客様の声の一覧を表示します。"
+msgstr ""
+
+#: assets/js/editor-blocks.js:148
+msgid "ASTREA Core — 取扱業務の一覧を表示します。"
+msgstr ""
+
+#: assets/js/editor-blocks.js:153
+msgid "専門家プロフィール項目"
+msgstr ""
+
+#: assets/js/editor-blocks.js:156
+msgid "ASTREA Core — 現在の専門家プロフィールの1項目（資格・経歴等）を表示します。"
+msgstr ""
+
+#: assets/js/editor-blocks.js:167
+msgid "ASTREA Core — 事務所の営業時間を表示します。"
+msgstr ""
+
+#: assets/js/editor-blocks.js:175
+msgid "ASTREA Core — 事務所のSNSリンク一覧を表示します。"
+msgstr ""
+
+#: assets/js/editor-blocks.js:183
+msgid "ASTREA Core — 現在のページの位置を示すパンくずリストを表示します。"
+msgstr ""
+
+#: assets/js/editor-blocks.js:188
+msgid "お問い合わせフォーム"
+msgstr ""
+
+#: assets/js/editor-blocks.js:191
+msgid "ASTREA Core — お問い合わせフォームを表示します。"
+msgstr ""

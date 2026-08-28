@@ -1,0 +1,319 @@
+# Copyright (C) 2026 Project-if
+# This file is distributed under the GNU General Public License v2 or later.
+msgid ""
+msgstr ""
+"Project-Id-Version: ASTREA 0.9.0\n"
+"Report-Msgid-Bugs-To: https://wordpress.org/support/theme/astrea\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"POT-Creation-Date: 2026-08-28T08:51:00+00:00\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"X-Generator: WP-CLI 2.12.0\n"
+"X-Domain: astrea\n"
+
+#. Theme Name of the theme
+#: style.css
+#: functions.php:50
+msgid "ASTREA"
+msgstr ""
+
+#. Theme URI of the theme
+#: style.css
+msgid "https://project-if.com/astrea"
+msgstr ""
+
+#. Description of the theme
+#: style.css
+msgid "If Professional ASTREA — 士業・専門家向けWordPress Block Theme。FREE単体で本番運用可能な専門家サイトを構築できることを目標とする（docs/specifications/05_astrea_free_v1_construction_baseline.md）。"
+msgstr ""
+
+#. Author of the theme
+#: style.css
+msgid "Project-if"
+msgstr ""
+
+#. Author URI of the theme
+#: style.css
+msgid "https://project-if.com/"
+msgstr ""
+
+#: functions.php:122
+msgid "ASTREA Coreを有効化すると、事務所情報・専門家プロフィール・料金・FAQ・問い合わせフォーム・SEO機能等が利用できるようになります。ASTREA Themeは単体でも安全に動作しますが、これらの機能にはASTREA Coreが必要です。"
+msgstr ""
+
+#: functions.php:130
+msgid "プラグイン画面を開く"
+msgstr ""
+
+#: functions.php:133
+msgid "今後表示しない"
+msgstr ""
+
+#: patterns/contact-form.php
+msgctxt "Pattern title"
+msgid "問い合わせフォーム"
+msgstr ""
+
+#: patterns/contact-form.php
+msgctxt "Pattern description"
+msgid "ASTREA Coreが処理する問い合わせフォームを配置するPattern。問い合わせページ等へ任意に挿入する。"
+msgstr ""
+
+#: patterns/home-case-teaser.php
+msgctxt "Pattern title"
+msgid "HOME - CASE Teaser"
+msgstr ""
+
+#: patterns/home-case-teaser.php
+msgctxt "Pattern description"
+msgid "対応事例を最大3件紹介する。1件も無い場合はセクション全体（見出し含む）を非表示にする（Decision 028、Construction Order 010）。事例全件は専用の対応事例一覧ページ（Archiveテンプレート）を利用する。"
+msgstr ""
+
+#: patterns/home-cta.php
+msgctxt "Pattern title"
+msgid "HOME - CTA"
+msgstr ""
+
+#: patterns/home-cta.php
+msgctxt "Pattern description"
+msgid "ページ末尾のCTA。電話番号（Office Profile Bindings）と、お問い合わせページへのボタンを配置する。お問い合わせページへのリンク先はPattern挿入後にユーザーがリンクを設定する（Construction Order 007のSetup機能で作成される問い合わせページを指定する）。"
+msgstr ""
+
+#: patterns/home-faq.php
+msgctxt "Pattern title"
+msgid "HOME - FAQ"
+msgstr ""
+
+#: patterns/home-faq.php
+msgctxt "Pattern description"
+msgid "重要FAQを最大3件紹介する。重要FAQが1件も無い場合はセクション全体（見出し含む）を非表示にする（Decision 028）。FAQ全件は専用のFAQ一覧ページ（Archiveテンプレート）を利用する。"
+msgstr ""
+
+#: patterns/home-flow.php
+msgctxt "Pattern title"
+msgid "HOME - Flow"
+msgstr ""
+
+#: patterns/home-flow.php
+msgctxt "Pattern description"
+msgid "ご相談から依頼までの流れを紹介する、編集可能な静的Pattern。ステップ数は固定せず自由に追加・削除できる（Decision 028、Coreデータ化しない）。"
+msgstr ""
+
+#: patterns/home-hero.php
+msgctxt "Pattern title"
+msgid "HOME - Hero"
+msgstr ""
+
+#: patterns/home-hero.php
+msgctxt "Pattern description"
+msgid "HOME冒頭のHero。事務所名（Office Profile）と、編集可能なキャッチコピー・電話CTAを配置する。"
+msgstr ""
+
+#: patterns/home-price.php
+msgctxt "Pattern title"
+msgid "HOME - Price"
+msgstr ""
+
+#: patterns/home-price.php
+msgctxt "Pattern description"
+msgid "料金情報を紹介する。料金が1件も無い場合はセクション全体（見出し含む）を非表示にする（Decision 028。専用の料金ページには「料金一覧」Patternを使う）。"
+msgstr ""
+
+#: patterns/home-professional-teaser.php
+msgctxt "Pattern title"
+msgid "HOME - Professional Teaser"
+msgstr ""
+
+#: patterns/home-professional-teaser.php
+msgctxt "Pattern description"
+msgid "代表者（Professional Profile）を1名紹介する。代表者が未設定の場合はセクション全体を非表示にする（Decision 028）。"
+msgstr ""
+
+#: patterns/home-results-teaser.php
+msgctxt "Pattern title"
+msgid "HOME - RESULTS Teaser"
+msgstr ""
+
+#: patterns/home-results-teaser.php
+msgctxt "Pattern description"
+msgid "実績（ラベル+値）を紹介する。1件も無い場合はセクション全体（見出し含む）を非表示にする（Decision 028、Construction Order 010）。"
+msgstr ""
+
+#: patterns/home-services-teaser.php
+msgctxt "Pattern title"
+msgid "HOME - Services Teaser"
+msgstr ""
+
+#: patterns/home-services-teaser.php
+msgctxt "Pattern description"
+msgid "取扱業務の新着3件を紹介する。1件も無い場合はセクション全体（見出し含む）を非表示にする（Decision 028）。"
+msgstr ""
+
+#: patterns/home-trust.php
+msgctxt "Pattern title"
+msgid "HOME - Trust"
+msgstr ""
+
+#: patterns/home-trust.php
+msgctxt "Pattern description"
+msgid "選ばれる理由・信頼要素を3項目で紹介する、編集可能な静的Pattern（Core連携なし、Decision 028）。"
+msgstr ""
+
+#: patterns/home-voice-teaser.php
+msgctxt "Pattern title"
+msgid "HOME - VOICE Teaser"
+msgstr ""
+
+#: patterns/home-voice-teaser.php
+msgctxt "Pattern description"
+msgid "お客様の声を最大3件紹介する。1件も無い場合はセクション全体（見出し含む）を非表示にする（Decision 028、Construction Order 010）。"
+msgstr ""
+
+#: patterns/office-info.php
+msgctxt "Pattern title"
+msgid "事務所情報"
+msgstr ""
+
+#: patterns/office-info.php
+msgctxt "Pattern description"
+msgid "事務所名・所在地・電話番号（既存Block Bindings）に、営業時間・SNSリンク（Construction Order 011の新規Dynamic Block）を組み合わせた、事務所概要ページ等へ挿入可能なPattern。Professional Profile・ACCESS固有情報（最寄駅・徒歩時間・駐車場・地図等）は含まない（Decision 022の責任分離）。"
+msgstr ""
+
+#: patterns/price-list.php
+msgctxt "Pattern title"
+msgid "料金一覧"
+msgstr ""
+
+#: patterns/price-list.php
+msgctxt "Pattern description"
+msgid "ASTREA Coreに登録した料金情報を一覧表示するPattern。料金専用ページへの挿入を想定する（HOMEへのTeaser用途は「HOME - 料金」Patternを使う）。"
+msgstr ""
+
+#: theme.json
+#: styles/modern.json
+#: styles/natural.json
+#: styles/trust.json
+msgctxt "Color name"
+msgid "Base"
+msgstr ""
+
+#: theme.json
+#: styles/modern.json
+#: styles/natural.json
+#: styles/trust.json
+msgctxt "Color name"
+msgid "Contrast"
+msgstr ""
+
+#: theme.json
+#: styles/modern.json
+#: styles/natural.json
+#: styles/trust.json
+msgctxt "Color name"
+msgid "Primary"
+msgstr ""
+
+#: theme.json
+#: styles/modern.json
+#: styles/natural.json
+#: styles/trust.json
+msgctxt "Color name"
+msgid "Secondary"
+msgstr ""
+
+#: theme.json
+#: styles/modern.json
+#: styles/natural.json
+#: styles/trust.json
+msgctxt "Color name"
+msgid "Surface"
+msgstr ""
+
+#: theme.json
+#: styles/modern.json
+#: styles/natural.json
+#: styles/trust.json
+msgctxt "Font family name"
+msgid "Heading"
+msgstr ""
+
+#: theme.json
+#: styles/modern.json
+#: styles/natural.json
+#: styles/trust.json
+msgctxt "Font family name"
+msgid "Body"
+msgstr ""
+
+#: theme.json
+msgctxt "Font size name"
+msgid "Small"
+msgstr ""
+
+#: theme.json
+msgctxt "Font size name"
+msgid "Medium"
+msgstr ""
+
+#: theme.json
+msgctxt "Font size name"
+msgid "Large"
+msgstr ""
+
+#: theme.json
+msgctxt "Font size name"
+msgid "X-Large"
+msgstr ""
+
+#: theme.json
+msgctxt "Font size name"
+msgid "XX-Large"
+msgstr ""
+
+#: theme.json
+msgctxt "Space size name"
+msgid "Small"
+msgstr ""
+
+#: theme.json
+msgctxt "Space size name"
+msgid "Medium"
+msgstr ""
+
+#: theme.json
+msgctxt "Space size name"
+msgid "Large"
+msgstr ""
+
+#: theme.json
+msgctxt "Space size name"
+msgid "X-Large"
+msgstr ""
+
+#: theme.json
+msgctxt "Template part name"
+msgid "Header"
+msgstr ""
+
+#: theme.json
+msgctxt "Template part name"
+msgid "Footer"
+msgstr ""
+
+#: styles/modern.json
+msgctxt "Style variation name"
+msgid "Modern"
+msgstr ""
+
+#: styles/natural.json
+msgctxt "Style variation name"
+msgid "Natural"
+msgstr ""
+
+#: styles/trust.json
+msgctxt "Style variation name"
+msgid "Trust"
+msgstr ""
