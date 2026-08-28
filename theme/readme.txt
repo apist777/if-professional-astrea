@@ -7,7 +7,7 @@ Requires PHP: 8.3
 Stable tag: 1.0.0-rc1
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
-Tags: block-theme, full-site-editing, translation-ready
+Tags: full-site-editing, translation-ready
 
 If Professional ASTREA — 日本の士業・専門家向けのBlock Theme。Theme単体で安全に動作し、ASTREA Core（任意Plugin）を組み合わせることで事務所情報・専門家紹介・料金・お問い合わせ等の表示機能が使えるようになります。
 
