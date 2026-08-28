@@ -86,3 +86,34 @@ function get_published_posts( string $post_type ): array {
 		)
 	);
 }
+
+/**
+ * Sanitizes a "related Service IDs" postmeta value: de-duplicates, coerces
+ * to integers, and keeps only IDs that currently resolve to a published
+ * Service. Extracted in Construction Order 010 from FAQ's original
+ * implementation (Construction Order 004) — CASE needs the exact same
+ * "array of Service IDs, only currently-published ones survive, no
+ * guessing at deleted references" behavior, and this is genuinely the same
+ * responsibility, not just similar-looking code. FAQ's own behavior/tests
+ * are unchanged: `Faq\sanitize_related_services()` now simply delegates
+ * here (see faq.php).
+ *
+ * @param mixed $value Raw meta value.
+ * @return int[]
+ */
+function sanitize_related_service_ids( $value ): array {
+	if ( ! is_array( $value ) ) {
+		return array();
+	}
+
+	$ids = array_unique( array_map( 'absint', $value ) );
+
+	return array_values(
+		array_filter(
+			$ids,
+			static function ( int $id ): bool {
+				return null !== \Astrea\Core\Service\get_service( $id );
+			}
+		)
+	);
+}

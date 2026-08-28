@@ -1508,3 +1508,192 @@ wp_cli post delete "$OTHER_FRONT_PAGE" "$HOME_PAGE_ID" $(wp_cli post list --post
 rm -f "$COOKIE_JAR"
 
 echo "All ASTREA HOME / GA4 / Core data-deletion end-to-end checks passed."
+
+# Part 11 (CF-CO) automates Construction Order 010: CASE/RESULTS/VOICE
+# Archive/Single display, the 3 new HOME Teaser Dynamic Blocks' 0-item
+# self-hide and heading+content behaviour, CASE's related-Service admin
+# save, Core deactivate/reactivate safety, and complete-data-deletion
+# coverage for all three new post types (including Media survival).
+
+COOKIE_JAR="$(mktemp)"
+curl -s -c "$COOKIE_JAR" "$SITE_URL/wp-login.php" > /dev/null
+curl -s -c "$COOKIE_JAR" -b "$COOKIE_JAR" -X POST "$SITE_URL/wp-login.php" \
+	--data-urlencode "log=admin" --data-urlencode "pwd=password" \
+	--data-urlencode "wp-submit=Log In" --data-urlencode "redirect_to=$SITE_URL/wp-admin/" \
+	-o /dev/null
+
+echo "=== CF. CASE Archive: 0件でNo Results、投稿後にタイトル・抜粋・画像リンクが表示される ==="
+check_no_fatal "CF: CASE archive, 0 items" "/cases/"
+if ! grep -qF "現在、対応事例の情報は準備中です。" "$BODY_FILE"; then
+	echo "FAIL [CF]: core/query-no-results message did not render on the empty CASE archive"
+	exit 1
+fi
+CASE_ATTACHMENT=$(wp_cli media import /var/www/html/wp-includes/images/w-logo-blue.png --porcelain)
+CASE_A=$(wp_cli post create --post_type=astrea_case --post_title="スモーク010事例A" --post_status=publish --post_excerpt="事例Aの概要です。" --post_content="事例Aの本文です。" --porcelain)
+wp_cli post meta update "$CASE_A" _thumbnail_id "$CASE_ATTACHMENT"
+check_no_fatal "CF: CASE archive with 1 item" "/cases/"
+if grep -qF "現在、対応事例の情報は準備中です。" "$BODY_FILE"; then
+	echo "FAIL [CF]: No Results message still shown even though a CASE now exists"
+	exit 1
+fi
+if ! grep -qF "スモーク010事例A" "$BODY_FILE" || ! grep -qF "事例Aの概要です。" "$BODY_FILE"; then
+	echo "FAIL [CF]: CASE archive did not render title/excerpt"
+	exit 1
+fi
+echo "OK   [CF: CASE archive 0-item/1-item behaviour correct]"
+
+echo "=== CG. CASE Single: タイトル・画像・本文が表示される ==="
+CASE_A_PATH="/cases/$(wp_cli post get "$CASE_A" --field=post_name)/"
+check_no_fatal "CG: CASE single" "$CASE_A_PATH"
+if ! grep -qF "スモーク010事例A" "$BODY_FILE" || ! grep -qF "事例Aの本文です。" "$BODY_FILE"; then
+	echo "FAIL [CG]: CASE single did not render title/content"
+	exit 1
+fi
+echo "OK   [CG: CASE single renders correctly]"
+
+echo "=== CH. VOICE Archive: 0件でNo Results、投稿後に表示名・本文が表示される ==="
+check_no_fatal "CH: VOICE archive, 0 items" "/voices/"
+if ! grep -qF "現在、お客様の声の情報は準備中です。" "$BODY_FILE"; then
+	echo "FAIL [CH]: core/query-no-results message did not render on the empty VOICE archive"
+	exit 1
+fi
+VOICE_A=$(wp_cli post create --post_type=astrea_voice --post_title="40代・経営者様" --post_status=publish --post_content="大変助かりました。" --porcelain)
+check_no_fatal "CH: VOICE archive with 1 item" "/voices/"
+if grep -qF "現在、お客様の声の情報は準備中です。" "$BODY_FILE"; then
+	echo "FAIL [CH]: No Results message still shown even though a VOICE now exists"
+	exit 1
+fi
+if ! grep -qF "40代・経営者様" "$BODY_FILE" || ! grep -qF "大変助かりました。" "$BODY_FILE"; then
+	echo "FAIL [CH]: VOICE archive did not render display name/content"
+	exit 1
+fi
+echo "OK   [CH: VOICE archive 0-item/1-item behaviour correct]"
+
+echo "=== CI. RESULTS: 非公開URL、Dynamic Block経由でのみ表示される ==="
+RESULT_A=$(wp_cli post create --post_type=astrea_result --post_title="相談実績" --post_status=publish --porcelain)
+wp_cli post meta update "$RESULT_A" astrea_result_value "1,000件以上"
+if [ "$(curl -s -o /dev/null -w '%{http_code}' "$SITE_URL/?p=$RESULT_A")" = "200" ]; then
+	echo "FAIL [CI]: RESULTS post is reachable as a normal 200 page — no basis for an individual URL"
+	exit 1
+fi
+echo "OK   [CI: RESULTS has no individual URL]"
+
+echo "=== CJ. HOME Teaser Dynamic Blocks: 0件で見出し含め完全非表示、投稿後に見出し+内容が表示される ==="
+CASE_TEASER_PAGE=$(wp_cli post create --post_type=page --post_title="Smoke010 Case Teaser" --post_status=publish --post_content='<!-- wp:astrea/case-list {"limit":3,"heading":"対応事例"} /-->' --porcelain)
+CASE_TEASER_PATH="/$(wp_cli post get "$CASE_TEASER_PAGE" --field=post_name)/"
+check_no_fatal "CJ: CASE Teaser page (1 CASE already exists)" "$CASE_TEASER_PATH"
+if ! grep -qF "対応事例" "$BODY_FILE" || ! grep -qF "スモーク010事例A" "$BODY_FILE"; then
+	echo "FAIL [CJ]: CASE Teaser did not render heading+content with an existing CASE"
+	exit 1
+fi
+
+RESULTS_TEASER_PAGE=$(wp_cli post create --post_type=page --post_title="Smoke010 Results Teaser" --post_status=publish --post_content='<!-- wp:astrea/results-list {"heading":"実績"} /-->' --porcelain)
+RESULTS_TEASER_PATH="/$(wp_cli post get "$RESULTS_TEASER_PAGE" --field=post_name)/"
+check_no_fatal "CJ: RESULTS Teaser page (1 RESULTS already exists)" "$RESULTS_TEASER_PATH"
+if ! grep -qF "実績" "$BODY_FILE" || ! grep -qF "1,000件以上" "$BODY_FILE"; then
+	echo "FAIL [CJ]: RESULTS Teaser did not render heading+content with an existing RESULTS entry"
+	exit 1
+fi
+
+VOICE_TEASER_PAGE=$(wp_cli post create --post_type=page --post_title="Smoke010 Voice Teaser" --post_status=publish --post_content='<!-- wp:astrea/voice-list {"limit":3,"heading":"お客様の声"} /-->' --porcelain)
+VOICE_TEASER_PATH="/$(wp_cli post get "$VOICE_TEASER_PAGE" --field=post_name)/"
+check_no_fatal "CJ: VOICE Teaser page (1 VOICE already exists)" "$VOICE_TEASER_PATH"
+if ! grep -qF "お客様の声" "$BODY_FILE" || ! grep -qF "大変助かりました。" "$BODY_FILE"; then
+	echo "FAIL [CJ]: VOICE Teaser did not render heading+content with an existing VOICE"
+	exit 1
+fi
+
+wp_cli post delete "$CASE_A" "$VOICE_A" "$RESULT_A" --force > /dev/null
+check_no_fatal "CJ: CASE Teaser page with zero CASEs" "$CASE_TEASER_PATH"
+if grep -qF "対応事例" "$BODY_FILE"; then
+	echo "FAIL [CJ]: CASE Teaser heading appeared even though there are zero CASEs (whole-section self-hide expected)"
+	exit 1
+fi
+check_no_fatal "CJ: RESULTS Teaser page with zero RESULTS" "$RESULTS_TEASER_PATH"
+if grep -qF "実績" "$BODY_FILE"; then
+	echo "FAIL [CJ]: RESULTS Teaser heading appeared even though there are zero RESULTS entries"
+	exit 1
+fi
+check_no_fatal "CJ: VOICE Teaser page with zero VOICEs" "$VOICE_TEASER_PATH"
+if grep -qF "お客様の声" "$BODY_FILE"; then
+	echo "FAIL [CJ]: VOICE Teaser heading appeared even though there are zero VOICEs"
+	exit 1
+fi
+echo "OK   [CJ: all 3 HOME Teaser Dynamic Blocks self-hide at zero items, show heading+content once populated]"
+
+echo "=== CK. CASE admin: 編集画面にMeta Boxが正しく表示される ==="
+# CASE's edit screen is the Block Editor (show_in_rest: true); simulating
+# its hybrid REST+classic-meta-box save flow via raw curl (no real browser
+# JS) would not reflect how it actually saves, so — consistent with how
+# FAQ/Price/Professional's own meta box *saving* is verified via PHPUnit's
+# direct save_meta() calls, not a simulated form POST — this step only
+# confirms real-HTTP wiring: the screen loads without Fatal and renders
+# the expected Service checkbox.
+CASE_SVC=$(wp_cli post create --post_type=astrea_service --post_title="スモーク010業務" --post_status=publish --porcelain)
+CASE_B=$(wp_cli post create --post_type=astrea_case --post_title="スモーク010事例B" --post_status=publish --porcelain)
+# check_no_fatal() sends no cookies (it's meant for public pages); this is
+# an authenticated wp-admin URL, so fetch it directly with the logged-in
+# session instead — matching how every other admin-screen check in this
+# file (ADMIN_HTML=$(curl ... -b "$COOKIE_JAR" ...)) already does it.
+CASE_EDIT_STATUS=$(curl -s -b "$COOKIE_JAR" -o "$BODY_FILE" -w '%{http_code}' "$SITE_URL/wp-admin/post.php?post=$CASE_B&action=edit")
+if [ "$CASE_EDIT_STATUS" != "200" ]; then
+	echo "FAIL [CK]: expected HTTP 200 for the CASE edit screen, got $CASE_EDIT_STATUS"
+	exit 1
+fi
+if ! grep -qF "astrea_case_meta_nonce" "$BODY_FILE"; then
+	echo "FAIL [CK]: CASE meta box Nonce field not found on the edit screen"
+	exit 1
+fi
+if ! grep -qF "スモーク010業務" "$BODY_FILE"; then
+	echo "FAIL [CK]: CASE meta box did not list the available Service"
+	exit 1
+fi
+echo "OK   [CK: CASE edit screen loads with the related-Service meta box wired up]"
+
+echo "=== CL. Core deactivated: CASE/RESULTS/VOICE Dynamic display disappears, Theme stays safe ==="
+wp_cli plugin deactivate astrea-core
+fetch_no_fatal_any_status "CL: CASE archive while Core inactive" "/cases/"
+fetch_no_fatal_any_status "CL: VOICE archive while Core inactive" "/voices/"
+fetch_no_fatal_any_status "CL: CASE Teaser page while Core inactive" "$CASE_TEASER_PATH"
+if grep -qF "対応事例" "$BODY_FILE"; then
+	echo "FAIL [CL]: CASE Teaser leaked content while Core is inactive"
+	exit 1
+fi
+wp_cli plugin activate astrea-core
+check_no_fatal "CL: CASE archive after reactivation"
+echo "OK   [CL: Core deactivate/reactivate leaves Theme safe for CASE/RESULTS/VOICE]"
+
+echo "=== CM. Core complete data deletion covers CASE/RESULTS/VOICE, Media survives ==="
+CASE_C=$(wp_cli post create --post_type=astrea_case --post_title="削除確認用事例" --post_status=publish --porcelain)
+CASE_C_ATTACHMENT=$(wp_cli media import /var/www/html/wp-includes/images/w-logo-blue.png --porcelain)
+wp_cli post meta update "$CASE_C" _thumbnail_id "$CASE_C_ATTACHMENT"
+RESULT_B=$(wp_cli post create --post_type=astrea_result --post_title="削除確認用実績" --post_status=publish --porcelain)
+VOICE_B=$(wp_cli post create --post_type=astrea_voice --post_title="削除確認用声" --post_status=publish --porcelain)
+
+DEL_HTML=$(curl -s -b "$COOKIE_JAR" "$SITE_URL/wp-admin/admin.php?page=astrea-core-data-deletion")
+DEL_NONCE=$(sed -n 's/.*name="astrea_delete_all_core_data_nonce" value="\([a-f0-9]*\)".*/\1/p' <<< "$DEL_HTML" | head -1)
+curl -s -b "$COOKIE_JAR" -o /dev/null -X POST "$SITE_URL/wp-admin/admin-post.php" \
+	--data-urlencode "action=astrea_delete_all_core_data" \
+	--data-urlencode "astrea_delete_all_core_data_nonce=$DEL_NONCE" \
+	--data-urlencode "confirm_understood=1" \
+	--data-urlencode "confirm_phrase=削除する"
+
+for id in "$CASE_C" "$RESULT_B" "$VOICE_B"; do
+	STATUS=$(wp_cli post get "$id" --field=post_status 2>/dev/null || echo "gone")
+	if [ "$STATUS" != "gone" ]; then
+		echo "FAIL [CM]: post $id (CASE/RESULTS/VOICE) survived complete data deletion"
+		exit 1
+	fi
+done
+ATTACHMENT_STATUS=$(wp_cli post get "$CASE_C_ATTACHMENT" --field=post_status 2>/dev/null || echo "gone")
+if [ "$ATTACHMENT_STATUS" = "gone" ]; then
+	echo "FAIL [CM]: CASE Featured Image attachment was deleted by complete data deletion"
+	exit 1
+fi
+echo "OK   [CM: complete data deletion removes CASE/RESULTS/VOICE, Media survives]"
+
+echo "=== Cleanup: remove Construction Order 010 smoke-test fixtures ==="
+wp_cli post delete "$CASE_B" "$CASE_SVC" "$CASE_TEASER_PAGE" "$RESULTS_TEASER_PAGE" "$VOICE_TEASER_PAGE" "$CASE_ATTACHMENT" "$CASE_C_ATTACHMENT" --force > /dev/null 2>&1 || true
+rm -f "$COOKIE_JAR"
+
+echo "All ASTREA CASE / RESULTS / VOICE end-to-end checks passed."

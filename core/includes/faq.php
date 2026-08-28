@@ -139,22 +139,7 @@ function register_post_type_and_meta() {
  * @return int[]
  */
 function sanitize_related_services( $value ): array {
-	if ( ! is_array( $value ) ) {
-		return array();
-	}
-
-	$ids = array_unique( array_map( 'absint', $value ) );
-
-	$ids = array_values(
-		array_filter(
-			$ids,
-			static function ( int $id ): bool {
-				return null !== \Astrea\Core\Service\get_service( $id );
-			}
-		)
-	);
-
-	return $ids;
+	return \Astrea\Core\Shared\sanitize_related_service_ids( $value );
 }
 
 add_action( 'pre_get_posts', __NAMESPACE__ . '\\enforce_deterministic_order' );

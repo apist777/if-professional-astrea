@@ -18,6 +18,9 @@ use Astrea\Core\ProfessionalProfile;
 use Astrea\Core\Service;
 use Astrea\Core\Price;
 use Astrea\Core\Faq;
+use Astrea\Core\CaseStudy;
+use Astrea\Core\Result;
+use Astrea\Core\Voice;
 use Astrea\Core\Inquiry;
 use Astrea\Core\Seo;
 use Astrea\Core\Setup;
@@ -32,16 +35,32 @@ class DataDeletionTest extends WP_UnitTestCase {
 		self::factory()->post->create( array( 'post_type' => Service\POST_TYPE ) );
 		self::factory()->post->create( array( 'post_type' => Price\POST_TYPE ) );
 		self::factory()->post->create( array( 'post_type' => Faq\POST_TYPE ) );
+		self::factory()->post->create( array( 'post_type' => CaseStudy\POST_TYPE ) );
+		self::factory()->post->create( array( 'post_type' => Result\POST_TYPE ) );
+		self::factory()->post->create( array( 'post_type' => Voice\POST_TYPE ) );
 		self::factory()->post->create( array( 'post_type' => Inquiry\POST_TYPE ) );
 
 		$result = DataDeletion\delete_all_core_data();
 
-		$this->assertSame( 5, $result['posts'] );
+		$this->assertSame( 8, $result['posts'] );
 		$this->assertSame( array(), get_posts( array( 'post_type' => ProfessionalProfile\POST_TYPE, 'post_status' => 'any' ) ) );
 		$this->assertSame( array(), get_posts( array( 'post_type' => Service\POST_TYPE, 'post_status' => 'any' ) ) );
 		$this->assertSame( array(), get_posts( array( 'post_type' => Price\POST_TYPE, 'post_status' => 'any' ) ) );
 		$this->assertSame( array(), get_posts( array( 'post_type' => Faq\POST_TYPE, 'post_status' => 'any' ) ) );
+		$this->assertSame( array(), get_posts( array( 'post_type' => CaseStudy\POST_TYPE, 'post_status' => 'any' ) ) );
+		$this->assertSame( array(), get_posts( array( 'post_type' => Result\POST_TYPE, 'post_status' => 'any' ) ) );
+		$this->assertSame( array(), get_posts( array( 'post_type' => Voice\POST_TYPE, 'post_status' => 'any' ) ) );
 		$this->assertSame( array(), get_posts( array( 'post_type' => Inquiry\POST_TYPE, 'post_status' => 'any' ) ) );
+	}
+
+	public function test_delete_all_core_data_never_deletes_case_featured_image() {
+		$attachment_id = self::factory()->attachment->create_object( array( 'file' => 'case.png' ) );
+		$case_id       = self::factory()->post->create( array( 'post_type' => CaseStudy\POST_TYPE ) );
+		set_post_thumbnail( $case_id, $attachment_id );
+
+		DataDeletion\delete_all_core_data();
+
+		$this->assertNotNull( get_post( $attachment_id ), 'CASE Featured Images must never be deleted (Decision 019).' );
 	}
 
 	public function test_delete_all_core_data_removes_faq_taxonomy_terms() {

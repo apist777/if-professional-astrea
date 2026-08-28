@@ -3,7 +3,7 @@
  * Plugin Name: ASTREA Core
  * Plugin URI: https://project-if.com/astrea
  * Description: If Professional ASTREA — テーマを変更しても保持すべき情報とサイト共通機能を担当する、ASTREA Themeの公式推奨Plugin（任意）。「Coreは推奨する。しかしThemeを人質にしない。」（Decision 021）。
- * Version: 0.9.0
+ * Version: 0.10.0
  * Requires at least: 7.0
  * Requires PHP: 8.3
  * Author: Project-if
@@ -22,7 +22,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit; // Disallow direct access.
 }
 
-define( 'ASTREA_CORE_VERSION', '0.9.0' );
+define( 'ASTREA_CORE_VERSION', '0.10.0' );
 define( 'ASTREA_CORE_FILE', __FILE__ );
 define( 'ASTREA_CORE_DIR', plugin_dir_path( __FILE__ ) );
 
@@ -40,6 +40,14 @@ require ASTREA_CORE_DIR . 'includes/price-list-block.php';
 require ASTREA_CORE_DIR . 'includes/faq.php';
 require ASTREA_CORE_DIR . 'includes/faq-admin.php';
 require ASTREA_CORE_DIR . 'includes/faq-list-block.php';
+require ASTREA_CORE_DIR . 'includes/case.php';
+require ASTREA_CORE_DIR . 'includes/case-admin.php';
+require ASTREA_CORE_DIR . 'includes/case-list-block.php';
+require ASTREA_CORE_DIR . 'includes/result.php';
+require ASTREA_CORE_DIR . 'includes/result-admin.php';
+require ASTREA_CORE_DIR . 'includes/results-list-block.php';
+require ASTREA_CORE_DIR . 'includes/voice.php';
+require ASTREA_CORE_DIR . 'includes/voice-list-block.php';
 require ASTREA_CORE_DIR . 'includes/inquiry.php';
 require ASTREA_CORE_DIR . 'includes/inquiry-email-confirmation.php';
 require ASTREA_CORE_DIR . 'includes/inquiry-notifications.php';
@@ -86,6 +94,11 @@ register_activation_hook( __FILE__, __NAMESPACE__ . '\\activate' );
  * rules for an unrelated reason. This does not create or modify any
  * content; it only makes routing aware of the post types.
  *
+ * Construction Order 010 adds CASE (`cases` archive) and VOICE (`voices`
+ * archive) to this same list for the same reason. RESULTS has no rewrite
+ * rule (non-public, like Price) but is registered here too for
+ * consistency with Price's own inclusion.
+ *
  * Inquiry (Contact, Construction Order 005) schedules two daily Cron
  * events (Retention cleanup, digest notification) on activation/
  * reactivation, and runs one Retention cleanup pass immediately — this
@@ -99,6 +112,9 @@ function activate() {
 	Service\register_post_type_and_meta();
 	Price\register_post_type_and_meta();
 	Faq\register_post_type_and_meta();
+	CaseStudy\register_post_type_and_meta();
+	Result\register_post_type_and_meta();
+	Voice\register_post_type();
 	flush_rewrite_rules();
 
 	Inquiry\schedule_cleanup_cron();

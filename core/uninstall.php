@@ -69,6 +69,13 @@
  * mirrors this file's history exactly, and likewise never touches
  * Media Library attachments or Setup-generated Pages/Navigation.
  *
+ * As of Construction Order 010, `astrea_case`, `astrea_result`, and
+ * `astrea_voice` posts/postmeta (CASE/RESULTS/VOICE, Decision 029) are
+ * Core-owned data under the same policy — intentionally NOT deleted here
+ * either. CASE Featured Images are, like Professional Profile photos, an
+ * ordinary Media Library attachment the user selected, not something
+ * ASTREA copies into its own storage.
+ *
  * @package Astrea\Core
  */
 
@@ -77,7 +84,8 @@ if ( ! defined( 'WP_UNINSTALL_PLUGIN' ) ) {
 }
 
 // Intentionally no-op: `astrea_core_office_profile`, `astrea_professional`,
-// `astrea_service`, `astrea_price`, `astrea_faq`, `astrea_inquiry`
+// `astrea_service`, `astrea_price`, `astrea_faq`, `astrea_case`,
+// `astrea_result`, `astrea_voice`, `astrea_inquiry`
 // posts/postmeta/taxonomy terms, `astrea_core_contact_settings`,
 // `astrea_core_seo_settings`, `astrea_core_generated_pages`, and their
 // featured-image / OGP-image attachments must all survive a plain

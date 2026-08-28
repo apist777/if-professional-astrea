@@ -27,7 +27,7 @@
  * inserts it manually and edits before publishing, but not something this
  * action may publish unedited (matches the established policy against
  * ever publishing placeholder/fictional content — see
- * includes/setup-pages.php's 事務所概要 page). The other 7 Patterns are
+ * includes/setup-pages.php's 事務所概要 page). The remaining Patterns are
  * either fully data-driven with a documented empty-state (self-hiding
  * Dynamic Blocks) or generic-but-genuine copy (Flow, CTA), and are safe to
  * publish immediately.
@@ -46,13 +46,23 @@ if ( ! defined( 'ABSPATH' ) ) {
  * slugs are a public contract between Theme and Core (the same role
  * Decision 012's `astrea/*` Block namespace already plays for Blocks),
  * documented here and in the Construction 008 research doc.
+ *
+ * Construction Order 010 added the CASE/RESULTS/VOICE Teasers. This only
+ * affects NEW HOME generation (sites with no tracked 'home' entry yet) —
+ * generate_home_page()'s existing idempotency guard means an
+ * already-generated HOME (tracked or user-edited) is never touched by this
+ * list changing, exactly as it was never touched when Construction 009's
+ * own Patterns were first added here.
  */
 const HOME_PATTERN_SLUGS = array(
 	'astrea/home-hero',
 	'astrea/home-services-teaser',
+	'astrea/home-case-teaser',
+	'astrea/home-results-teaser',
 	'astrea/home-professional-teaser',
 	'astrea/home-price',
 	'astrea/home-faq',
+	'astrea/home-voice-teaser',
 	'astrea/home-flow',
 	'astrea/home-cta',
 );
