@@ -264,7 +264,7 @@ Escaping・Translation・Plugin Territoryはいずれも問題なし（`esc_html
 17. **End：**（本報告末尾のHISTORY.csv記録時に実測記録）
 18. **Duration：**（Start/Endの実測差分）
 19. **research-doc path：** `docs/research/2026-08-28_construction_order_011_research.md`（本ファイル）
-20. **Commit/CI：**（コミット後に追記）
+20. **Commit/CI：** `75d0fbd`／CI Green（PHP syntax + Coding Standards、Theme/Core independence smoke test とも成功）
 
 ## Security Audit 追加項目
 
