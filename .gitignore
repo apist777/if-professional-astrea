@@ -27,3 +27,7 @@ npm-debug.log*
 # Local environment secrets
 .env
 .env.local
+
+# Owner Visual Acceptance Fixture DB backups (Construction Order 015G §36/§44:
+# Fixture DB itself is not Git-managed — these are local safety snapshots only)
+/.fixture-backups/
