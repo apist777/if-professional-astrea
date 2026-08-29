@@ -1,0 +1,373 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<title>ASTREA Visual v2 — HOME Wireframe (Static Mockup, not Product Code)</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<style>
+  :root {
+    --color-base: #ffffff;
+    --color-contrast: #1b2430;
+    --color-primary: #1f3a5c;
+    --color-secondary: #8a94a6;
+    --color-surface: #f2f4f7;
+    --color-border: #d8dee6;
+    --font-heading: Georgia, 'Hiragino Mincho ProN', 'Yu Mincho', serif;
+    --font-body: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Hiragino Kaku Gothic ProN', 'Yu Gothic', sans-serif;
+    --space-s: 1rem;
+    --space-m: 2rem;
+    --space-l: 3.5rem;
+    --space-xl: 6rem;
+    --radius-sm: 4px;
+    --radius-md: 6px;
+    --content-width: 720px;
+    --wide-width: 1200px;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    font-family: var(--font-body);
+    color: var(--color-contrast);
+    background: var(--color-base);
+    line-height: 1.6;
+  }
+  h1, h2, h3 { font-family: var(--font-heading); line-height: 1.3; margin: 0; }
+  .notice {
+    background: #fff3cd;
+    color: #664d03;
+    padding: 0.75rem 1.5rem;
+    font-size: 0.875rem;
+    text-align: center;
+    font-family: var(--font-body);
+  }
+  .wrap { max-width: var(--wide-width); margin: 0 auto; padding: 0 var(--space-m); }
+  .wrap-narrow { max-width: var(--content-width); margin: 0 auto; padding: 0 var(--space-m); }
+
+  /* ---- Header v2 ---- */
+  header.site-header {
+    border-bottom: 1px solid var(--color-border);
+  }
+  .header-inner {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--space-m);
+    padding: var(--space-s) var(--space-m);
+    flex-wrap: wrap;
+  }
+  .office-identity {
+    font-family: var(--font-heading);
+    font-size: 1.125rem;
+    font-weight: bold;
+    padding-right: var(--space-m);
+    border-right: 1px solid var(--color-border);
+  }
+  .header-nav-cta {
+    display: flex;
+    align-items: center;
+    gap: var(--space-m);
+    flex-wrap: wrap;
+    flex: 1;
+    justify-content: flex-end;
+  }
+  nav.primary-nav ul { display: flex; gap: 1.25rem; list-style: none; margin: 0; padding: 0; }
+  nav.primary-nav a { color: var(--color-contrast); text-decoration: none; font-size: 0.9375rem; }
+  .cta-phone {
+    background: var(--color-primary);
+    color: var(--color-base);
+    padding: 0.6rem 1.25rem;
+    border-radius: var(--radius-md);
+    text-decoration: none;
+    font-size: 0.9375rem;
+    white-space: nowrap;
+  }
+
+  /* ---- Sections ---- */
+  section { padding: var(--space-xl) 0; }
+  section.surface { background: var(--color-surface); }
+  .section-head { text-align: center; max-width: 640px; margin: 0 auto var(--space-l); }
+  .section-head .eyebrow { color: var(--color-secondary); font-size: 0.8125rem; letter-spacing: 0.05em; text-transform: uppercase; }
+  .section-head h2 { font-size: 1.875rem; margin-top: 0.5rem; }
+
+  /* ---- Hero ---- */
+  .hero { background: var(--color-surface); padding: var(--space-xl) 0; }
+  .hero-inner { max-width: 760px; margin: 0 auto; text-align: left; padding: 0 var(--space-m); }
+  .hero h1 { font-size: 2.5rem; margin-bottom: var(--space-s); }
+  .hero p.lede { font-size: 1.125rem; color: var(--color-contrast); margin-bottom: var(--space-m); }
+  .hero-ctas { display: flex; gap: 0.75rem; flex-wrap: wrap; }
+  .btn-primary { background: var(--color-primary); color: var(--color-base); padding: 0.75rem 1.5rem; border-radius: var(--radius-md); text-decoration: none; font-size: 0.9375rem; }
+  .btn-secondary { border: 1px solid var(--color-contrast); color: var(--color-contrast); padding: 0.75rem 1.5rem; border-radius: var(--radius-md); text-decoration: none; font-size: 0.9375rem; }
+
+  /* ---- Card Grid (Services) ---- */
+  .card-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: var(--space-m); }
+  .card {
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-md);
+    padding: var(--space-m);
+    background: var(--color-base);
+  }
+  .card h3 { font-size: 1.125rem; margin-bottom: 0.5rem; }
+  .card p { font-size: 0.9375rem; color: var(--color-contrast); margin: 0; }
+
+  /* ---- CASE cards ---- */
+  .case-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: var(--space-m); }
+  .case-card {
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-md);
+    overflow: hidden;
+    background: var(--color-base);
+  }
+  .case-card .case-media { background: var(--color-surface); height: 120px; display: flex; align-items: center; justify-content: center; color: var(--color-secondary); font-size: 0.8125rem; }
+  .case-card .case-body { padding: var(--space-s) var(--space-m) var(--space-m); }
+  .case-card h3 { font-size: 1.0625rem; margin-bottom: 0.5rem; }
+  .case-card p { font-size: 0.875rem; color: var(--color-contrast); margin: 0 0 0.75rem; }
+  .case-card a { font-size: 0.875rem; color: var(--color-primary); text-decoration: none; }
+
+  /* ---- Results (Large Numeric Metrics) ---- */
+  .results-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: var(--space-l); text-align: center; }
+  .result-metric .number { font-family: var(--font-heading); font-size: clamp(2.5rem, 5vw, 4rem); color: var(--color-primary); line-height: 1; }
+  .result-metric .label { margin-top: 0.5rem; font-size: 0.9375rem; color: var(--color-contrast); }
+
+  /* ---- Professional (Photo + Profile) ---- */
+  .pro-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: var(--space-m); }
+  .pro-card { text-align: center; }
+  .pro-photo {
+    width: 128px; height: 128px; border-radius: 50%;
+    background: var(--color-surface);
+    display: flex; align-items: center; justify-content: center;
+    margin: 0 auto var(--space-s);
+    font-family: var(--font-heading); font-size: 1.75rem; color: var(--color-secondary);
+    border: 1px solid var(--color-border);
+  }
+  .pro-card h3 { font-size: 1.0625rem; }
+  .pro-card .role { font-size: 0.8125rem; color: var(--color-secondary); margin: 0.25rem 0 0.5rem; }
+  .pro-card p.bio { font-size: 0.875rem; margin: 0; }
+
+  /* ---- Price cards ---- */
+  .price-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: var(--space-m); }
+  .price-group-label { font-size: 0.8125rem; color: var(--color-secondary); text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 0.75rem; grid-column: 1 / -1; }
+  .price-card { border: 1px solid var(--color-border); border-radius: var(--radius-md); padding: var(--space-m); display: flex; justify-content: space-between; align-items: baseline; background: var(--color-base); }
+  .price-card h3 { font-size: 1rem; }
+  .price-card .amount { font-family: var(--font-heading); font-size: 1.25rem; color: var(--color-primary); white-space: nowrap; }
+
+  /* ---- Testimonial cards (VOICE) ---- */
+  .voice-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: var(--space-m); }
+  .voice-card { border: 1px solid var(--color-border); border-radius: var(--radius-md); padding: var(--space-m); background: var(--color-base); position: relative; }
+  .voice-card .quote-mark { font-family: var(--font-heading); font-size: 2.5rem; color: var(--color-surface); position: absolute; top: 0.5rem; left: 1rem; line-height: 1; }
+  .voice-card blockquote { margin: 1.25rem 0 0.75rem; font-size: 0.9375rem; }
+  .voice-card cite { font-size: 0.8125rem; color: var(--color-secondary); font-style: normal; }
+
+  /* ---- Flow (Numbered Steps) ---- */
+  .flow-list { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(3, 1fr); gap: var(--space-m); }
+  .flow-list li { text-align: left; }
+  .flow-list .step-num { font-family: var(--font-heading); font-size: 1.5rem; color: var(--color-primary); }
+  .flow-list .step-title { font-weight: bold; margin: 0.25rem 0; }
+  .flow-list .step-desc { font-size: 0.875rem; color: var(--color-contrast); }
+
+  /* ---- CTA ---- */
+  .cta-section { background: var(--color-contrast); color: var(--color-base); text-align: center; }
+  .cta-section h2 { color: var(--color-base); font-size: 1.75rem; margin-bottom: var(--space-m); }
+  .cta-section .btn-primary { background: var(--color-base); color: var(--color-contrast); }
+
+  /* ---- Footer ---- */
+  footer.site-footer { background: var(--color-primary); color: var(--color-base); padding: var(--space-l) 0; }
+  .footer-inner { display: flex; justify-content: space-between; gap: var(--space-m); flex-wrap: wrap; }
+  .footer-inner nav ul { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 0.5rem; }
+  .footer-inner a { color: var(--color-base); text-decoration: none; font-size: 0.9375rem; }
+
+  @media (max-width: 782px) {
+    .card-grid, .case-grid, .results-grid, .pro-grid, .price-grid, .voice-grid, .flow-list {
+      grid-template-columns: 1fr;
+    }
+    .header-inner { flex-direction: column; align-items: flex-start; }
+    .office-identity { border-right: none; padding-right: 0; }
+    .header-nav-cta { justify-content: flex-start; width: 100%; }
+  }
+</style>
+</head>
+<body>
+
+<div class="notice">これはASTREA Visual v2の静的Wireframe/Mockupです（Construction Order 015A）。Product Codeではなく、実装前の方向性確認用です。Fixtureは「ASTREA行政書士事務所」（架空）。</div>
+
+<header class="site-header">
+  <div class="header-inner">
+    <div class="office-identity">ASTREA行政書士事務所</div>
+    <div class="header-nav-cta">
+      <nav class="primary-nav">
+        <ul>
+          <li><a href="#">事務所概要</a></li>
+          <li><a href="#">取扱業務</a></li>
+          <li><a href="#">専門家紹介</a></li>
+          <li><a href="#">料金</a></li>
+          <li><a href="#">FAQ</a></li>
+          <li><a href="#">お問い合わせ</a></li>
+        </ul>
+      </nav>
+      <a class="cta-phone" href="#">03-5555-0123</a>
+    </div>
+  </div>
+</header>
+
+<section class="hero">
+  <div class="hero-inner">
+    <h1>ASTREA行政書士事務所</h1>
+    <p class="lede">お客様に寄り添う、専門家によるご相談窓口です。</p>
+    <div class="hero-ctas">
+      <a class="btn-primary" href="#">03-5555-0123</a>
+      <a class="btn-secondary" href="#">お問い合わせはこちら</a>
+    </div>
+  </div>
+</section>
+
+<section>
+  <div class="wrap">
+    <div class="section-head">
+      <div class="eyebrow">Services</div>
+      <h2>取扱業務</h2>
+    </div>
+    <div class="card-grid">
+      <div class="card"><h3>会社設立サポート</h3><p>株式会社・合同会社の設立に必要な定款作成から登記書類の準備まで一括でサポートします。</p></div>
+      <div class="card"><h3>建設業許可申請</h3><p>新規許可・更新・業種追加まで、建設業許可に関する各種申請を代行します。</p></div>
+      <div class="card"><h3>相続・遺言サポート</h3><p>遺言書作成、遺産分割協議書の作成、相続手続き全般をサポートします。</p></div>
+    </div>
+  </div>
+</section>
+
+<section class="surface">
+  <div class="wrap">
+    <div class="section-head">
+      <div class="eyebrow">Case Studies</div>
+      <h2>対応事例</h2>
+    </div>
+    <div class="case-grid">
+      <div class="case-card">
+        <div class="case-media">Case Image Slot（任意）</div>
+        <div class="case-body">
+          <h3>飲食店の会社設立を2週間でサポート</h3>
+          <p>独立開業を目指す飲食店オーナー様の会社設立を、最短2週間でサポートしました。</p>
+          <a href="#">詳しく見る →</a>
+        </div>
+      </div>
+      <div class="case-card">
+        <div class="case-media">Case Image Slot（任意）</div>
+        <div class="case-body">
+          <h3>建設業許可を初回申請で取得</h3>
+          <p>必要書類の不備を事前に洗い出し、初回申請でスムーズに許可を取得しました。</p>
+          <a href="#">詳しく見る →</a>
+        </div>
+      </div>
+      <div class="case-card">
+        <div class="case-media">Case Image Slot（任意）</div>
+        <div class="case-body">
+          <h3>相続手続きを3ヶ月で完了</h3>
+          <p>複数の相続人がいる案件で、名義変更まで3ヶ月で完了しました。</p>
+          <a href="#">詳しく見る →</a>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section>
+  <div class="wrap">
+    <div class="section-head">
+      <div class="eyebrow">Results</div>
+      <h2>実績</h2>
+    </div>
+    <div class="results-grid">
+      <div class="result-metric"><div class="number">500+</div><div class="label">相談実績</div></div>
+      <div class="result-metric"><div class="number">200+</div><div class="label">会社設立支援</div></div>
+      <div class="result-metric"><div class="number">98%</div><div class="label">建設業許可取得率</div></div>
+    </div>
+  </div>
+</section>
+
+<section class="surface">
+  <div class="wrap">
+    <div class="section-head">
+      <div class="eyebrow">Professionals</div>
+      <h2>専門家紹介</h2>
+    </div>
+    <div class="pro-grid">
+      <div class="pro-card"><div class="pro-photo">佐藤</div><h3>佐藤 健一</h3><div class="role">代表行政書士</div><p class="bio">会社設立・建設業許可を中心に15年以上の実務経験を持つ。</p></div>
+      <div class="pro-card"><div class="pro-photo">田中</div><h3>田中 美咲</h3><div class="role">行政書士</div><p class="bio">相続・遺言分野を専門とする。丁寧なヒアリングに定評がある。</p></div>
+      <div class="pro-card"><div class="pro-photo">鈴木</div><h3>鈴木 大輔</h3><div class="role">行政書士</div><p class="bio">外国人在留資格・補助金申請を担当。</p></div>
+    </div>
+  </div>
+</section>
+
+<section>
+  <div class="wrap-narrow">
+    <div class="section-head">
+      <div class="eyebrow">Price</div>
+      <h2>料金</h2>
+    </div>
+    <div class="price-grid">
+      <div class="price-group-label">設立・許認可</div>
+      <div class="price-card"><h3>会社設立パック</h3><div class="amount">55,000円〜</div></div>
+      <div class="price-card"><h3>建設業許可申請</h3><div class="amount">110,000円〜</div></div>
+      <div class="price-group-label">相続・遺言</div>
+      <div class="price-card"><h3>相続手続きサポート</h3><div class="amount">88,000円〜</div></div>
+      <div class="price-group-label">顧問契約</div>
+      <div class="price-card"><h3>顧問契約</h3><div class="amount">月額22,000円〜</div></div>
+    </div>
+  </div>
+</section>
+
+<section class="surface">
+  <div class="wrap">
+    <div class="section-head">
+      <div class="eyebrow">Voice</div>
+      <h2>お客様の声</h2>
+    </div>
+    <div class="voice-grid">
+      <div class="voice-card"><div class="quote-mark">"</div><blockquote>会社設立の手続きを丁寧にサポートしていただき、スムーズに開業できました。</blockquote><cite>都内 IT企業 代表者様</cite></div>
+      <div class="voice-card"><div class="quote-mark">"</div><blockquote>建設業許可の申請でお世話になりました。初回で許可が下りました。</blockquote><cite>建設会社 経営者様</cite></div>
+      <div class="voice-card"><div class="quote-mark">"</div><blockquote>複雑な相続手続きでしたが、親身に対応していただきました。</blockquote><cite>相続手続きご依頼者様</cite></div>
+    </div>
+  </div>
+</section>
+
+<section>
+  <div class="wrap">
+    <div class="section-head">
+      <div class="eyebrow">Flow</div>
+      <h2>ご相談の流れ</h2>
+    </div>
+    <ol class="flow-list">
+      <li><div class="step-num">01</div><div class="step-title">お問い合わせ</div><div class="step-desc">フォームまたはお電話にてご連絡ください。</div></li>
+      <li><div class="step-num">02</div><div class="step-title">ご相談・お見積り</div><div class="step-desc">ご状況を伺い、対応方針をご案内します。</div></li>
+      <li><div class="step-num">03</div><div class="step-title">ご契約・着手</div><div class="step-desc">内容にご納得いただいた上で対応を開始します。</div></li>
+    </ol>
+  </div>
+</section>
+
+<section class="cta-section">
+  <div class="wrap-narrow">
+    <h2>まずはお気軽にご相談ください</h2>
+    <a class="btn-primary" href="#">お問い合わせフォームへ</a>
+  </div>
+</section>
+
+<footer class="site-footer">
+  <div class="wrap footer-inner">
+    <div>
+      <div style="font-family: var(--font-heading); font-size: 1.0625rem; margin-bottom: 0.5rem;">ASTREA行政書士事務所</div>
+      <div style="font-size: 0.875rem;">東京都千代田区丸の内一丁目1番1号 丸の内センタービル8F</div>
+      <div style="font-size: 0.875rem;">03-5555-0123</div>
+    </div>
+    <nav>
+      <ul>
+        <li><a href="#">事務所概要</a></li>
+        <li><a href="#">取扱業務</a></li>
+        <li><a href="#">専門家紹介</a></li>
+        <li><a href="#">料金</a></li>
+        <li><a href="#">FAQ</a></li>
+        <li><a href="#">お問い合わせ</a></li>
+      </ul>
+    </nav>
+  </div>
+</footer>
+
+</body>
+</html>
