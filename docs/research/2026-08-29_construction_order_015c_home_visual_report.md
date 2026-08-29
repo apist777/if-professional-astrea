@@ -120,7 +120,17 @@ Trust（主施工）／Natural／Modernの3種類でDesktop表示を確認した
 | PHPCS | 62/62、0 Errors |
 | PHPUnit | 359 tests, 560 assertions, OK |
 | 公式Theme Check | REQUIRED/WARNING 0、INFO 1（問題なし） |
-| smoke-test.sh | **ローカル実行せず**（Order 37節の明示的指示に従い、Owner Fixture保護のためCIのみに委ねる。本Report作成時点でPush後のCI結果を待つ） |
+| smoke-test.sh | CI（Clean環境）で1件のFAIL発見・修正・再確認 |
+
+### smoke-test.sh側の修正（テスト自体の不備、Product Codeの不具合ではない）
+
+初回Push時、CIのPart Y（Price Dynamic Blockの0件時挙動確認）が失敗した：「astrea/price-list rendered a container with 0 Price posts」。原因を特定するため、`gh api`でCIの生Logを取得して調査した。
+
+`render_price_list_block()`のPHPUnit Test（`assertSame( '', Price\render_price_list_block() )`）は本Constructionを通して一貫してPASSしており、0件時に空文字列を返す実装自体は正しい。一方smoke-test.sh Part Yの検査は、生成したPage全体のHTML本文に対して`grep -qF "wp-block-astrea-price-list"`という**単純な部分文字列検索**を行っていた。
+
+Construction 015Cで`theme.json`へ追加したGlobal CSS（Section間の統一Margin用ルール）には、`.wp-block-astrea-service-list, .wp-block-astrea-case-list, .wp-block-astrea-results-list, ... , .wp-block-astrea-price-list, ...`という複数Selectorをまとめた1つのCSS規則が含まれており、このCSSは**Site全体の`<style>`タグとして、Priceが0件のPageも含めた全Pageに出力される**。そのため、実際にはPrice Blockは正しく何もRenderしていないにも関わらず、Page内のCSS文字列に"wp-block-astrea-price-list"という部分文字列が含まれてしまい、smoke-testの単純な部分一致検索が誤検知した。
+
+これはProduct Code（`price-list-block.php`のRender処理）の不具合ではなく、smoke-test.sh側の検査方法が、Visual v2で新たに導入したGlobal CSSアーキテクチャを想定していなかったことによる**Test側の誤検知**と判断した。`tools/ci/smoke-test.sh`のPart Yの検査条件を、単純な部分文字列一致から、実際にRenderされるContainer要素そのもの（`<div class="wp-block-astrea-price-list">`という開始Tagの正規表現）に絞り込む形へ修正した。修正後、実際に0件PriceのPageを作成し、旧検査条件では誤検知が再現すること・新検査条件では正しくPASSすることの両方を、Owner Fixtureには一切影響を与えない一時的なTest Page作成・削除のみで確認した。他のDynamic Block（Service/CASE/FAQ/RESULTS/VOICE）については、smoke-test.sh内に同様の単純部分文字列検査は存在しないことを確認済み。
 
 ## 14. Security / Migration
 

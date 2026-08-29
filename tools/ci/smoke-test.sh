@@ -423,7 +423,14 @@ check_no_fatal "Y: faq archive, 0 items" "/faq/"
 PRICE_EMPTY_PAGE=$(wp_cli post create --post_type=page --post_status=publish --post_title="Smoke Price Page" --post_content='<!-- wp:astrea/price-list /-->' --porcelain)
 PRICE_PAGE_PATH="/$(wp_cli post get "$PRICE_EMPTY_PAGE" --field=post_name)/"
 check_no_fatal "Y: price-list Dynamic Block, 0 items" "$PRICE_PAGE_PATH"
-if grep -qF "wp-block-astrea-price-list" "$BODY_FILE"; then
+# Match the actual rendered container tag, not a bare substring: Construction
+# 015C added theme.json global CSS that legitimately mentions the
+# "wp-block-astrea-price-list" class name in a shared selector (for margin
+# rules applied when the block DOES render), which is present in every
+# page's <style> block regardless of whether this page's block rendered
+# anything — a plain `grep -qF` for the class name alone would false-positive
+# on that unrelated CSS, not on real rendered content.
+if grep -qE '<div class="wp-block-astrea-price-list"' "$BODY_FILE"; then
 	echo "FAIL [Y]: astrea/price-list rendered a container with 0 Price posts (must render nothing per §8)"
 	exit 1
 fi
