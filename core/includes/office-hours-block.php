@@ -131,13 +131,20 @@ function render_hours_block( array $attributes = array() ): string {
 
 	$rows = '';
 	foreach ( WEEKDAYS as $day ) {
-		$row = $weekly[ $day ];
+		$row       = $weekly[ $day ];
+		$is_closed = ! empty( $row['closed'] );
 
-		$value = empty( $row['closed'] )
-			? esc_html( $row['open'] ) . '〜' . esc_html( $row['close'] )
-			: esc_html__( '休業', 'astrea-core' );
+		$value = $is_closed
+			? esc_html__( '休業', 'astrea-core' )
+			: esc_html( $row['open'] ) . '〜' . esc_html( $row['close'] );
 
-		$rows .= '<dt>' . esc_html( weekday_label( $day ) ) . '</dt><dd>' . $value . '</dd>';
+		// Construction Order 015E: a class hook only (no colour/urgency
+		// language baked in here — §13 explicitly bans an error/warning
+		// look for an ordinary closed day; Theme CSS keeps this to a muted
+		// tone, never red).
+		$dd_class = $is_closed ? ' class="is-closed"' : '';
+
+		$rows .= '<dt>' . esc_html( weekday_label( $day ) ) . '</dt><dd' . $dd_class . '>' . $value . '</dd>';
 	}
 
 	$body = '<dl class="wp-block-astrea-office-hours-weekly">' . $rows . '</dl>';

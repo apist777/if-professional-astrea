@@ -160,6 +160,14 @@
 		},
 	} );
 
+	registerDynamicBlock( 'astrea/office-summary', {
+		title: __( '事務所基本情報', 'astrea-core' ),
+		icon: 'building',
+		category: 'widgets',
+		description: __( 'ASTREA Core — 事務所名・所在地・電話番号を表示します。', 'astrea-core' ),
+		attributes: headingAndEmpty,
+	} );
+
 	registerDynamicBlock( 'astrea/office-hours', {
 		title: __( '営業時間', 'astrea-core' ),
 		icon: 'clock',

@@ -126,5 +126,15 @@ function render_price_list_block( array $attributes = array() ): string {
 
 	$heading_html = '' !== $heading ? '<h2>' . esc_html( $heading ) . '</h2>' : '';
 
-	return $heading_html . '<div class="wp-block-astrea-price-list">' . $items . '</div>';
+	// Construction Order 015E: the dedicated Price page wants a more
+	// spacious, "detail page" presentation than the HOME teaser's compact
+	// summary. There is no new context attribute for this — `heading` set
+	// is already the existing, established signal that this call is the
+	// HOME teaser (only home-price.php sets it; the Price page's own
+	// content and the price-list Pattern both leave it unset and rely on
+	// the page's own post-title instead), so it doubles as the compact/
+	// detailed switch without inventing new Block API surface.
+	$list_class = '' !== $heading ? 'wp-block-astrea-price-list wp-block-astrea-price-list--compact' : 'wp-block-astrea-price-list';
+
+	return $heading_html . '<div class="' . esc_attr( $list_class ) . '">' . $items . '</div>';
 }

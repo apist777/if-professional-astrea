@@ -227,6 +227,7 @@ Featured Imageが無い場合でも破綻しないよう、Photo Slotには：
 - **015C実装で確定した方式**：`astrea_price_group`は、投稿を実際にGroup単位でBucket化・再ソートする「Section Grouping」ではなく、**各項目自身にGroup名をKicker Labelとして常時表示する**方式を採用した。理由：`get_prices()`は`menu_order, title, ID`順であり`group`順に整列されないため、「Groupが変わったら見出しを出す」実装は、実データがGroupごとに連続していない場合に同じGroup名の見出しが複数回・分断されて表示される不具合を生む。並び順を変更する「再ソート」自体がPost v1 Finding 8の実装領域に踏み込むため、Presentation層のみで完結する現方式を正とする。
 - Offer Schema（JSON-LD）の追加は禁止（Decision 026のFAQPage/Offer/ProfessionalService自動生成禁止方針を維持）
 - Price GroupのPost v1 Backlog（Finding 8——Groupごとの構造的な表示切り替え・実際のBucket化）は引き続き着手しない
+- **015E実装で確定した方式**：専用Price Page（比較・理解・問い合わせ判断のための詳細Presentation）とHOME Teaser（概要）の視覚差は、新しいContext属性を追加せず、既存の`heading`属性（HOME Teaserのみが設定する、Price Page/Patternは設定しない）を流用したCompact/Detailed切り替えで実現した：`heading`が設定されていれば`wp-block-astrea-price-list--compact`Classを付与し、HOME側の既存の詰まったPadding・地味なGroup Kickerをそのまま維持。Price Page側（Classなし＝新しいDefault）はPaddingを拡張し、Group KickerをPill状のBadgeへ強調——Finding 8のBucket化・再ソートには一切踏み込んでいない。
 
 ## 11. Voice v2 Specification
 
@@ -242,6 +243,10 @@ VoiceをQuote（引用符付きBlockquote）・Attribution（`display_name`）�
 - Mobile：横幅不足時は縦積みへ自然に切り替わるResponsive設計とし、Table自体がHorizontal Scrollを必要とする構造は避ける
 - 休業日の表現（現状「休業」というText表示）は維持しつつ、視覚的にグレーアウト等で区別する
 
+- **015E実装で確定した方式**：Desktop/Mobileとも同一の`dl`（`dt`=曜日、`dd`=時間）をCSS Gridで「曜日｜時間」2列に整形し、行ごとに下Borderで区切る——HTML `<table>`は採用しなかった（既存の`office-hours-block.php`が既にSemanticな`dl`を返しており、Markup変更なしでCSSのみでTable相当の視覚を実現できたため）。休業日は`dd`に`is-closed`Class（PHP側で追加、Data Contract変更なし）を付け、Secondary色へ変更するのみ——赤・警告色・Icon等は使用しない。Closure Exceptions（`business_hours.exceptions`）は`office-hours-block.php`の既存出力（`<ul>`）をSurface系とは別の淡いBase背景＋左BorderのBoxとして週次Tableの下に独立表示し、通常営業時間との違いを一目で区別できるようにした。
+- **Office Name/Address/Phone（015E実装で新設）**：既存の3つのBlock Bindings付きParagraphを`astrea/office-summary`という新規Dynamic Blockに置き換えた（`get_office_profile()`を読むだけ、新規Dataなし）。Office Nameは見出し的な単独Text（「事務所名」というLabelを付けない——名刺に「名前：」と書かないのと同じ理由）、Address/PhoneのみLabel付き`dl`とした。個別のFieldが空の場合はそのFieldの行だけを省略し、既存Setup生成済みPage（Owner Fixture）は空Label/空Rowを残さないことを実機確認済み。
+- **Office SNS（015E実装で確定した方式）**：既存の`astrea/office-sns`（`<ul><li><a>`）自体は変更せず、CSSのみでBorder付きPill形状のChipへ変換し、`::after{content:"↗"}`という装飾Unicode文字1つでExternal Link感を付与した（新規Icon Library・Brand Logoは使用していない）。
+
 ## 13. Contact Form v2 Specification
 
 既存Field構成（お名前・メールアドレス・電話番号・件名・お問い合わせ内容）は変更しない。改善対象はVisual Styleのみ。
@@ -253,6 +258,8 @@ VoiceをQuote（引用符付きBlockquote）・Attribution（`display_name`）�
 - Focus / Error：既存のAccessibility要件（Focus可視性）を維持しながら、Formとして違和感のないStyleを適用
 - Button：3.6節のButton Tokenに準拠
 - Form Container：Card状のContainer（Border、Surface背景）でForm全体をひとまとまりに見せる
+
+- **015E実装で確定した方式**：既存`.wp-block-astrea-contact-form`（Form自体にもSuccess State（`role="status"`のDiv）にも共通して付いている既存Class）にCard Style（Surface背景、Border、radius-md、`max-width:32rem`＋`margin:auto`）を適用——PHP側の変更は0（Markup/ClassはConstruction Order 005当時のまま）。Input/Textareaは`box-sizing:border-box`＋統一Padding/min-heightでCSSのみ統一。Focusは`outline:2px solid var(--wp--preset--color--primary);outline-offset:2px`を明示追加（従来はBrowser Default Outlineのみで、Themeとしては未定義だった——`outline:none`は一切使用していない）。Error表示は既存の`.astrea-contact-form__errors`（`role="alert"`）・`aria-invalid`・`.astrea-contact-form__field-error`をそのまま使い、左Border＋Primary色文字でCSSのみ強調（Validation Logic・Error文言・Server処理は無変更）。Submit ButtonはMobileで`width:100%`、480px以上で`width:auto`に戻すCSSのみの調整。
 
 ## 14. Footer v2 Specification
 
@@ -296,3 +303,7 @@ PROは将来、以下で価値を出す方向とする（v2 Visual Designの対�
 - Responsive／Accessibility（既存確認済み水準を後退させない）
 - Theme Check／WordPress.org Rules
 - 既存ユーザーContent・既存Setup生成HOMEの上書き禁止（Migrationによる強制上書きは行わない）
+
+### Release前Backlog（Visual v2の対象外、失わないための記録）
+
+- **CPT Archive `og:url`がHOME URLを返す既存挙動**（Construction Order 015Dで発見、015Eでも対応せず）：`seo-meta.php`のOGP生成がCPT Archiveページでも`home_url()`相当を返しており、本来はそのArchive自身のURLを返すべき。SEO Architecture Freezeの対象のため、Visual v2の各Constructionでは着手しない。Release前のSEO Fix候補として明示的に記録する。

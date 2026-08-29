@@ -45,11 +45,16 @@ const GENERATE_PAGES_NONCE  = 'astrea_setup_generate_pages_nonce';
  * placeholder paragraph the site owner is expected to rewrite (事務所概要 —
  * never fabricated business content, see 07 research §10).
  *
- * Construction Order 011 appended the same real Office Profile display
- * blocks used by the `astrea/office-info` Pattern (office_name/address/
- * phone Bindings + astrea/office-hours + astrea/office-sns) below the
- * placeholder paragraph — this is genuine data (or a self-hiding empty
- * state), never fabricated content, so it is safe to publish immediately.
+ * Construction Order 011 appended the real Office Profile display blocks
+ * (office_name/address/phone + astrea/office-hours + astrea/office-sns)
+ * below the placeholder paragraph — this is genuine data (or a
+ * self-hiding empty state), never fabricated content, so it is safe to
+ * publish immediately. Construction Order 015E replaced the three
+ * independent Block-Bindings Paragraphs (office_name/address/phone) with
+ * the `astrea/office-summary` Dynamic Block introduced that same order —
+ * same underlying data, same public read boundary, only the rendered
+ * Markup changed (a Label/Value structure instead of three bare
+ * paragraphs), matching the `astrea/office-info` Pattern this mirrors.
  * Per the established Construction Order 009 HOME precedent,
  * generate_pages() below only ever inserts this for a page it is creating
  * for the first time — an already-generated (or user-edited) 事務所概要
@@ -65,11 +70,13 @@ function page_definitions(): array {
 			'content' => "<!-- wp:paragraph -->\n<p>" .
 				esc_html__( 'ここに事務所の紹介文を入力してください。', 'astrea-core' ) .
 				"</p>\n<!-- /wp:paragraph -->\n\n" .
-				'<!-- wp:paragraph {"metadata":{"bindings":{"content":{"source":"astrea-core/office-profile","args":{"key":"office_name"}}}}} -->' . "\n<p></p>\n<!-- /wp:paragraph -->\n\n" .
-				'<!-- wp:paragraph {"metadata":{"bindings":{"content":{"source":"astrea-core/office-profile","args":{"key":"address"}}}}} -->' . "\n<p></p>\n<!-- /wp:paragraph -->\n\n" .
-				'<!-- wp:paragraph {"metadata":{"bindings":{"content":{"source":"astrea-core/office-profile","args":{"key":"phone"}}}}} -->' . "\n<p></p>\n<!-- /wp:paragraph -->\n\n" .
+				'<!-- wp:group {"className":"astrea-office-page","layout":{"type":"flex","orientation":"vertical"}} -->' . "\n" .
+				'<div class="wp-block-group astrea-office-page">' . "\n\n" .
+				'<!-- wp:astrea/office-summary /-->' . "\n\n" .
 				'<!-- wp:astrea/office-hours {"heading":"' . esc_html__( '営業時間', 'astrea-core' ) . '"} /-->' . "\n\n" .
-				'<!-- wp:astrea/office-sns {"heading":"' . esc_html__( 'SNS', 'astrea-core' ) . '"} /-->',
+				'<!-- wp:astrea/office-sns {"heading":"' . esc_html__( 'SNS', 'astrea-core' ) . '"} /-->' . "\n\n" .
+				'</div>' . "\n" .
+				'<!-- /wp:group -->',
 		),
 		'price'   => array(
 			'title'   => __( '料金', 'astrea-core' ),
