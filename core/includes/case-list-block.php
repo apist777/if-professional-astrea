@@ -79,13 +79,17 @@ function render_case_list_block( array $attributes = array() ): string {
 	$items = '';
 
 	foreach ( $cases as $case ) {
+		$permalink = get_permalink( $case['id'] );
+
 		$items .= '<div class="wp-block-astrea-case-item">';
-		$items .= '<h3><a href="' . esc_url( get_permalink( $case['id'] ) ) . '">' . esc_html( $case['title'] ) . '</a></h3>';
+		$items .= '<h3><a href="' . esc_url( $permalink ) . '">' . esc_html( $case['title'] ) . '</a></h3>';
 
 		$excerpt = '' !== $case['excerpt'] ? $case['excerpt'] : wp_trim_words( wp_strip_all_tags( $case['content'] ), 40 );
 		if ( '' !== $excerpt ) {
-			$items .= '<p>' . esc_html( $excerpt ) . '</p>';
+			$items .= '<p class="wp-block-astrea-case-item-excerpt">' . esc_html( $excerpt ) . '</p>';
 		}
+
+		$items .= '<p class="wp-block-astrea-case-item-action"><a href="' . esc_url( $permalink ) . '">' . esc_html__( '詳しく見る', 'astrea-core' ) . '</a></p>';
 
 		$items .= '</div>';
 	}

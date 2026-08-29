@@ -84,23 +84,26 @@ function render_representative_block( array $attributes = array() ): string {
 
 	$representative = $representatives[0];
 
-	$body = '<div class="wp-block-astrea-representative">';
+	$has_photo = (bool) $representative['photo_id'];
+	$body      = '<div class="wp-block-astrea-representative' . ( $has_photo ? ' has-photo' : ' no-photo' ) . '">';
 
-	if ( $representative['photo_id'] ) {
-		$body .= wp_get_attachment_image( $representative['photo_id'], 'medium' );
+	if ( $has_photo ) {
+		$body .= '<div class="wp-block-astrea-representative-photo">' . wp_get_attachment_image( $representative['photo_id'], 'medium' ) . '</div>';
 	}
 
-	$body .= '<h3>' . esc_html( $representative['name'] ) . '</h3>';
+	$body .= '<div class="wp-block-astrea-representative-body">';
+	$body .= '<h3 class="wp-block-astrea-representative-name">' . esc_html( $representative['name'] ) . '</h3>';
 
 	if ( '' !== $representative['qualification'] ) {
-		$body .= '<p>' . esc_html( $representative['qualification'] ) . '</p>';
+		$body .= '<p class="wp-block-astrea-representative-qualification">' . esc_html( $representative['qualification'] ) . '</p>';
 	}
 
 	$bio_excerpt = wp_trim_words( wp_strip_all_tags( $representative['bio'] ), 40 );
 	if ( '' !== $bio_excerpt ) {
-		$body .= '<p>' . esc_html( $bio_excerpt ) . '</p>';
+		$body .= '<p class="wp-block-astrea-representative-bio">' . esc_html( $bio_excerpt ) . '</p>';
 	}
 
+	$body .= '</div>';
 	$body .= '</div>';
 
 	$heading_html = '' !== $heading ? '<h2>' . esc_html( $heading ) . '</h2>' : '';

@@ -204,18 +204,19 @@ Featured Imageが無い場合でも破綻しないよう、Photo Slotには：
 
 ## 9. Results v2 Specification
 
-既存Result Data（Title/Content、例：「相談実績500件以上」）を、大きな数字として視覚化するComponentを設計する。
+既存Result Dataを、大きな数字として視覚化するComponentを設計する。
 
-- 数値部分（「500+」「98%」等）と、説明文（「相談実績」「建設業許可取得率」等）を、Design Tokenの`results-number`（3.1節）で分離して強調する。
-- **データの意味を勝手に推測しない**：現在のResult Dataは自由入力のTitle/Content形式であり、「数値」と「説明」を機械的に分離するParsingロジックは追加しない（Post v1 Backlog化されている構造変更は行わない）。v2では、既存のTitle全体を大きく見せるVisual Treatment（Title自体を大きなFont Sizeで表示する）に留める案を基本とする。
+- **015C実装で確認した実際のData構造**：Result CPTは既に`label`（post_title）と`value`（専用Postmeta `astrea_result_value`）が分離したFieldを持つ（自由入力のTitle/Content一体型ではない）。したがって「数値と説明を機械的に分離するParsing」は不要かつ不適切——`value`をそのままDesign Tokenの`results-number`（3.1節）で強調表示し、`label`を補助Textとして表示すればよい。
+- **データの意味を勝手に推測しない**の原則は、Postmeta `value`が未入力（空文字列）の場合に、`label`の文字列から数値らしき部分を抜き出そうとするような処理を禁止する意味で維持する。
+- `results-number` Tokenの実際の値は、実機Fixtureでの折返し確認を経て`clamp(1.75rem, 3.5vw, 2.5rem)`に確定した（015A時点の暫定値`clamp(2.5rem, 5vw, 4rem)`は、3列Grid内で日本語4〜6文字程度の値が2行に折り返してしまうことが判明したため縮小した）。
 
 ## 10. Price v2 Specification
 
-既存Price情報（Title、`astrea_price_amount`、`astrea_price_group`）のみを使用し、Price CardまたはStructured Listを設計する。
+既存Price情報（Title、`astrea_price_amount`、`astrea_price_group`）のみを使用し、Structured Listを設計する（Card Gridにはしない——Servicesとの視覚的差別化のため）。
 
-- `astrea_price_group`によるSection Grouping（既存Meta Fieldの活用、新規Field追加なし）
+- **015C実装で確定した方式**：`astrea_price_group`は、投稿を実際にGroup単位でBucket化・再ソートする「Section Grouping」ではなく、**各項目自身にGroup名をKicker Labelとして常時表示する**方式を採用した。理由：`get_prices()`は`menu_order, title, ID`順であり`group`順に整列されないため、「Groupが変わったら見出しを出す」実装は、実データがGroupごとに連続していない場合に同じGroup名の見出しが複数回・分断されて表示される不具合を生む。並び順を変更する「再ソート」自体がPost v1 Finding 8の実装領域に踏み込むため、Presentation層のみで完結する現方式を正とする。
 - Offer Schema（JSON-LD）の追加は禁止（Decision 026のFAQPage/Offer/ProfessionalService自動生成禁止方針を維持）
-- Price GroupのPost v1 Backlog（Finding 8）自体の実装着手はv2 Visual Designの対象外。v2では「見た目の改善」のみを行い、「Groupごとの構造的な表示切り替え機能」は着手しない
+- Price GroupのPost v1 Backlog（Finding 8——Groupごとの構造的な表示切り替え・実際のBucket化）は引き続き着手しない
 
 ## 11. Voice v2 Specification
 

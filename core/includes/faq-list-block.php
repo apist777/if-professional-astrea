@@ -94,8 +94,8 @@ function render_faq_list_block( array $attributes = array() ): string {
 
 	foreach ( $faqs as $faq ) {
 		$items .= '<div class="wp-block-astrea-faq-item">';
-		$items .= '<h3>' . esc_html( $faq['question'] ) . '</h3>';
-		$items .= '<div>' . wp_kses_post( apply_filters( 'the_content', $faq['answer'] ) ) . '</div>'; // phpcs:ignore WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedHooknameFound -- invoking WordPress core's own `the_content` filter, not declaring a new hook.
+		$items .= '<h3 class="wp-block-astrea-faq-item-question"><span class="wp-block-astrea-faq-item-label" aria-hidden="true">Q</span>' . esc_html( $faq['question'] ) . '</h3>';
+		$items .= '<div class="wp-block-astrea-faq-item-answer"><span class="wp-block-astrea-faq-item-label" aria-hidden="true">A</span>' . wp_kses_post( apply_filters( 'the_content', $faq['answer'] ) ) . '</div>'; // phpcs:ignore WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedHooknameFound -- invoking WordPress core's own `the_content` filter, not declaring a new hook.
 		$items .= '</div>';
 	}
 

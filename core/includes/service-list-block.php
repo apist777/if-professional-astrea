@@ -87,13 +87,17 @@ function render_service_list_block( array $attributes = array() ): string {
 	$items = '';
 
 	foreach ( $services as $service ) {
+		$permalink = get_permalink( $service['id'] );
+
 		$items .= '<div class="wp-block-astrea-service-item">';
-		$items .= '<h3><a href="' . esc_url( get_permalink( $service['id'] ) ) . '">' . esc_html( $service['name'] ) . '</a></h3>';
+		$items .= '<h3><a href="' . esc_url( $permalink ) . '">' . esc_html( $service['name'] ) . '</a></h3>';
 
 		$excerpt = wp_trim_words( wp_strip_all_tags( $service['description'] ), 40 );
 		if ( '' !== $excerpt ) {
-			$items .= '<p>' . esc_html( $excerpt ) . '</p>';
+			$items .= '<p class="wp-block-astrea-service-item-description">' . esc_html( $excerpt ) . '</p>';
 		}
+
+		$items .= '<p class="wp-block-astrea-service-item-action"><a href="' . esc_url( $permalink ) . '">' . esc_html__( '詳しく見る', 'astrea-core' ) . '</a></p>';
 
 		$items .= '</div>';
 	}

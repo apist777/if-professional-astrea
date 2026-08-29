@@ -101,14 +101,24 @@ function render_price_list_block( array $attributes = array() ): string {
 
 	foreach ( $prices as $price ) {
 		$items .= '<div class="wp-block-astrea-price-item">';
-		$items .= '<h3>' . esc_html( $price['name'] ) . '</h3>';
+
+		if ( '' !== $price['group'] ) {
+			// Per-item kicker label, not a sorted/bucketed section grouping —
+			// get_prices() orders by menu_order/title/ID, never by group, so
+			// grouping into buckets here would require re-sorting (Post v1
+			// Finding 8's territory, explicitly out of scope). Showing the
+			// group as each item's own label works regardless of order.
+			$items .= '<p class="wp-block-astrea-price-item-group">' . esc_html( $price['group'] ) . '</p>';
+		}
+
+		$items .= '<h3 class="wp-block-astrea-price-item-name">' . esc_html( $price['name'] ) . '</h3>';
 
 		if ( '' !== $price['amount'] ) {
-			$items .= '<p>' . nl2br( esc_html( $price['amount'] ) ) . '</p>';
+			$items .= '<p class="wp-block-astrea-price-item-amount">' . nl2br( esc_html( $price['amount'] ) ) . '</p>';
 		}
 
 		if ( '' !== $price['notes'] ) {
-			$items .= '<p>' . nl2br( esc_html( $price['notes'] ) ) . '</p>';
+			$items .= '<p class="wp-block-astrea-price-item-notes">' . nl2br( esc_html( $price['notes'] ) ) . '</p>';
 		}
 
 		$items .= '</div>';
