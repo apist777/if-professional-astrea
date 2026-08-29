@@ -1,8 +1,8 @@
 # 07. ASTREA Visual v3 — Design Direction (B+C)
 
-- **Status**: PHASE 1 実装済み（Header / Hero / First View、Construction 016B）。Phase 2（Services以降）はOwner Approval待ち、未実装。
-- **Construction Order**: 016A → 016A-R1 → 016B（Phase 1実装）
-- **Date**: 2026-08-29（016A/016A-R1）/ 2026-08-30（016B）
+- **Status**: PHASE 1 実装済み・REVISE対応済み（Header / Hero / First View、Construction 016B → 016B-R1でJapanese Typography問題を修正）。Phase 2（Services以降）はOwner Approval待ち、未実装。
+- **Construction Order**: 016A → 016A-R1 → 016B（Phase 1実装）→ 016B-R1（Typography Revision）
+- **Date**: 2026-08-29（016A/016A-R1）/ 2026-08-30（016B / 016B-R1）
 - **Functional Baseline**: RC1 (1.0.0-rc1) — 変更なし
 
 ## 0. 位置づけ
@@ -183,7 +183,24 @@ Construction Order 016BでHeader/Hero/First Viewのみを実際のASTREA FREE Th
 - **Next Section Hint（§4）**: Mockupの「"01 SERVICES" + 罫線」ラベルは採用せず、**罫線のみ（Theme CSSの`::after`疑似要素、Markupなし）**とした。理由: `core/cover`は自身のInnerBlocks以外の追加Markup Siblingを許容せず（Gutenberg Block Validationのround-trip検証で不整合になる）、また出荷PatternはHeroの次に必ず"SERVICES"が来ることを前提にできない（既存installationは`setup-home.php`のPattern順序をOwnerが自由に並べ替えられる）。
 - **H1のCopy契約（§4）**: MockupのH1文言「複雑な手続きを、／前へ進める力に。」はデザイン検証用のFixture Copyであり、出荷Pattern既定のH1は**Construction Order 011以来の契約通り事務所名（`office_name` Binding）を維持**した。Owner Fixtureの実機HOME（`http://localhost:8888/`）でも同様（H1=ASTREA行政書士事務所）。Mockupが検証したのはTypography Scale／Layout／Photography構成であり、H1の中身そのものの差し替えではない。
 - **Mobile Hero（§5）**: 016A-R1承認構図（写真右上ブリード＋Textプレート・オーバーラップ、55pxオーバーラップ、`overflow:hidden`によるMargin Collapsing対策）をそのまま実装した。上記「Hero文字色の方針」により、プレートはR1 Mockupの白背景＋濃色文字ではなく**濃色（Contrastトークン）背景＋白文字**とした（写真の明度に依存しない配色）。実機確認: `docs/research/screenshots/016b/hero-real-mobile-375.png`・`hero-real-mobile-320.png`。Photography未設定時（デフォルトState）はプレート構図自体を使わず、コンパクトな単色Hero（写真スロット無し）へ自然にFallbackする（`:has(.wp-block-cover__image-background)`でScope）。
-- **新規Design Token**: `accent`（Gold、Trust `#B99A5C` / Natural `#c2a46b` / Modern `#a8925c`）をpaletteへ追加（Icon Setの既存Gold `#B99A5C`との統一）。Eyebrowの装飾罫線のみに使用（WCAG計算の結果、明背景ではAA未達のためText用途には使わない）。`heroTitle`（`clamp(2.4rem, 4.6vw, 4rem)`）・`heroEyebrow`（`0.78rem`）を`settings.custom.typography`へ追加（既存`resultsNumber`と同じToken方式）。
+- **新規Design Token**: `accent`（Gold、Trust `#B99A5C` / Natural `#c2a46b` / Modern `#a8925c`）をpaletteへ追加（Icon Setの既存Gold `#B99A5C`との統一）。Kicker（016B時点ではEyebrowという名称、016B-R1で`astrea-hero-kicker`へ改称——§16参照）の装飾罫線のみに使用（WCAG計算の結果、明背景ではAA未達のためText用途には使わない）。`heroTitle`（`clamp(2.4rem, 4.6vw, 4rem)`）・`heroEyebrow`（`0.78rem`）を`settings.custom.typography`へ追加（既存`resultsNumber`と同じToken方式）。
 - **実装ヒヤリハット**: Style Variation「選択済みSnapshot」（`wp_global_styles`投稿）が旧Token値のまま固定されており、theme.json/styles/*.jsonへの`accent`追加が実機に反映されない事象を発見（015B/015Cで既知のWordPress標準挙動と同種）。今回はPaletteが配列（`palette.theme`）として丸ごと上書き保持される一方、`custom`配下のObjectキー（例: `typography.heroTitle`）はTheme側の値とMergeされる、という**キーの型（Array vs Object）によって再同期の要否が異なる**ことを新たに確認した。該当Snapshot投稿のPalette配列へ`accent`を追記して復旧した。
 
 Phase 2（Services/Results/Professional/CASE/Section Rhythm全体）は本Orderの範囲外であり、本書§6〜10の設計はOwner Approval後の次のConstruction Orderで実装する。
+
+## 16. 016B-R1実装確定事項 — Japanese Typographyの恒久原則化
+
+Construction Order 016B-R1（Owner Verdict: 016B REVISE）で、Owner実機確認により日本語Typographyの重大な問題（漢字の字形違和感、意味を無視した改行、H1=事務所名がVisual上の主役になっていた問題）が発見され、これを修正した。詳細は`docs/research/2026-08-30_construction_016b_r1_japanese_typography_report.md`参照。
+
+**恒久原則（Visual v3のみならずASTREA全体に適用）**:
+
+> **Japanese Typography is a first-class design requirement.**
+> 日本語の字形（Glyph）・改行・文字組みは、Overflow/Validation等の機械的な合否基準と同格の「製品品質」として扱う。日本語ユーザーが「字形がおかしい」「改行が不自然」と一目で感じた時点で、その画面はどれだけデザインが洗練されていてもVisual Qualityとして不合格である。
+
+この原則の直接の帰結として、以下を今後のConstruction Orderにも適用する:
+
+- **新しいFont Stackを追加・変更する際は、必ず実在するJapanese Font名を、対象プラットフォーム（Windows/macOS/iOS/Android/Linux）ごとに列挙し、素の`serif`/`sans-serif`キーワード1つに依存しないこと。** Mac/Windows名前のFontだけを書いて安心しない——実際に稼働する環境（CI、実ユーザーのLinux/Android等）にそのFontが存在するかどうかは、`fc-list`等で機械的に確認できる場合は確認すること。
+- **Chromium上で実際に選択されたFontを確認したい場合は、CSSの`computed font-family`ではなく、DevTools Protocolの`CSS.getPlatformFontsForNode`（実際に描画に使われた物理Font名を返す）を使うこと。** `getComputedStyle().fontFamily`はCSSで指定したFallback Chain の文字列をそのまま返すだけで、実際にどのFontが選ばれたかは分からない——本Orderの根本原因調査で確立した手法。
+- **新しい見出し/コピー要素を追加する際は、`word-break:normal; line-break:strict; overflow-wrap:anywhere;`をText Wrapper（継承元）へ、`text-wrap:pretty`を各Text要素へ付与することを既定の作法とする**（016B-R1でHeroに適用したパターンをそのまま再利用可能）。
+- **Semantic Heading LevelとVisual Sizeの分離は、この製品で繰り返し使われる正当な設計パターンである**（Construction 011のHero H1、016B-R1のKicker/Primary分離）。「見た目を大きくしたいから見出しレベルを上げる/下げる」という発想ではなく、Semantic構造（H1は1つ、文書の論理構造を表す）とVisual Style（CSSでいくらでも調整可能）を独立して設計すること。
+- **完全な日本語の意味的改行（形態素単位のPhrase-wrap、例: BudouX）は、CSSのみ（`text-wrap:pretty`等）では実現できない既知の限界である。** 特定の複合語がViewport幅によって2行にまたがることは起こり得る（1文字だけが孤立するような最悪パターンは`text-wrap:pretty`で概ね回避できるが、意味単位の完全遵守は保証されない）。この限界を許容するか、JS製の形態素解析ライブラリ導入という別のConstruction Orderで対応するかは、都度Ownerの判断を仰ぐこと（新規JS依存の追加は本書の設計原則を超える意思決定であり、勝手に追加しない）。

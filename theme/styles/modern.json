@@ -19,12 +19,12 @@
         {
           "slug": "heading",
           "name": "Heading",
-          "fontFamily": "'Helvetica Neue', Arial, 'Hiragino Sans', 'Yu Gothic', sans-serif"
+          "fontFamily": "'Helvetica Neue', Arial, 'Hiragino Sans', 'Hiragino Kaku Gothic ProN', 'Yu Gothic Medium', 'Yu Gothic', YuGothic, '游ゴシック体', '游ゴシック', 'Noto Sans CJK JP', 'Noto Sans JP', 'IPAGothic', 'VL PGothic', 'Droid Sans Japanese', Meiryo, 'MS PGothic', sans-serif"
         },
         {
           "slug": "body",
           "name": "Body",
-          "fontFamily": "'Helvetica Neue', Arial, 'Hiragino Sans', 'Yu Gothic', sans-serif"
+          "fontFamily": "'Helvetica Neue', Arial, 'Hiragino Sans', 'Hiragino Kaku Gothic ProN', 'Yu Gothic Medium', 'Yu Gothic', YuGothic, '游ゴシック体', '游ゴシック', 'Noto Sans CJK JP', 'Noto Sans JP', 'IPAGothic', 'VL PGothic', 'Droid Sans Japanese', Meiryo, 'MS PGothic', sans-serif"
         }
       ]
     },
