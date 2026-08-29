@@ -178,6 +178,10 @@ WordPress標準の`get_the_archive_title()`は、投稿タイプArchiveに対し
 
 具体的な実装（Filter追加箇所）は015B以降のConstruction Orderで確定する。本書では「安全な方法が存在する」ことの確認に留める。
 
+- **015D実装で確定した方式**：`core/includes/archive-title.php`を新設し、`get_the_archive_title`Filterで`is_post_type_archive(MANAGED_POST_TYPES)`かつ`get_queried_object() instanceof WP_Post_Type`の場合のみ`$post_type_object->labels->name`を返す。`document_title_parts`（`<title>`生成、`seo-meta.php`が別途管理）には未接続で、実機確認で`<title>`への影響が無いことを確認した。Search・Category・Tag・Date Archiveは対象post typeに含まれないため無変更。
+- Archiveごとの実際のListing形式は、`core/query`のNative Grid Layout（`layout:{"type":"grid","minimumColumnWidth":...}`、WP 6.3+標準）のみで実現し、CSS側の`grid-template-columns`手書き実装は行っていない。1〜5件のCount Stressで不自然な引き伸ばし・空白が出ないことを実機確認済み。
+- Archive Empty State（0件時）はHOME Teaserの完全自己非表示（Decision 028）とは異なり、Header/Breadcrumb/H1を表示したまま「準備中」Message + `core/home-link`のみを表示する。`core/home-link`はNavigation外での単体使用時に裸の`<li>`を出すため、`list-style:none`のCSSを別途当てている。
+
 ## 7. Single v2 Specification
 
 Service / Professional / CASE等のSingle Templateに、以下の構造を設計する。
@@ -191,6 +195,10 @@ Service / Professional / CASE等のSingle Templateに、以下の構造を設計
 
 新しいSemantic Data（Postmeta等）は追加しない。既存のPost Type・Taxonomy・既存Fieldのみで構成する。
 
+- **015D実装で確定した方式**：「Related / Next Action」は新規Block属性を追加せず（静的Patternから動的な現在の投稿IDを渡す手段が無いため）、既存の`astrea/service-list`・`astrea/case-list`（HOMEで使っているものと同一のDynamic Block）に`is_singular()`によるコンテキスト検出を追加し、同じBlockをSingle上で「関連コンテンツ」として再利用する方式を採った。Service Singleは自分自身を除外した他Serviceを表示し、CASE Singleは`case.php`に既存の`related_services` Postmeta（新規Dataではない）が指すServiceのみを表示する。新しい「レコメンドエンジン」は作っていない。
+- Closing CTAは新規`astrea/closing-cta` Dynamic Blockとして実装（既存の12以上のDynamic Block自己非表示Patternと同一設計）。Contact URLは新規Optionを持たず、`setup-pages.php`の`get_contact_page_url()`が「Setup生成ページの追跡（`GENERATED_PAGES_OPTION`）→ 見つからなければ`setup-checklist.php`の`is_contact_reachable()`と同じBlock-scan検出」の順で解決する。電話番号は既存Office Profileから取得。両方存在しない場合は空文字列を返し、Block自体が消える（実機でCore OFF状態のFatal無し・空白での安全消滅を確認）。
+- Breadcrumbは既存の`get_breadcrumb_items()`を修正し、従来欠けていた`astrea_case`/`astrea_voice`の3階層解決（Home/Archive/Current）を追加した（015D施工中に発見した既存の欠落。詳細は施工報告書参照）。Breadcrumbの見た目は番号付きリストに見えないよう`list-style:none`＋`::after`による「/」区切りへ変更し、`<ol>`自体・aria-label・BreadcrumbList JSON-LDは無変更。
+
 ## 8. Professional v2 Specification
 
 Featured Imageがある場合：Photo・Name・Qualification・Title・Biography・Career/Education/Affiliation・CTAが自然に構成されるLayoutを設計する（既存のProfessional Profile Fieldのみを使用、新規Field追加は無し）。
@@ -201,6 +209,8 @@ Featured Imageが無い場合でも破綻しないよう、Photo Slotには：
 - またはPhoto無し用のText中心Layoutへの自動切り替え
 
 のいずれかを採用する。具体的な実装方式（CSSのみでの切り替えか、Templateレベルでの条件分岐か）は015D以降で確定する。
+
+- **015D実装で確定した方式**：Archive/SingleともにCSSのみで対応し、Templateレベルの条件分岐は追加していない。`core/post-featured-image`は写真が無い投稿では空文字列を返す（WordPress core標準挙動）ため、追加コード無しで「写真エリア自体が存在しない」状態が自然に得られる（015Cの「Placeholder favor B：非表示」方針と一致）。Single Headerは`160px`、Archive Cardは`96px`の円形写真枠（`border-radius:50%`）とし、Mobileでは`600px`以下でFlex方向を`column`に切り替え中央寄せする。Owner Fixtureは実写真を持たないため、円形フレームに実写真が入った場合の見え方は未検証（Known Issueとして報告書に記録）。
 
 ## 9. Results v2 Specification
 

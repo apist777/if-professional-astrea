@@ -3,26 +3,33 @@
 <!-- wp:group {"tagName":"main","layout":{"type":"constrained"}} -->
 <main class="wp-block-group">
 
+<!-- wp:group {"className":"astrea-archive-header","layout":{"type":"constrained"}} -->
+<div class="wp-block-group astrea-archive-header">
 <!-- wp:astrea/breadcrumb /-->
-
 <!-- wp:query-title {"type":"archive","level":1} /-->
+</div>
+<!-- /wp:group -->
 
-<!-- wp:query {"query":{"postType":"astrea_faq","inherit":true}} -->
-<div class="wp-block-query">
+<!-- wp:query {"className":"astrea-archive-listing astrea-faq-archive-listing","query":{"postType":"astrea_faq","inherit":true}} -->
+<div class="wp-block-query astrea-archive-listing astrea-faq-archive-listing">
 <!-- wp:post-template -->
-<!-- wp:group {"tagName":"article","layout":{"type":"constrained"}} -->
-<article class="wp-block-group">
-<!-- wp:post-title {"level":2,"isLink":false} /-->
-<!-- wp:post-content /-->
+<!-- wp:group {"tagName":"article","className":"wp-block-astrea-faq-item","layout":{"type":"constrained"}} -->
+<article class="wp-block-group wp-block-astrea-faq-item">
+<!-- wp:post-title {"level":2,"isLink":false,"className":"wp-block-astrea-faq-item-question"} /-->
+<!-- wp:post-content {"className":"wp-block-astrea-faq-item-answer"} /-->
 </article>
 <!-- /wp:group -->
 <!-- /wp:post-template -->
 
 <!-- wp:query-no-results -->
+<!-- wp:group {"className":"astrea-archive-empty","layout":{"type":"constrained"}} -->
+<div class="wp-block-group astrea-archive-empty">
 <!-- wp:paragraph -->
 <p>現在、FAQの情報は準備中です。</p>
 <!-- /wp:paragraph -->
 <!-- wp:home-link {"content":"トップページに戻る"} /-->
+</div>
+<!-- /wp:group -->
 <!-- /wp:query-no-results -->
 </div>
 <!-- /wp:query -->

@@ -191,4 +191,14 @@
 		description: __( 'ASTREA Core — お問い合わせフォームを表示します。', 'astrea-core' ),
 		attributes: {},
 	} );
+
+	registerDynamicBlock( 'astrea/closing-cta', {
+		title: __( 'お問い合わせへのご案内', 'astrea-core' ),
+		icon: 'megaphone',
+		category: 'widgets',
+		description: __( 'ASTREA Core — ページ末尾のお問い合わせ導線を表示します。', 'astrea-core' ),
+		attributes: {
+			heading: { type: 'string', default: '' },
+		},
+	} );
 } )( window.wp.blocks, window.wp.element, window.wp.i18n );

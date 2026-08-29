@@ -64,6 +64,21 @@ function render_case_list_block( array $attributes = array() ): string {
 
 	$cases = get_cases();
 
+	// Construction Order 015D: on a CASE Single page, this block doubles as
+	// the "Related Cases" section — exclude the post being viewed. Same
+	// deterministic, same-post-type approach as Service's own Single reuse.
+	if ( is_singular( POST_TYPE ) ) {
+		$current_id = get_queried_object_id();
+		$cases      = array_values(
+			array_filter(
+				$cases,
+				static function ( $case_item ) use ( $current_id ) {
+					return $case_item['id'] !== $current_id;
+				}
+			)
+		);
+	}
+
 	if ( $limit > 0 ) {
 		$cases = array_slice( $cases, 0, $limit );
 	}
@@ -89,7 +104,10 @@ function render_case_list_block( array $attributes = array() ): string {
 			$items .= '<p class="wp-block-astrea-case-item-excerpt">' . esc_html( $excerpt ) . '</p>';
 		}
 
-		$items .= '<p class="wp-block-astrea-case-item-action"><a href="' . esc_url( $permalink ) . '">' . esc_html__( '詳しく見る', 'astrea-core' ) . '</a></p>';
+		$items .= '<p class="wp-block-astrea-case-item-action"><a href="' . esc_url( $permalink ) . '">' . esc_html__( '詳しく見る', 'astrea-core' ) . '<span class="screen-reader-text">' .
+			/* translators: %s: Case title, appended to a "詳しく見る" link's accessible name only — not shown visually. */
+			sprintf( esc_html__( '（%sについて）', 'astrea-core' ), esc_html( $case['title'] ) ) .
+			'</span></a></p>';
 
 		$items .= '</div>';
 	}

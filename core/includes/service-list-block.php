@@ -72,6 +72,39 @@ function render_service_list_block( array $attributes = array() ): string {
 
 	$services = get_services();
 
+	// Construction Order 015D: on a Service Single page, this block doubles
+	// as the "Related Services" section — exclude the post being viewed so
+	// it never lists itself as its own related item. Deterministic (same
+	// post type, existing sort order), not a recommendation engine.
+	if ( is_singular( POST_TYPE ) ) {
+		$current_id = get_queried_object_id();
+		$services   = array_values(
+			array_filter(
+				$services,
+				static function ( $service ) use ( $current_id ) {
+					return $service['id'] !== $current_id;
+				}
+			)
+		);
+	} elseif ( is_singular( \Astrea\Core\CaseStudy\POST_TYPE ) ) {
+		// On a CASE Single page, this block shows the specific Services that
+		// CASE's own existing `related_services` field already names
+		// (Decision-preexisting data, not new — see case.php). Zero related
+		// Services recorded for this Case simply self-hides, exactly like
+		// any other zero-item state.
+		$case                = \Astrea\Core\CaseStudy\get_case( get_queried_object_id() );
+		$related_service_ids = ( $case && ! empty( $case['related_services'] ) ) ? $case['related_services'] : array();
+
+		$services = array_values(
+			array_filter(
+				$services,
+				static function ( $service ) use ( $related_service_ids ) {
+					return in_array( $service['id'], $related_service_ids, true );
+				}
+			)
+		);
+	}
+
 	if ( $limit > 0 ) {
 		$services = array_slice( $services, 0, $limit );
 	}
@@ -97,7 +130,10 @@ function render_service_list_block( array $attributes = array() ): string {
 			$items .= '<p class="wp-block-astrea-service-item-description">' . esc_html( $excerpt ) . '</p>';
 		}
 
-		$items .= '<p class="wp-block-astrea-service-item-action"><a href="' . esc_url( $permalink ) . '">' . esc_html__( '詳しく見る', 'astrea-core' ) . '</a></p>';
+		$items .= '<p class="wp-block-astrea-service-item-action"><a href="' . esc_url( $permalink ) . '">' . esc_html__( '詳しく見る', 'astrea-core' ) . '<span class="screen-reader-text">' .
+			/* translators: %s: Service name, appended to a "詳しく見る" link's accessible name only — not shown visually. */
+			sprintf( esc_html__( '（%sについて）', 'astrea-core' ), esc_html( $service['name'] ) ) .
+			'</span></a></p>';
 
 		$items .= '</div>';
 	}

@@ -134,6 +134,60 @@ function page_still_exists( int $post_id ): bool {
 	return $post instanceof \WP_Post && 'page' === $post->post_type && 'trash' !== $post->post_status;
 }
 
+/**
+ * A published Contact page's URL, if one exists (Construction Order 015D
+ * — read-only helper for Visual v2's Closing CTA; adds no new option, no
+ * new persistence).
+ *
+ * Prefers the Setup-generated page tracked in `GENERATED_PAGES_OPTION`
+ * (cheap, no query). But a real site's Contact page is not always that
+ * one — the Owner Fixture itself proved this: its "お問い合わせ" page is a
+ * genuine, published Page containing the Contact Form block, yet
+ * `GENERATED_PAGES_OPTION` was never populated for it (created outside
+ * the Setup flow), so relying on that tracking alone silently produced
+ * "no Contact page" even though visitors can plainly reach one. Falls
+ * back to the same detection `setup-checklist.php`'s
+ * `is_contact_reachable()` already uses — scanning published Pages for
+ * the Contact Form block — reusing existing detection rather than
+ * inventing a second, narrower one (Order §27).
+ *
+ * Returns null whenever there is nothing safe to link to — callers must
+ * treat null as "don't show a Contact action", never fall back to a
+ * guessed or hardcoded URL.
+ *
+ * @return string|null
+ */
+function get_contact_page_url(): ?string {
+	$recorded   = get_option( GENERATED_PAGES_OPTION, array() );
+	$contact_id = isset( $recorded['contact'] ) ? (int) $recorded['contact'] : 0;
+
+	if ( $contact_id > 0 && page_still_exists( $contact_id ) && 'publish' === get_post_status( $contact_id ) ) {
+		$permalink = get_permalink( $contact_id );
+		if ( $permalink ) {
+			return $permalink;
+		}
+	}
+
+	$pages = get_posts(
+		array(
+			'post_type'      => 'page',
+			'post_status'    => 'publish',
+			'posts_per_page' => -1,
+			'fields'         => 'ids',
+			'no_found_rows'  => true,
+		)
+	);
+
+	foreach ( $pages as $page_id ) {
+		if ( has_block( CONTACT_FORM_BLOCK_NAME, $page_id ) ) {
+			$permalink = get_permalink( $page_id );
+			return $permalink ? $permalink : null;
+		}
+	}
+
+	return null;
+}
+
 add_action( 'admin_post_' . GENERATE_PAGES_ACTION, __NAMESPACE__ . '\\handle_generate_pages' );
 
 /**

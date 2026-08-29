@@ -3,26 +3,33 @@
 <!-- wp:group {"tagName":"main","layout":{"type":"constrained"}} -->
 <main class="wp-block-group">
 
+<!-- wp:group {"className":"astrea-archive-header","layout":{"type":"constrained"}} -->
+<div class="wp-block-group astrea-archive-header">
 <!-- wp:astrea/breadcrumb /-->
-
 <!-- wp:query-title {"type":"archive","level":1} /-->
+</div>
+<!-- /wp:group -->
 
-<!-- wp:query {"query":{"postType":"astrea_voice","inherit":true}} -->
-<div class="wp-block-query">
-<!-- wp:post-template -->
-<!-- wp:group {"tagName":"article","layout":{"type":"constrained"}} -->
-<article class="wp-block-group">
-<!-- wp:post-content /-->
-<!-- wp:post-title {"level":2,"isLink":false} /-->
+<!-- wp:query {"className":"astrea-archive-listing astrea-voice-archive-listing","query":{"postType":"astrea_voice","inherit":true}} -->
+<div class="wp-block-query astrea-archive-listing astrea-voice-archive-listing">
+<!-- wp:post-template {"layout":{"type":"grid","columnCount":null,"minimumColumnWidth":"20rem"}} -->
+<!-- wp:group {"tagName":"article","className":"wp-block-astrea-voice-item","layout":{"type":"constrained"}} -->
+<article class="wp-block-group wp-block-astrea-voice-item">
+<!-- wp:post-content {"className":"astrea-voice-quote"} /-->
+<!-- wp:post-title {"level":2,"isLink":false,"className":"astrea-voice-attribution"} /-->
 </article>
 <!-- /wp:group -->
 <!-- /wp:post-template -->
 
 <!-- wp:query-no-results -->
+<!-- wp:group {"className":"astrea-archive-empty","layout":{"type":"constrained"}} -->
+<div class="wp-block-group astrea-archive-empty">
 <!-- wp:paragraph -->
 <p>現在、お客様の声の情報は準備中です。</p>
 <!-- /wp:paragraph -->
 <!-- wp:home-link {"content":"トップページに戻る"} /-->
+</div>
+<!-- /wp:group -->
 <!-- /wp:query-no-results -->
 </div>
 <!-- /wp:query -->

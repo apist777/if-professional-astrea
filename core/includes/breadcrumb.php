@@ -50,6 +50,21 @@ function get_breadcrumb_items(): array {
 		return append_post_type_trail( $home, 'astrea_faq' );
 	}
 
+	// Construction Order 015D: astrea_case/astrea_voice were previously
+	// missing from this list, so a CASE Single silently fell through to the
+	// generic 2-level `is_singular()` branch below — dropping the "対応事例"
+	// archive link that Service/Professional Singles already show. Wiring
+	// them into the same existing `append_post_type_trail()` helper closes
+	// that gap; VOICE has no Single template today, but including it keeps
+	// the hierarchy correct if that ever changes.
+	if ( is_singular( 'astrea_case' ) || is_post_type_archive( 'astrea_case' ) ) {
+		return append_post_type_trail( $home, 'astrea_case' );
+	}
+
+	if ( is_singular( 'astrea_voice' ) || is_post_type_archive( 'astrea_voice' ) ) {
+		return append_post_type_trail( $home, 'astrea_voice' );
+	}
+
 	if ( is_tax( 'astrea_faq_category' ) ) {
 		$term  = get_queried_object();
 		$items = array( $home );

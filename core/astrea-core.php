@@ -62,6 +62,8 @@ require ASTREA_CORE_DIR . 'includes/seo-plugin-detection.php';
 require ASTREA_CORE_DIR . 'includes/seo-settings.php';
 require ASTREA_CORE_DIR . 'includes/seo-admin.php';
 require ASTREA_CORE_DIR . 'includes/breadcrumb.php';
+require ASTREA_CORE_DIR . 'includes/archive-title.php';
+require ASTREA_CORE_DIR . 'includes/closing-cta-block.php';
 require ASTREA_CORE_DIR . 'includes/seo-meta.php';
 require ASTREA_CORE_DIR . 'includes/seo-structured-data.php';
 require ASTREA_CORE_DIR . 'includes/ga4.php';
