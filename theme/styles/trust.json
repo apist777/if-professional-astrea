@@ -9,7 +9,8 @@
         { "slug": "contrast", "color": "#1b2430", "name": "Contrast" },
         { "slug": "primary", "color": "#1f3a5c", "name": "Primary" },
         { "slug": "secondary", "color": "#8a94a6", "name": "Secondary" },
-        { "slug": "surface", "color": "#f2f4f7", "name": "Surface" }
+        { "slug": "surface", "color": "#f2f4f7", "name": "Surface" },
+        { "slug": "border", "color": "#c3ccd6", "name": "Border" }
       ]
     },
     "typography": {
