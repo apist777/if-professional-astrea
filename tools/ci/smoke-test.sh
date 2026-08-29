@@ -899,7 +899,7 @@ assert_all_json_ld_valid "AT: Home JSON-LD"
 
 echo "=== AU. Service Archive <head>: Breadcrumb + meta description ==="
 check_no_fatal "AU: Service Archive" "/services/"
-if ! grep -qF 'wp-block-astrea-breadcrumb' "$BODY_FILE" || ! grep -qF '"@type":"BreadcrumbList"' "$BODY_FILE"; then
+if ! grep -qF 'class="wp-block-astrea-breadcrumb"' "$BODY_FILE" || ! grep -qF '"@type":"BreadcrumbList"' "$BODY_FILE"; then
 	echo "FAIL [AU]: Breadcrumb (visual or JSON-LD) missing on Service Archive"
 	exit 1
 fi
@@ -1028,7 +1028,7 @@ echo "OK   [BA: known SEO Plugin coexistence — ASTREA's overlapping output sup
 echo "=== BB. Core deactivated: no Fatal, ASTREA SEO output removed ==="
 wp_cli plugin deactivate astrea-core
 fetch_no_fatal_any_status "BB: Home while Core inactive" "/"
-if grep -qF '"@type":"Organization"' "$BODY_FILE" || grep -qF 'wp-block-astrea-breadcrumb' "$BODY_FILE"; then
+if grep -qF '"@type":"Organization"' "$BODY_FILE" || grep -qF 'class="wp-block-astrea-breadcrumb"' "$BODY_FILE"; then
 	echo "FAIL [BB]: ASTREA SEO output leaked while Core is inactive"
 	exit 1
 fi

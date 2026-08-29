@@ -120,7 +120,7 @@ Trust（デフォルト）に加え、Natural・ModernでCASE Single・Service A
 - 公式 Theme Check プラグイン実行: REQUIRED 0 / WARNING 0（INFO 1件、text-domain統一の情報表示のみ・RC1から既知の許容事項）。実行後プラグインは削除。
 - PHPCS: 62/62（0 errors, 0 warnings）。
 - PHPUnit: 359 tests / 560 assertions、OK（既存ベースラインと一致、回帰なし）。
-- **smoke-test.sh（CI, Clean環境）**: 初回PushでPart K（Professional Archiveの順序チェック）がFAILした。原因は`visible_content_only()`が`<script>`ブロックのみ除去しており、Archiveに新規追加した`core/read-more`が付与する隠しAccessible Name（`<span class="screen-reader-text">: {タイトル}</span>`）を除去していなかったため、氏名が可視H2タイトルと隠しSpanの2箇所でカウントされ二重化したこと。015C Part Yと同種の「新しい正当なMarkupに対するTest側のBlunt Checkの誤検知」であり、製品コードのAccessibility実装は意図通り。`visible_content_only()`に`.screen-reader-text`のStripを追加し、実機HTMLで氏名が1回のみカウントされることを確認した上で再Push、CI Greenを確認した。
+- **smoke-test.sh（CI, Clean環境）**: 初回PushでPart K（Professional Archiveの順序チェック）がFAILした。原因は`visible_content_only()`が`<script>`ブロックのみ除去しており、Archiveに新規追加した`core/read-more`が付与する隠しAccessible Name（`<span class="screen-reader-text">: {タイトル}</span>`）を除去していなかったため、氏名が可視H2タイトルと隠しSpanの2箇所でカウントされ二重化したこと。015C Part Yと同種の「新しい正当なMarkupに対するTest側のBlunt Checkの誤検知」であり、製品コードのAccessibility実装は意図通り。`visible_content_only()`に`.screen-reader-text`のStripを追加し、実機HTMLで氏名が1回のみカウントされることを確認した上で再Push。2回目のCIでは別のPart BB（Core非活性時にASTREA SEO出力が残っていないことの確認）がFAILした。原因は015Dでtheme.jsonへ追加したBreadcrumb用CSS（`.wp-block-astrea-breadcrumb`セレクタ）がTheme側の常時出力（Core状態に無関係）であるにもかかわらず、Testが`grep -qF 'wp-block-astrea-breadcrumb'`という素朴な部分一致でCheckしていたため、実際のBreadcrumb要素ではなくCSSセレクタ文字列を誤検知していたこと。これもPart Y/Kと同種のTest側Blunt Check誤検知。`class="wp-block-astrea-breadcrumb"`という実際のHTML属性値に一致条件を絞る修正をAU/BBの2箇所に適用し、実機HTMLで(1)実際の要素がある場合は1件、(2)CSSのみでHOMEのように要素が無い場合は0件、を正しく判別できることを確認した上で再々Push、CI Greenを確認した。
 
 ## 12. スコープ外・Known Issues
 
