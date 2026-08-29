@@ -10,7 +10,8 @@
         { "slug": "primary", "color": "#111111", "name": "Primary" },
         { "slug": "secondary", "color": "#666666", "name": "Secondary" },
         { "slug": "surface", "color": "#f5f5f5", "name": "Surface" },
-        { "slug": "border", "color": "#cccccc", "name": "Border" }
+        { "slug": "border", "color": "#cccccc", "name": "Border" },
+        { "slug": "accent", "color": "#a8925c", "name": "Accent" }
       ]
     },
     "typography": {

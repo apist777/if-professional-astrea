@@ -1,8 +1,8 @@
 # 07. ASTREA Visual v3 — Design Direction (B+C)
 
-- **Status**: DESIGN BLUEPRINT（Owner Approval待ち、実装なし）
-- **Construction Order**: 016A
-- **Date**: 2026-08-29
+- **Status**: PHASE 1 実装済み（Header / Hero / First View、Construction 016B）。Phase 2（Services以降）はOwner Approval待ち、未実装。
+- **Construction Order**: 016A → 016A-R1 → 016B（Phase 1実装）
+- **Date**: 2026-08-29（016A/016A-R1）/ 2026-08-30（016B）
 - **Functional Baseline**: RC1 (1.0.0-rc1) — 変更なし
 
 ## 0. 位置づけ
@@ -173,3 +173,17 @@ Hero/Results/Professionalの構造はVariation間で共通。差は:
 10. Accessibility Full Audit
 
 いずれもOwner Approval後、個別Construction Orderとして分割実施することを推奨する（一括実装はRegression Risk過大と判断）。
+
+## 15. 016B実装確定事項（Header / Hero / First View、Phase 1）
+
+Construction Order 016BでHeader/Hero/First Viewのみを実際のASTREA FREE Theme（`theme/parts/header.html`・`theme/patterns/home-hero.php`・`theme.json`）へ実装した。以下は本書§4〜§12の設計意図に対する確定・divergenceの記録であり、Services/Results/Professional/CASE（Phase 2、本書§6〜9に設計済みだが未実装）には影響しない。
+
+- **Header統合方針の変更（§4「Header透過統合」）**: 本書はOwner承認Mockupに基づき「Heroへ Header透過統合（写真の上にHeaderが重なる）」を候補としていたが、実装では**Headerを通常のDocument Flowに残し、Hero直上に隙間なく接続する透過・軽量なHeader**へ変更した。理由: Header（`theme/parts/header.html`）はHOME以外の全Template（Archive/Single/Office/Price/Contact/検索/404等、Hero自体が存在しないページ）で共有されるSite-wide Template Partであり、`position:absolute`やNegative Margin等のOverlap技法はHero非存在ページでのHeader崩壊リスクを伴う。Order §9自身が「Header透明化/Hero統合Header/軽量Header」を並列候補として許容していたため、Risk回避を優先しこの解釈を採用した。実機（`docs/research/screenshots/016b/home-upper-real-desktop-1440.png`）で見た目の一体感・軽量さは確保できていることを確認済み。将来、真の写真オーバーラップが必要と判断された場合はHOME専用Hero Patternの中にHeader相当のMarkupを取り込む設計変更が必要になる（既存Site-wide Header Template Partの流用では実現不可）。
+- **Hero文字色の方針（§4・§12）**: 本書はMockup写真（明るい空領域）を前提にNavy文字＋最小限のScrimを想定していたが、出荷Default（`theme/patterns/home-hero.php`、写真未設定時）は**任意の将来の写真（明度・構図不明）に耐える必要がある**ため、Hero文字は常にWhite（`textColor:"base"`）＋`overlayColor:"contrast"`の暗いOverlayを標準とした（既存015G Hero・Closing CTAと同じ確立済み規約）。Owner Fixtureでは実写真（`hero-office-city.png`、明るいOffice/City背景）に対し`dimRatio:75`で実用コントラストを確保した。§11 No-Photo Resilienceの意図（写真無し=単色背景+同じEditorial Typography）はこの方針と完全に一致する。
+- **Next Section Hint（§4）**: Mockupの「"01 SERVICES" + 罫線」ラベルは採用せず、**罫線のみ（Theme CSSの`::after`疑似要素、Markupなし）**とした。理由: `core/cover`は自身のInnerBlocks以外の追加Markup Siblingを許容せず（Gutenberg Block Validationのround-trip検証で不整合になる）、また出荷PatternはHeroの次に必ず"SERVICES"が来ることを前提にできない（既存installationは`setup-home.php`のPattern順序をOwnerが自由に並べ替えられる）。
+- **H1のCopy契約（§4）**: MockupのH1文言「複雑な手続きを、／前へ進める力に。」はデザイン検証用のFixture Copyであり、出荷Pattern既定のH1は**Construction Order 011以来の契約通り事務所名（`office_name` Binding）を維持**した。Owner Fixtureの実機HOME（`http://localhost:8888/`）でも同様（H1=ASTREA行政書士事務所）。Mockupが検証したのはTypography Scale／Layout／Photography構成であり、H1の中身そのものの差し替えではない。
+- **Mobile Hero（§5）**: 016A-R1承認構図（写真右上ブリード＋Textプレート・オーバーラップ、55pxオーバーラップ、`overflow:hidden`によるMargin Collapsing対策）をそのまま実装した。上記「Hero文字色の方針」により、プレートはR1 Mockupの白背景＋濃色文字ではなく**濃色（Contrastトークン）背景＋白文字**とした（写真の明度に依存しない配色）。実機確認: `docs/research/screenshots/016b/hero-real-mobile-375.png`・`hero-real-mobile-320.png`。Photography未設定時（デフォルトState）はプレート構図自体を使わず、コンパクトな単色Hero（写真スロット無し）へ自然にFallbackする（`:has(.wp-block-cover__image-background)`でScope）。
+- **新規Design Token**: `accent`（Gold、Trust `#B99A5C` / Natural `#c2a46b` / Modern `#a8925c`）をpaletteへ追加（Icon Setの既存Gold `#B99A5C`との統一）。Eyebrowの装飾罫線のみに使用（WCAG計算の結果、明背景ではAA未達のためText用途には使わない）。`heroTitle`（`clamp(2.4rem, 4.6vw, 4rem)`）・`heroEyebrow`（`0.78rem`）を`settings.custom.typography`へ追加（既存`resultsNumber`と同じToken方式）。
+- **実装ヒヤリハット**: Style Variation「選択済みSnapshot」（`wp_global_styles`投稿）が旧Token値のまま固定されており、theme.json/styles/*.jsonへの`accent`追加が実機に反映されない事象を発見（015B/015Cで既知のWordPress標準挙動と同種）。今回はPaletteが配列（`palette.theme`）として丸ごと上書き保持される一方、`custom`配下のObjectキー（例: `typography.heroTitle`）はTheme側の値とMergeされる、という**キーの型（Array vs Object）によって再同期の要否が異なる**ことを新たに確認した。該当Snapshot投稿のPalette配列へ`accent`を追記して復旧した。
+
+Phase 2（Services/Results/Professional/CASE/Section Rhythm全体）は本Orderの範囲外であり、本書§6〜10の設計はOwner Approval後の次のConstruction Orderで実装する。
