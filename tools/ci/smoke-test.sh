@@ -100,15 +100,25 @@ check_no_fatal() {
 }
 
 # Strips <script>...</script> blocks (notably JSON-LD, Construction Order
-# 006) from the last BODY_FILE before printing it. Order-sensitive checks
-# that scan for a set of names/titles must use this instead of the raw
-# file — since Organization JSON-LD legitimately repeats those same names
-# sitewide, a plain grep across the whole body would double-count them.
+# 006) and .screen-reader-text spans (Construction Order 015D — WordPress
+# core's own core/read-more block appends
+# `<span class="screen-reader-text">: {title}</span>` to disambiguate
+# repeated "詳しく見る" links for Accessible Name purposes) from the last
+# BODY_FILE before printing it. Order-sensitive checks that scan for a set
+# of names/titles must use this instead of the raw file — since both JSON-LD
+# and this hidden accessible-name text legitimately repeat the same
+# name/title a second time per item, and a plain grep across the raw body
+# would double-count them without actually reflecting what a sighted visitor
+# sees.
 visible_content_only() {
 	node -e '
 		const fs = require("fs");
 		const html = fs.readFileSync(process.argv[1], "utf8");
-		process.stdout.write(html.replace(/<script[\s\S]*?<\/script>/g, ""));
+		process.stdout.write(
+			html
+				.replace(/<script[\s\S]*?<\/script>/g, "")
+				.replace(/<span class="screen-reader-text">[\s\S]*?<\/span>/g, "")
+		);
 	' "$BODY_FILE"
 }
 
