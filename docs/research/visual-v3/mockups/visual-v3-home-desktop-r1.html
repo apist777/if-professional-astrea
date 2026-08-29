@@ -1,0 +1,380 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<title>ASTREA Visual v3 — B+C Mockup</title>
+<style>
+  :root{
+    --navy:#102A43;
+    --navy-soft:#1f3a5c;
+    --gold:#B99A5C;
+    --ink:#1b2430;
+    --paper:#ffffff;
+    --paper-warm:#fbfaf7;
+    --line:#d8d2c4;
+    --muted:#6b7280;
+    --content-w: 1200px;
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;background:var(--paper);color:var(--ink);
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","Hiragino Kaku Gothic ProN","Yu Gothic",sans-serif;
+    -webkit-font-smoothing:antialiased;}
+  .serif{font-family:Georgia,"Hiragino Mincho ProN","Yu Mincho",serif;}
+  a{color:inherit;text-decoration:none;}
+  .wrap{max-width:var(--content-w);margin:0 auto;padding:0 40px;}
+
+  /* ===== Header (integrated, transparent over hero) ===== */
+  .site-header{position:absolute;top:0;left:0;right:0;z-index:20;padding:28px 0;}
+  .site-header .wrap{display:flex;align-items:center;justify-content:space-between;}
+  .logo{font-size:1.05rem;font-weight:700;letter-spacing:.02em;color:var(--navy);}
+  .logo small{display:block;font-size:.62rem;font-weight:400;letter-spacing:.18em;color:var(--muted);margin-top:2px;}
+  nav.primary-nav{display:flex;align-items:center;gap:36px;}
+  nav.primary-nav a{font-size:.86rem;color:var(--navy);letter-spacing:.02em;position:relative;}
+  .header-cta{display:flex;align-items:center;gap:18px;}
+  .header-phone{font-size:.92rem;font-weight:700;color:var(--navy);border-left:1px solid var(--line);padding-left:18px;}
+  .header-btn{font-size:.8rem;padding:10px 20px;border:1px solid var(--navy);color:var(--navy);letter-spacing:.03em;}
+  .menu-affordance{display:none;}
+
+  /* ===== Hero v3 (R1: readability refinement, impact preserved) ===== */
+  .hero{position:relative;min-height:74vh;display:flex;align-items:center;overflow:hidden;background:#eef1f0;}
+  .hero-media{position:absolute;inset:0;}
+  .hero-media img{width:100%;height:100%;object-fit:cover;object-position:64% 52%;}
+  /* R1: soft, angled text-safe-area scrim — confined to the left text column,
+     fades to fully transparent well before the busy building/window region.
+     Peak opacity .40 on the far-left edge only; this is a legibility guard,
+     not a photo-dimming overlay (Owner explicitly rejected a strong gradient). */
+  .hero-textscrim{position:absolute;left:0;top:0;bottom:0;width:min(56%,760px);z-index:3;pointer-events:none;
+    background:linear-gradient(100deg, rgba(251,250,247,.40) 0%, rgba(251,250,247,.22) 42%, rgba(251,250,247,0) 76%);}
+  .hero-content{position:relative;z-index:5;width:100%;padding:120px 0 90px;}
+  .hero-grid{display:grid;grid-template-columns:minmax(0,660px) 1fr;gap:40px;align-items:end;}
+  .eyebrow{display:flex;align-items:center;gap:14px;margin-bottom:26px;}
+  .eyebrow .rule{width:40px;height:1px;background:var(--gold);}
+  .eyebrow span{font-size:.78rem;letter-spacing:.22em;color:var(--navy);text-transform:uppercase;}
+  h1.hero-h1{font-size:clamp(2.4rem,4.6vw,4rem);line-height:1.28;font-weight:700;color:var(--navy);margin:0 0 28px;letter-spacing:.01em;}
+  /* R1: narrower measure (460px→400px) keeps the trailing edge of every line
+     clear of the skyline, plus a soft white text-shadow as a second, even
+     more minimal legibility guard (no box, no border, no visible edge). */
+  .hero-copy{font-size:1.05rem;line-height:1.9;color:var(--navy-soft);max-width:400px;margin:0 0 40px;
+    text-shadow:0 1px 16px rgba(251,250,247,.9),0 1px 2px rgba(251,250,247,.9);}
+  .hero-actions{display:flex;align-items:center;gap:22px;flex-wrap:wrap;}
+  .btn-primary{display:inline-block;background:var(--navy);color:#fff;font-size:.92rem;letter-spacing:.03em;padding:16px 34px;}
+  .btn-secondary{display:inline-flex;align-items:center;gap:10px;font-size:.92rem;color:var(--navy);font-weight:700;
+    text-shadow:0 1px 12px rgba(251,250,247,.9);}
+  .btn-secondary .ico{width:18px;height:18px;border:1px solid var(--navy);border-radius:50%;display:inline-flex;align-items:center;justify-content:center;font-size:.7rem;background:rgba(251,250,247,.55);}
+
+  /* R1: meta label was sitting directly on the busiest window/building
+     texture and read as low-contrast. Fixed with a slightly darker/more
+     opaque ink + soft light text-shadow (glow), not a background plate. */
+  .hero-meta{position:absolute;right:40px;top:50%;transform:translateY(-50%) rotate(180deg);writing-mode:vertical-rl;
+    font-size:.72rem;letter-spacing:.28em;color:rgba(16,42,67,.82);z-index:6;
+    text-shadow:0 0 10px rgba(251,250,247,.85),0 0 3px rgba(251,250,247,.9);}
+  .hero-scroll{position:absolute;left:40px;bottom:26px;z-index:6;display:flex;align-items:center;gap:12px;}
+  .hero-scroll .line{width:1px;height:34px;background:rgba(16,42,67,.4);}
+  .hero-scroll span{font-size:.68rem;letter-spacing:.16em;color:rgba(16,42,67,.65);}
+
+  /* ===== Section shell ===== */
+  section{padding:120px 0;}
+  .section-head{display:flex;justify-content:space-between;align-items:flex-end;margin-bottom:64px;gap:24px;}
+  .section-head .index{font-size:.78rem;letter-spacing:.2em;color:var(--gold);text-transform:uppercase;margin-bottom:14px;display:block;}
+  .section-head h2{font-size:clamp(1.8rem,2.6vw,2.5rem);margin:0;font-weight:700;color:var(--navy);}
+  .section-head p{max-width:360px;font-size:.92rem;line-height:1.8;color:var(--muted);margin:0;}
+
+  /* ===== Services — editorial numbered list ===== */
+  .services{background:var(--paper);}
+  .service-row{display:grid;grid-template-columns:90px 1fr 1fr 120px;gap:32px;align-items:start;padding:34px 0;border-top:1px solid var(--line);}
+  .service-row:last-child{border-bottom:1px solid var(--line);}
+  .service-num{font-family:Georgia,serif;font-size:1.6rem;color:var(--gold);}
+  .service-title{font-size:1.3rem;font-weight:700;color:var(--navy);display:flex;align-items:center;gap:14px;}
+  .service-title img{width:26px;height:26px;opacity:.9;}
+  .service-desc{font-size:.92rem;line-height:1.85;color:var(--muted);}
+  .service-link{font-size:.84rem;color:var(--navy);font-weight:700;text-align:right;align-self:center;}
+
+  /* ===== Results — full width dark ===== */
+  .results{background:var(--navy);color:#fff;}
+  .results .section-head h2, .results .section-head p{color:#fff;}
+  .results .section-head p{color:rgba(255,255,255,.65);}
+  .results-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:0;}
+  .results-item{text-align:left;padding-right:40px;border-right:1px solid rgba(255,255,255,.18);}
+  .results-item:last-child{border-right:none;padding-right:0;}
+  .results-num{font-family:Georgia,serif;font-size:clamp(3.2rem,6vw,5.4rem);line-height:1;color:#fff;margin-bottom:18px;}
+  .results-num .unit{font-size:.4em;color:var(--gold);margin-left:6px;}
+  .results-label{font-size:.9rem;letter-spacing:.03em;color:rgba(255,255,255,.75);}
+
+  /* ===== Professional — large photo asymmetric ===== */
+  .professional{background:var(--paper-warm);}
+  .pro-grid{display:grid;grid-template-columns:1.15fr 0.85fr;gap:0;align-items:stretch;}
+  .pro-media{position:relative;min-height:560px;}
+  .pro-media img{width:100%;height:100%;object-fit:cover;position:absolute;inset:0;}
+  .pro-text{padding:70px 0 70px 70px;display:flex;flex-direction:column;justify-content:center;}
+  .pro-role{font-size:.78rem;letter-spacing:.2em;color:var(--gold);text-transform:uppercase;margin-bottom:18px;}
+  .pro-name{font-family:Georgia,"Hiragino Mincho ProN","Yu Mincho",serif;font-size:clamp(2.2rem,3vw,3rem);color:var(--navy);margin:0 0 22px;}
+  .pro-stmt{font-size:1rem;line-height:2;color:var(--navy-soft);margin:0 0 30px;max-width:360px;}
+  .pro-link{font-size:.86rem;font-weight:700;color:var(--navy);display:inline-flex;align-items:center;gap:10px;}
+
+  /* ===== CASE — Editorial hierarchy, current-asset-safe (R1) =====
+     Source images are ~512×260px; none are enlarged past a modest,
+     native-friendly display size (avoids visible softness — see
+     Report §"CASE Asset Limitation"). Hierarchy (Feature vs Secondary)
+     is created by TYPE SCALE and ROW TREATMENT, not by blowing up a
+     low-resolution image. Degrades to Number+Rule+Label+Title+Description
+     with zero images (No-Photo Fallback) — nothing here depends on the
+     <img> being present. */
+  .case-section{background:var(--paper);}
+  .case-editorial{border-top:1px solid var(--line);}
+  .case-entry{display:grid;grid-template-columns:64px 1fr auto;gap:32px;align-items:center;
+    padding:38px 0;border-bottom:1px solid var(--line);}
+  .case-entry--feature{grid-template-columns:80px 1fr auto;padding:46px 0;}
+  .case-num{font-family:Georgia,serif;color:var(--gold);font-size:1.7rem;align-self:start;}
+  .case-entry--feature .case-num{font-size:2.3rem;}
+  .case-label{font-size:.74rem;letter-spacing:.16em;color:var(--gold);text-transform:uppercase;margin-bottom:10px;}
+  .case-body h3{font-size:1.05rem;margin:0 0 10px;color:var(--navy);font-weight:700;}
+  .case-entry--feature .case-body h3{font-size:1.55rem;}
+  .case-body p{font-size:.86rem;line-height:1.75;color:var(--muted);margin:0 0 12px;max-width:480px;}
+  .case-link{font-size:.82rem;font-weight:700;color:var(--navy);}
+  .case-media{width:190px;height:120px;position:relative;overflow:hidden;flex-shrink:0;}
+  .case-entry--feature .case-media{width:260px;height:160px;}
+  .case-media img{width:100%;height:100%;object-fit:cover;position:absolute;inset:0;}
+  .case-media.is-empty{background:var(--paper-warm);border:1px solid var(--line);display:flex;align-items:center;justify-content:center;}
+  .case-media.is-empty::after{content:"";width:26px;height:26px;border:1px solid var(--gold);border-radius:50%;}
+  .case-asset-note{margin-top:18px;font-size:.74rem;color:var(--muted);}
+
+  .measure-note{max-width:var(--content-w);margin:40px auto 0;padding:0 40px;font-size:.72rem;color:var(--muted);}
+
+  /* ===== Mobile (375px reference, 320px must still hold) ===== */
+  @media (max-width:600px){
+    .wrap{padding:0 22px;}
+
+    .site-header{padding:18px 0;}
+    .site-header .wrap{align-items:flex-start;}
+    .logo{font-size:.92rem;}
+    .logo small{font-size:.56rem;}
+    nav.primary-nav{display:none;}
+    .header-cta{flex-direction:column;align-items:flex-end;gap:8px;}
+    .header-phone{border-left:none;padding-left:0;font-size:.8rem;}
+    .header-btn{display:none;}
+    .menu-affordance{display:flex;flex-direction:column;gap:5px;width:22px;margin-left:14px;}
+    .menu-affordance span{display:block;height:1.5px;background:var(--navy);}
+
+    /* R1 Mobile Hero — asymmetric "photo upper-right / type block overlap",
+       not a stacked/shrunk Desktop. Photography keeps a real, undiminished
+       visual role (a large right-bled slice at native contrast, no scrim
+       dimming it); Typography sits on its own solid plate that overlaps
+       the photo's lower-left corner for tension, then reads at full
+       contrast because it is no longer printed over the image at all. */
+    .hero{min-height:0;display:block;align-items:stretch;position:relative;overflow:hidden;}
+    .hero-textscrim{display:none;}
+    .hero-media{position:absolute;top:0;right:0;bottom:auto;left:auto;width:80%;height:52vw;min-height:220px;max-height:300px;}
+    .hero-media img{object-position:78% 42%;}
+    .hero-content{position:relative;z-index:5;background:var(--paper);margin-top:min(44vw,220px);padding:30px 0 40px;
+      box-shadow:0 -1px 0 rgba(16,42,67,.06);}
+    .hero-grid{grid-template-columns:1fr;gap:0;align-items:start;}
+    .hero-grid > div:last-child{display:none;}
+    .eyebrow{margin-bottom:16px;}
+    h1.hero-h1{font-size:clamp(2rem,8.4vw,2.5rem);line-height:1.34;margin:0 0 18px;}
+    .hero-copy{font-size:.92rem;line-height:1.8;max-width:none;margin:0 0 26px;text-shadow:none;}
+    .hero-actions{display:flex;flex-direction:column;align-items:stretch;gap:12px;}
+    .btn-primary{text-align:center;padding:17px 20px;order:1;}
+    .btn-secondary{justify-content:center;padding:14px 20px;border:1px solid var(--line);order:2;text-shadow:none;}
+    .btn-secondary .ico{background:none;}
+    .hero-meta{display:none;}
+    .hero-scroll{position:static;margin:34px 22px 0;}
+
+    section{padding:70px 0;}
+    .section-head{flex-direction:column;align-items:flex-start;gap:14px;margin-bottom:40px;}
+    .section-head p{max-width:none;}
+
+    .service-row{grid-template-columns:44px 1fr;grid-template-areas:"num title" ". desc" ". link";row-gap:8px;padding:26px 0;}
+    .service-num{grid-area:num;font-size:1.3rem;}
+    .service-title{grid-area:title;font-size:1.12rem;}
+    .service-desc{grid-area:desc;}
+    .service-link{grid-area:link;text-align:left;}
+
+    .results-grid{grid-template-columns:1fr;gap:34px;}
+    .results-item{border-right:none;padding-right:0;border-bottom:1px solid rgba(255,255,255,.18);padding-bottom:28px;}
+    .results-item:last-child{border-bottom:none;padding-bottom:0;}
+    .results-num{font-size:3rem;}
+
+    .pro-grid{grid-template-columns:1fr;}
+    .pro-media{min-height:78vw;}
+    .pro-text{padding:44px 22px 56px;}
+    .pro-stmt{max-width:none;}
+
+    .case-entry{grid-template-columns:36px 1fr;grid-template-areas:"num body" "media media";gap:14px;padding:28px 0;}
+    .case-entry--feature{grid-template-columns:36px 1fr;padding:30px 0;}
+    .case-num{grid-area:num;font-size:1.3rem;}
+    .case-entry--feature .case-num{font-size:1.5rem;}
+    .case-body{grid-area:body;}
+    .case-entry--feature .case-body h3{font-size:1.22rem;}
+    .case-media{grid-area:media;width:100%;height:150px;margin-top:6px;}
+    .case-entry--feature .case-media{width:100%;height:170px;}
+  }
+</style>
+</head>
+<body>
+
+<div class="hero">
+  <header class="site-header">
+    <div class="wrap">
+      <div class="logo">ASTREA<small>行政書士事務所 / TOKYO</small></div>
+      <nav class="primary-nav">
+        <a href="#">取扱業務</a>
+        <a href="#">専門家紹介</a>
+        <a href="#">対応事例</a>
+        <a href="#">FAQ</a>
+      </nav>
+      <div class="header-cta">
+        <span class="header-phone">03-5555-0123</span>
+        <a class="header-btn" href="#">お問い合わせ</a>
+        <span class="menu-affordance" aria-hidden="true"><span></span><span></span><span></span></span>
+      </div>
+    </div>
+  </header>
+
+  <div class="hero-media">
+    <img src="../assets/model-house/hero-office-city.png" alt="">
+  </div>
+  <div class="hero-textscrim" aria-hidden="true"></div>
+
+  <div class="hero-content">
+    <div class="wrap">
+      <div class="hero-grid">
+        <div>
+          <div class="eyebrow"><span class="rule"></span><span>ASTREA行政書士事務所</span></div>
+          <h1 class="hero-h1 serif">複雑な手続きを、<br>前へ進める力に。</h1>
+          <p class="hero-copy">会社設立・許認可・相続——専門知識が必要な手続きを、経験豊富な行政書士が最初のご相談から着手まで一貫してお手伝いします。</p>
+          <div class="hero-actions">
+            <a class="btn-primary" href="#">お問い合わせはこちら</a>
+            <a class="btn-secondary" href="#"><span class="ico">☎</span>03-5555-0123</a>
+          </div>
+        </div>
+        <div></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="hero-meta">ADMINISTRATIVE SCRIVENER OFFICE — SINCE 2011</div>
+  <div class="hero-scroll"><span class="serif">01</span><div class="line"></div><span>SERVICES</span></div>
+</div>
+
+<section class="services">
+  <div class="wrap">
+    <div class="section-head">
+      <div>
+        <span class="index">Services — 02</span>
+        <h2>取扱業務</h2>
+      </div>
+      <p>会社設立から許認可、相続まで。状況に応じて、必要な手続きを整理してご案内します。</p>
+    </div>
+
+    <div class="service-row">
+      <div class="service-num serif">01</div>
+      <div class="service-title"><img src="../assets/icons/astrea/company.svg" alt="">会社設立サポート</div>
+      <div class="service-desc">株式会社・合同会社の設立に必要な定款作成から登記書類の準備まで一括でサポートします。</div>
+      <div class="service-link">詳しく見る →</div>
+    </div>
+    <div class="service-row">
+      <div class="service-num serif">02</div>
+      <div class="service-title"><img src="../assets/icons/astrea/permit.svg" alt="">建設業許可申請</div>
+      <div class="service-desc">新規許可・更新・業種追加まで、建設業許可に関する各種申請を代行します。</div>
+      <div class="service-link">詳しく見る →</div>
+    </div>
+    <div class="service-row">
+      <div class="service-num serif">03</div>
+      <div class="service-title"><img src="../assets/icons/astrea/inheritance.svg" alt="">相続・遺言サポート</div>
+      <div class="service-desc">遺言書作成、遺産分割協議書の作成、相続手続き全般をサポートします。</div>
+      <div class="service-link">詳しく見る →</div>
+    </div>
+  </div>
+</section>
+
+<section class="results">
+  <div class="wrap">
+    <div class="section-head">
+      <div>
+        <span class="index" style="color:var(--gold)">Results — 03</span>
+        <h2>実績</h2>
+      </div>
+      <p>これまでのご相談・ご依頼から。</p>
+    </div>
+    <div class="results-grid">
+      <div class="results-item">
+        <div class="results-num serif">200<span class="unit">社+</span></div>
+        <div class="results-label">会社設立支援</div>
+      </div>
+      <div class="results-item">
+        <div class="results-num serif">98<span class="unit">%</span></div>
+        <div class="results-label">建設業許可取得率</div>
+      </div>
+      <div class="results-item">
+        <div class="results-num serif">500<span class="unit">件+</span></div>
+        <div class="results-label">相談実績</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="professional" style="padding:0;">
+  <div class="pro-grid">
+    <div class="pro-media">
+      <img src="../assets/model-house/professional-sato-kenichi-wide.png" alt="">
+    </div>
+    <div class="pro-text">
+      <div class="pro-role">代表行政書士 — Profile</div>
+      <div class="pro-name">佐藤 健一</div>
+      <p class="pro-stmt">大手建設会社の法務部門を経て2011年に独立開業。会社設立・建設業許可を中心に15年以上の実務経験を持ち、初めての方にも分かりやすい説明を心がけています。</p>
+      <a class="pro-link" href="#">プロフィールを見る →</a>
+    </div>
+  </div>
+</section>
+
+<section class="case-section">
+  <div class="wrap">
+    <div class="section-head">
+      <div>
+        <span class="index">Case — 04</span>
+        <h2>対応事例</h2>
+      </div>
+      <p>実際にいただいたご依頼から、一部をご紹介します。</p>
+    </div>
+    <div class="case-editorial">
+      <article class="case-entry case-entry--feature">
+        <div class="case-num serif">01</div>
+        <div class="case-body">
+          <div class="case-label">会社設立 ／ 飲食業</div>
+          <h3>飲食店の会社設立を2週間でサポート</h3>
+          <p>独立開業を目指す飲食店オーナー様の会社設立を、定款作成から登記書類準備まで最短2週間でサポートしました。</p>
+          <a class="case-link" href="#">詳しく見る →</a>
+        </div>
+        <div class="case-media"><img src="../assets/model-house/case-modern-office-building.png" alt=""></div>
+      </article>
+
+      <article class="case-entry">
+        <div class="case-num serif">02</div>
+        <div class="case-body">
+          <div class="case-label">建設業許可</div>
+          <h3>建設業許可を初回申請で取得</h3>
+          <p>必要書類の不備を事前に洗い出し、初回申請でスムーズに許可を取得したケースです。</p>
+          <a class="case-link" href="#">詳しく見る →</a>
+        </div>
+        <div class="case-media"><img src="../assets/model-house/case-legal-documents.png" alt=""></div>
+      </article>
+
+      <article class="case-entry">
+        <div class="case-num serif">03</div>
+        <div class="case-body">
+          <div class="case-label">相続・遺言</div>
+          <h3>相続手続きを3ヶ月で完了</h3>
+          <p>複数の相続人がいる案件で、遺産分割協議書の作成から名義変更まで3ヶ月で完了しました。</p>
+          <a class="case-link" href="#">詳しく見る →</a>
+        </div>
+        <div class="case-media is-empty" aria-hidden="true"></div>
+      </article>
+    </div>
+    <p class="case-asset-note">※ CASE 03は現行Asset未提供のため、No-Photo Fallback表示（Number/Rule/Labelのみ）を意図的に示しています。</p>
+  </div>
+</section>
+
+<p class="measure-note">※ Visual v3 Mockup — Construction Order 016A（Research/Design専用、製品コードではありません）</p>
+
+</body>
+</html>

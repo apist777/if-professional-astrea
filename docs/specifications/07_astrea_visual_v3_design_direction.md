@@ -89,13 +89,19 @@ Markup/Block構造は3 Variation共通。差はColor Token・Photography Treatme
 | Next Section Hint | Theme CSS + 既存Anchor |
 | Header透過統合 | Theme CSS（Header Template Part側の背景/位置調整）、016B以降で要検証（Header/Hero一体化はTemplate構造に踏み込む可能性あり） |
 
+### 016A-R1: Desktop Hero可読性改訂（Owner承認: Minor Revision）
+
+H1サイズ・Hero高さ・全体構図は無変更のまま、Supporting CopyがPhotographyの建物領域と競合する問題を解消：`object-position`微調整（60/55→64/52%）、Supporting Copy `max-width`縮小（460→400px）、Text Column左側への薄い角度付きScrim（左端最大不透明度.40、Text Column終端手前で透明化）、Supporting Copy/Meta Labelへの白Text-shadow追加。強いGradient・白Box・H1縮小はいずれも行っていない。詳細は`docs/research/2026-08-29_astrea_visual_v3_016a_r1_report.md`§1参照。
+
 ## 5. Mobile Hero（375px基準、320pxまで成立）
 
-Desktopの縮小ではなく、以下の階層で再設計：
+**016A-R1でOwner承認の構図に更新（016A原本の「Photography上部背景＋Gradient Scrim＋Text重ね」案は不採用）。**
 
-Identity（ロゴ、小さく）→ Navigation affordance（Hamburger、Nav本体は非表示）→ Photography（画像を上部に配置、高さを抑える）→ Gradient Scrim（下から）→ Eyebrow → H1（2行、`clamp(2rem,9vw,2.6rem)`）→ Supporting copy → Primary CTA（フル幅）→ Secondary（電話、フル幅Outline）→ Next section hint。
+「写真右上ブリード＋Textプレート・オーバーラップ」構図：写真（画面右80%幅、高さ220–300pxClamp）をTop-right配置し、その直下にEyebrow/H1/Copy/CTAを収めた不透明な白背景Textプレートを、写真の下端へ55pxオーバーラップさせて重ねる。Textは写真の上ではなく不透明背景の上に乗るため、Scrim/Text-shadowなしで完全なコントラストを確保する。CTAは`order`でPrimary（お問い合わせ）→Secondary（電話）の優先順位を明示。
 
-Mockup実測で320px/375pxともHorizontal Overflow 0件を確認。日本語H1は2行に収まる（オーファン改行なし）。
+**実装上の既知の罠**: `.hero-content`に`margin-top`でオーバーラップ量を指定する際、親要素（`.hero`）が`overflow:visible`のままだとCSS Margin Collapsing（親子間の上マージン相殺）が発生し、Header・写真・Textが同一Y座標に重なって表示される。親へ`overflow:hidden`（Block Formatting Context確立）を指定して回避する。016B実装時に同種のOverlap構図を採用する場合は必ず同じ対策を行うこと。
+
+Mockup実測で320px/375pxともHorizontal Overflow 0件、日本語H1「複雑な手続きを、／前へ進める力に。」は2行を維持（オーファン改行なし）。詳細は`docs/research/2026-08-29_astrea_visual_v3_016a_r1_report.md`§2参照。
 
 ## 6. Services — Editorial Numbered List
 
@@ -111,7 +117,13 @@ Wide Photo（`professional-sato-kenichi-wide.png`、1536×1024）を画面の55�
 
 ## 9. CASE — Photography-led Editorial（解像度制約あり、§3 Finding参照）
 
-Feature 1点（大）+ Secondary 2点（小、Thumbnail）の非対称Grid。Feature画像下部にDark Gradient Overlay + CASE番号 + Title + 短い説明。ただし§3のAsset Findingにより、Feature用の高解像度素材が無い場合は、3点同格のThumbnail運用（Order 015D確立済みのCard Grid相当だがEditorial番号付き）へフォールバックする設計にしておく。
+**016A-R1でOwner承認の構図に更新（016A原本の「Feature大画像＋Dark Gradient Overlay」案は解像度制約により不採用）。**
+
+Feature/Secondaryの区別を「画像サイズの差」ではなく「Typography・Row Treatmentの差」で作る設計へ変更した。各CASEをNumber（Serif、Gold、Featureは2.3rem/Secondaryは1.7rem）／Body（Category・Serviceラベル＋Title＋Description＋Link）／Media（画像、原寸以下で表示——Featureは260×160px、Secondaryは190×120px、いずれもアップスケールなし）の3カラムRowとし、Row間を細い罫線で区切る。白背景・角丸・影のCard表現は使用しない（Servicesと共通する編集的リズム）。
+
+**No-Photo Fallback**: 画像が無いCASEは`.case-media.is-empty`（Paper Warm背景＋Gold細線円のみ）へ自然に縮退し、Number/Rule/Label/Title/Description/Linkだけで完結する。Mockupでは意図的に1件（CASE 03）を無画像にして実演済み。
+
+**High-Res Asset Specification**（将来より大きなFeature演出を行う場合のみ必要、現行R1では不要）: Feature用3:2または16:10・最小幅1600px、Secondary用2:1・最小幅800px。Text-overlay Safe Areaは現行R1設計（画像内へ文字を焼き込まない）では不要。詳細は`docs/research/2026-08-29_astrea_visual_v3_016a_r1_report.md`§3参照。
 
 ## 10. Section Rhythm
 
