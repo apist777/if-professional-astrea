@@ -1793,12 +1793,22 @@ for expected in "行政書士" "10年の実務経験" "○○大学卒業" "○�
 done
 PROF_EMPTY_SLUG=$(wp_cli post get "$PROF_EMPTY" --field=post_name)
 check_no_fatal "CO: Professional Single (empty optional fields)" "/professionals/$PROF_EMPTY_SLUG/"
-for absent in "経歴" "学歴" "所属" "登録情報" "wp-block-astrea-professional-field"; do
+for absent in "経歴" "学歴" "所属" "登録情報"; do
 	if grep -qF "$absent" "$BODY_FILE"; then
 		echo "FAIL [CO]: '$absent' must not appear when the underlying field is empty (no label-only sections)"
 		exit 1
 	fi
 done
+# Matched as a rendered element's class attribute, not a bare substring:
+# 015D added `.wp-block-astrea-professional-field` styling to theme.json's
+# always-present global CSS (Theme-owned, unrelated to whether this
+# specific field actually rendered), so a plain substring match here would
+# false-positive on that CSS selector text exactly like Part AU/BB's
+# Breadcrumb CSS did.
+if grep -qF 'class="wp-block-astrea-professional-field"' "$BODY_FILE"; then
+	echo "FAIL [CO]: 'wp-block-astrea-professional-field' must not appear when the underlying field is empty (no label-only sections)"
+	exit 1
+fi
 echo "OK   [CO: Professional Single shows every populated field, never a blank labelled section]"
 
 echo "=== CP. astrea/office-hours + astrea/office-sns: 0件で完全非表示、設定後に表示される ==="
