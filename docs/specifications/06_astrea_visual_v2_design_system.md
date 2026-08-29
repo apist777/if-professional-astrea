@@ -271,6 +271,11 @@ Trust／Natural／Modernの3 Variationは、Markupを完全に共通のまま維
 
 これは、RC1で確認済みの「3 VariationがMarkup共通で成立する」という既存Architecture上の制約と一致する。
 
+### 015F実装で確定したVariation Identity / Token値
+
+- **Card Radius（015C Known Issue、015Fでレビュー確定）**：`settings.custom.border.radiusSm/radiusMd`をVariationごとにOverrideする方式（選択肢B）を採用した。Trust: 4px/6px（変更なし、王道と現代の中間）。Natural: 8px/14px（柔らかく人間的だが、Buttonの999px Pillほどは丸くしない——Cardまでpill化しないという015F明示指示に整合）。Modern: 0px/0px（Buttonの0px Radiusと揃え、直線的なVisual Languageを徹底）。Markup・PHP変更ゼロ、`theme/styles/{trust,natural,modern}.json`の`settings.custom`追加のみ。
+- **Contrast Audit（015Fで発見・修正）**：3 Variationの`secondary`色（Muted Text用）が実際のContrast比を計算した結果、Trust 3.06:1・Natural 2.77:1（いずれもWCAG AA通常文字の基準4.5:1未達）であることが判明。Trust secondaryを`#8a94a6`→`#69707e`、Natural secondaryを`#c98a5e`→`#916344`へ、同じ色相を保ったまま暗く調整し、Base/Surface両背景で4.5:1以上を確保した。またNatural Primary（Button背景色）に白文字を乗せた際のContrastが3.63:1（AA未達）だったため、`#7a8c6a`→`#6b7b5d`へ調整し4.5:1以上を確保した。いずれも既存の色相・Variationとしての「らしさ」は維持し、暗く締まった分だけ視認性が上がった（Naturalが「カフェ寄り」に見えるリスクをむしろ下げる副効果もあった）。Trust Primary/Modern全色は元々AA基準を満たしており変更していない。
+
 ## 16. Photography Policy
 
 標準Theme（画像無し状態）でも完成して見えることを最優先とする。画像が追加された場合に、ProfessionalなWeb Siteへ進化できるImage Slotを用意する。
@@ -282,6 +287,12 @@ Trust／Natural／Modernの3 Variationは、Markupを完全に共通のまま維
 | CASE | 任意の画像Slot（Featured Image）を許容するが、無くても成立するCard Designを基本とする |
 
 Demoでは高品質な写真を使用する想定だが、Demo専用のArchitecture（Demo限定のBlock、Demo限定のTemplate）は作らない。標準Theme ArchitectureのままDemoも構築する。
+
+### 015F実装で確認したPhotography実績
+
+- Professional Featured Image実装（Construction Order 003当時の既存Slot、`core/post-featured-image`）は追加コード無しでArchive/Singleとも正しく機能することを、実際の検証用Fixture画像（自作・権利フリーの抽象Avatar、実在の顔写真ではない）で確認した。Archive: 96px円形、Single: 160px円形、いずれも`object-fit:cover`で正しくCrop。
+- 画像あり/なし混在（Owner Fixtureの3名中2名に画像、1名は意図的に画像なしのまま）でもGridは崩れず、画像なしの項目は写真枠自体が存在しない（015B/015Cで確定した「Placeholder favor B：非表示」方針どおり）ことを確認した。
+- 検証用画像はTheme配布物には含めず、Owner Fixtureの投稿にのみ添付。実際の顔写真ではなく、CSSグラデーション背景に頭文字1文字を乗せただけの完全に自作・抽象的な画像であり、権利上安全。
 
 ## 17. FREE / PRO Boundary
 
