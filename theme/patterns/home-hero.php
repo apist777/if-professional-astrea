@@ -74,6 +74,19 @@
  *   Japanese-first font stacks (this Pattern's Markup did not need to
  *   change for that fix).
  *
+ * Construction Order 016B-R2 implementation notes (First View
+ * Reconstruction — see
+ * docs/research/2026-08-30_construction_016b_r2_first_view_reconstruction_report.md):
+ * - `minHeight` is now `62vh` (was a fixed `560px`). The Hero's real root
+ *   cause of looking "boxed" on Desktop was NOT this Pattern at all — it
+ *   was `theme/templates/front-page.html`'s bare `wp:post-content` block
+ *   silently constraining the entire post content area (Hero included) to
+ *   `contentSize` (720px). Fixing that (see front-page.html) restored true
+ *   full-bleed width; this `vh` change additionally makes the Hero's
+ *   height scale with the actual viewport (Order §6) instead of a fixed
+ *   pixel floor that read as ~92% of viewport height on short laptop
+ *   screens (1366×768) and ~66% on tall ones (1920×1080).
+ *
  * @package Astrea\Theme
  */
 
@@ -81,8 +94,8 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit; // Disallow direct access.
 }
 ?>
-<!-- wp:cover {"dimRatio":100,"overlayColor":"contrast","minHeight":560,"contentPosition":"center left","align":"full","className":"astrea-hero-v3"} -->
-<div class="wp-block-cover alignfull astrea-hero-v3" style="min-height:560px">
+<!-- wp:cover {"dimRatio":100,"overlayColor":"contrast","minHeight":62,"minHeightUnit":"vh","contentPosition":"center left","align":"full","className":"astrea-hero-v3"} -->
+<div class="wp-block-cover alignfull astrea-hero-v3" style="min-height:62vh">
 <span aria-hidden="true" class="wp-block-cover__background has-contrast-background-color has-background-dim-100 has-background-dim"></span>
 <div class="wp-block-cover__inner-container is-position-center-left has-custom-content-position">
 

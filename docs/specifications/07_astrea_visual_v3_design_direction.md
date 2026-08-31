@@ -1,8 +1,8 @@
 # 07. ASTREA Visual v3 — Design Direction (B+C)
 
-- **Status**: PHASE 1 実装済み・REVISE対応済み（Header / Hero / First View、Construction 016B → 016B-R1でJapanese Typography問題を修正）。Phase 2（Services以降）はOwner Approval待ち、未実装。
-- **Construction Order**: 016A → 016A-R1 → 016B（Phase 1実装）→ 016B-R1（Typography Revision）
-- **Date**: 2026-08-29（016A/016A-R1）/ 2026-08-30（016B / 016B-R1）
+- **Status**: PHASE 1 実装済み・2回のREVISE対応済み（Header / Hero / First View、016B → 016B-R1でJapanese Typography問題を修正 → 016B-R2でFirst View Reconstruction、Owner Verdict待ち）。Phase 2（Services以降）はOwner Approval待ち、未実装。
+- **Construction Order**: 016A → 016A-R1 → 016B（Phase 1実装）→ 016B-R1（Typography Revision）→ 016B-R2（First View Reconstruction）
+- **Date**: 2026-08-29（016A/016A-R1）/ 2026-08-30（016B / 016B-R1）/ 2026-08-31（016B-R2）
 - **Functional Baseline**: RC1 (1.0.0-rc1) — 変更なし
 
 ## 0. 位置づけ
@@ -204,3 +204,24 @@ Construction Order 016B-R1（Owner Verdict: 016B REVISE）で、Owner実機確�
 - **新しい見出し/コピー要素を追加する際は、`word-break:normal; line-break:strict; overflow-wrap:anywhere;`をText Wrapper（継承元）へ、`text-wrap:pretty`を各Text要素へ付与することを既定の作法とする**（016B-R1でHeroに適用したパターンをそのまま再利用可能）。
 - **Semantic Heading LevelとVisual Sizeの分離は、この製品で繰り返し使われる正当な設計パターンである**（Construction 011のHero H1、016B-R1のKicker/Primary分離）。「見た目を大きくしたいから見出しレベルを上げる/下げる」という発想ではなく、Semantic構造（H1は1つ、文書の論理構造を表す）とVisual Style（CSSでいくらでも調整可能）を独立して設計すること。
 - **完全な日本語の意味的改行（形態素単位のPhrase-wrap、例: BudouX）は、CSSのみ（`text-wrap:pretty`等）では実現できない既知の限界である。** 特定の複合語がViewport幅によって2行にまたがることは起こり得る（1文字だけが孤立するような最悪パターンは`text-wrap:pretty`で概ね回避できるが、意味単位の完全遵守は保証されない）。この限界を許容するか、JS製の形態素解析ライブラリ導入という別のConstruction Orderで対応するかは、都度Ownerの判断を仰ぐこと（新規JS依存の追加は本書の設計原則を超える意思決定であり、勝手に追加しない）。
+
+## 17. 016B-R2実装確定事項 — First View Quality Gate（恒久原則）
+
+Construction Order 016B-R2（Owner Verdict: 016B REJECTED、First View再施工）で、実装済みだったHeader/Heroが「Viewportではなく中央の箱」に見えるという重大なVisual Fidelity問題が発見され、これを修正した。詳細は`docs/research/2026-08-30_construction_016b_r2_first_view_reconstruction_report.md`参照。Root Causeは`theme/templates/front-page.html`の無属性`wp:post-content`が、外側`<main>`の`is-layout-constrained`規則により`contentSize`(720px)へ収縮されていたこと——Hero自身の`align:full`は、既に収縮済みの親の内側で評価されるため無効化されていた。
+
+**恒久原則（Visual v3のみならずASTREA全体に適用）**:
+
+> **First View Quality Gate**
+> - Hero is viewport-level presentation. Heroは通常のContent Blockではなく、Viewportそのものを舞台とするFirst Viewとして扱う。
+> - Hero must not accidentally inherit ordinary content-width constraints. `align:full`を持つBlockが、祖先Templateの構造（無属性`wp:post-content`等）によって意図せずContent Width（`contentSize`/`wideSize`）へ収縮されていないか、新しいTemplateやPatternを作る際は必ずComputed CSS/DOM実測で確認すること——`align:full`クラスの有無だけでは不十分（本Orderの根本原因そのもの）。
+> - Approved visual mockups are design source of truth. 承認済みDesign Mockupが存在する場合、WordPress実装の都合（Block Themeの既定Layout挙動等）だけを理由に一般的なTheme Layoutへ静かに簡略化してはならない。再現に技術的障害がある場合はSTOPしてOwner判断を求める（Design Fidelity Gate、本書§4と同一原則）。
+> - Implementation convenience must not silently reduce design fidelity. 「実装できたのでこのDesignにしました」は禁止——016Bがまさにこの状態だった（技術的PASSを Visual PASSと誤認していた）。
+> - Owner acceptance uses actual browser first-view screenshots. Mockup HTMLやComponent単体のScreenshotではなく、実際のWordPress・実際のBrowser・実際のViewport全体（Header/Hero/次Section冒頭を含む）で確認する。
+> - **1920×1080 is mandatory for desktop visual acceptance.** 「実際にユーザーがURLを開いた瞬間に見る画面」を最初にOwnerへ提示すること。
+> - **Technical PASS does not equal Visual PASS.** PHPUnit/PHPCS/Theme Check/CI Green/Core OFF safe等の技術Checklistが全てPASSしていても、それはVisual Qualityの合格を意味しない。施工担当者自身が実機Screenshotを見て「中央に置いたHero画像」「普通の士業WordPress Template」に見える場合、COMPLETEと報告してはならない（本書§4 Visual Stop Condition）。
+
+この原則の直接の帰結として、新しいTemplate/Patternで`align:full`を使う際は以下を既定の確認事項とする:
+
+1. 対象Blockの祖先に`is-layout-constrained`なGroup/`<main>`が存在するか確認する。
+2. 直接の親が`is-layout-constrained`でない場合（例: 無属性`wp:post-content`が間に挟まる場合）、`align:full`だけでは不十分——親Chain全体が正しく`is-layout-constrained`として伝播しているかをComputed Width実測で確認する。
+3. `wp:post-content`を新しいTemplateで使う場合は、既定で`{"align":"full","layout":{"inherit":true}}`を検討する（本Orderで確立したPattern、front-page.htmlに適用済み）。他Templateへの横展開は、各Templateの実際のContent構成（`align:full`を使うBlockが存在するか）を見た上で個別に判断する（Order 016B-R2 Hard Scopeにより本Orderでは front-page.html のみ対応、他は将来の点検候補として記録）。

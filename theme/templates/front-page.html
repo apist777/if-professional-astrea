@@ -3,7 +3,23 @@
 <!-- wp:group {"tagName":"main","layout":{"type":"constrained"}} -->
 <main class="wp-block-group">
 <!-- wp:astrea/breadcrumb /-->
-<!-- wp:post-content /-->
+
+<!-- Construction Order 016B-R2 root-cause fix: a bare `wp:post-content`
+(no explicit `align`/`layout`) is a DIRECT CHILD of this `main` Group's
+own `is-layout-constrained` layout. WordPress Core's own constrained-
+layout CSS (`.is-layout-constrained > :where(:not(.alignfull)...)`)
+therefore constrains post-content ITSELF to `contentSize` (720px) —
+squeezing the entire HOME content area, Hero included, into a boxed
+720px column regardless of any `alignfull` classes further inside it.
+`align:"full"` exempts post-content from that outer constraint (letting
+it reach the true viewport edges, matching this main Group's own
+unconstrained width); `layout:{"inherit":true}` re-applies the same
+constrained layout logic INSIDE post-content so its own non-full/wide
+children (Services, Results, etc.) still correctly center at
+contentSize/wideSize. See
+docs/research/2026-08-30_construction_016b_r2_first_view_reconstruction_report.md
+§2 for the full DOM/CSS investigation. -->
+<!-- wp:post-content {"align":"full","layout":{"inherit":true}} /-->
 </main>
 <!-- /wp:group -->
 
