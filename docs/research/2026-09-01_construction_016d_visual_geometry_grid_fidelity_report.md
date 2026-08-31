@@ -186,7 +186,8 @@ theme/assets/icons/                      (10 SVGファイル、新規Git追跡)
 
 ## 19. Commit Hashes
 
-（本Report作成後にコミット、次のセクションで確定）
+- `db92883` — Construction 016D実装コミット（CI green確認済み）
+- `<HISTORY確認コミット>` — HISTORY.csv更新（次コミット、CI green確認後に本文書へ追記）
 
 ## 20. HISTORY.csv Update
 
