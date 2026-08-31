@@ -1,8 +1,8 @@
 # 07. ASTREA Visual v3 — Design Direction (B+C)
 
-- **Status**: PHASE 1 実装済み・2回のREVISE対応済み（Header / Hero / First View、016B → 016B-R1でJapanese Typography問題を修正 → 016B-R2でFirst View Reconstruction、Owner Verdict待ち）。Phase 2（Services以降）はOwner Approval待ち、未実装。
-- **Construction Order**: 016A → 016A-R1 → 016B（Phase 1実装）→ 016B-R1（Typography Revision）→ 016B-R2（First View Reconstruction）
-- **Date**: 2026-08-29（016A/016A-R1）/ 2026-08-30（016B / 016B-R1）/ 2026-08-31（016B-R2）
+- **Status**: PHASE 1（Header/Hero/First View）・Phase 2（Services/Results/Professional/CASE）とも実装済み（016B → 016B-R1 → 016B-R2 → 016C）。Owner確認待ち。
+- **Construction Order**: 016A → 016A-R1 → 016B（Phase 1実装）→ 016B-R1（Typography Revision）→ 016B-R2（First View Reconstruction）→ 016C（Content Sections）
+- **Date**: 2026-08-29（016A/016A-R1）/ 2026-08-30（016B / 016B-R1）/ 2026-08-31（016B-R2 / 016C）
 - **Functional Baseline**: RC1 (1.0.0-rc1) — 変更なし
 
 ## 0. 位置づけ
@@ -225,3 +225,19 @@ Construction Order 016B-R2（Owner Verdict: 016B REJECTED、First View再施工�
 1. 対象Blockの祖先に`is-layout-constrained`なGroup/`<main>`が存在するか確認する。
 2. 直接の親が`is-layout-constrained`でない場合（例: 無属性`wp:post-content`が間に挟まる場合）、`align:full`だけでは不十分——親Chain全体が正しく`is-layout-constrained`として伝播しているかをComputed Width実測で確認する。
 3. `wp:post-content`を新しいTemplateで使う場合は、既定で`{"align":"full","layout":{"inherit":true}}`を検討する（本Orderで確立したPattern、front-page.htmlに適用済み）。他Templateへの横展開は、各Templateの実際のContent構成（`align:full`を使うBlockが存在するか）を見た上で個別に判断する（Order 016B-R2 Hard Scopeにより本Orderでは front-page.html のみ対応、他は将来の点検候補として記録）。
+
+## 18. 016C実装確定事項 — Services / Results / Professional / CASE
+
+Construction Order 016Cで、本書§6〜9（Services/Results/Professional/CASE）を実装した。詳細は`docs/research/2026-08-31_construction_016c_home_content_sections_report.md`参照。
+
+- **Services（§6）**: 「01/02/03」の連番はCSS Counter（新規Core属性不要）で実現。番号=Row Listではなく3カラムGridへ適応（Order 016Cの明示指示）。大型アイコンは`astrea_service`にアイコン選択フィールドが無いため、全Service共通の汎用アイコン（folder、インラインSVG・`currentColor`）を採用——個別アイコン選択が必要になった場合は別途CPTフィールド新設のConstruction Orderが必要。
+- **Results（§7）**: `resultsNumber` Tokenを仕様書指定の`clamp(3.2rem, 6vw, 5.4rem)`へ拡大。Full-bleed濃色帯はDecision 028（0件時はSection全体を見出しごと非表示にする）と両立させるため、**静的なラッピングGroupを使わず**、Dynamic Blockが存在する時にしか描画されない`.wp-block-astrea-results-list`要素自体へ直接Full-bleedスタイルを適用する手法を確立した（`home-professional-teaser.php`が既に説明していた「静的Wrapperは0件時に空の帯として残る」制約への一般解）。
+- **Professional（§8）**: `wp_get_attachment_image()`の要求サイズを`medium`→`large`へ。既存Single Templateへの詳細Linkを追加。**新規恒久チェック**: 55–60%幅Photoへ引き伸ばす設計を新規適用する際は、対象の実際の画像アセットが十分な解像度・構図（アップスケール不要）であることを実機で確認すること——015F/015G時代の小さなAvatar画像を放置したまま拡大レイアウトだけ適用すると破綻する（本Orderで実際に遭遇し、Owner実写真への差し替えで解決）。
+- **CASE（§9）**: Media列とCategoryラベル（既存`related_services`フィールドを再利用、新規データなし）を追加。Feature/Secondaryの視覚差は行位置（`:first-child`）のみで判定し、新規Coreフラグは追加していない。
+
+**新規恒久原則（CSS実装Checklist、Visual v3以降のASTREA全体に適用）**:
+
+> - **既存クラス名の再利用範囲を必ず確認する。** 新しいSection/Component用CSSを書く前に、同じクラス名がArchiveページ等の別コンテキストで既に使われていないか確認する（`grep`で足りる）。共有されている場合は、対象コンテキスト固有の祖先セレクタ（例: `.wp-block-astrea-service-list .wp-block-astrea-service-item`）へ必ずScopeし、無関係なコンテキストへ影響を与えないこと——Source Order依存の暗黙的な優先順位に頼らない。
+> - **CSS Gridで複数要素を同一行に配置する場合は`grid-row`を明示する。** `grid-column`だけを指定して`grid-row`を自動判定に任せると、要素の出現順序によっては意図しない行へ配置される場合がある（Chromiumで実証済み）。
+> - **Full-bleed（`width:100%`等）とPaddingを同時に指定する要素には`box-sizing:border-box`を明示する。** 既定の`content-box`ではPaddingがWidthに加算され、意図しないOverflowを生む。
+> - **静的なラッピングGroup（背景色・Full-bleed装飾等）を、0件時に自己非表示するDynamic Blockの直接の親として使わない。** Decision 028の「0件ならSection全体が消える」という前提が壊れる（空の色付き帯が残る）。装飾は、Dynamic Blockが実際に描画する要素自身へ直接CSSを当てて実現すること。

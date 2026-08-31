@@ -11,6 +11,13 @@
  * Single page (astrea_case has one — see theme/templates/single-astrea_case.html),
  * since a case study is meant to be read in full.
  *
+ * Construction Order 016C added a Media column (photo or an intentional
+ * empty state) and a Category label sourced from the Case's own existing
+ * `related_services` field — no new data model, reusing a pre-existing
+ * field rather than inventing one. The Feature/Secondary visual
+ * distinction (first row larger, Visual v3 Design Direction §9) is pure
+ * Theme CSS keyed off row position (`:first-child`), not a new flag.
+ *
  * @package Astrea\Core
  */
 
@@ -97,6 +104,30 @@ function render_case_list_block( array $attributes = array() ): string {
 		$permalink = get_permalink( $case['id'] );
 
 		$items .= '<div class="wp-block-astrea-case-item">';
+
+		// Construction Order 016C (Visual v3 Design Direction §9): a
+		// Media column (photo or an intentional empty state, never a
+		// missing/broken image) and a Category/Service label sourced from
+		// the Case's own existing `related_services` field (already
+		// present — see case.php — never a new field). Only the first
+		// related Service is used as the label to keep it a single short
+		// word/phrase; a Case with none simply omits the label rather than
+		// guessing one.
+		if ( $case['photo_id'] ) {
+			$items .= '<div class="wp-block-astrea-case-item-media">' . wp_get_attachment_image( $case['photo_id'], 'medium' ) . '</div>';
+		} else {
+			$items .= '<div class="wp-block-astrea-case-item-media is-empty" aria-hidden="true"></div>';
+		}
+
+		$items .= '<div class="wp-block-astrea-case-item-body">';
+
+		if ( ! empty( $case['related_services'] ) ) {
+			$related_service = \Astrea\Core\Service\get_service( $case['related_services'][0] );
+			if ( $related_service ) {
+				$items .= '<p class="wp-block-astrea-case-item-label">' . esc_html( $related_service['name'] ) . '</p>';
+			}
+		}
+
 		$items .= '<h3><a href="' . esc_url( $permalink ) . '">' . esc_html( $case['title'] ) . '</a></h3>';
 
 		$excerpt = '' !== $case['excerpt'] ? $case['excerpt'] : wp_trim_words( wp_strip_all_tags( $case['content'] ), 40 );
@@ -109,7 +140,8 @@ function render_case_list_block( array $attributes = array() ): string {
 			sprintf( esc_html__( '（%sについて）', 'astrea-core' ), esc_html( $case['title'] ) ) .
 			'</span></a></p>';
 
-		$items .= '</div>';
+		$items .= '</div>'; // .wp-block-astrea-case-item-body
+		$items .= '</div>'; // .wp-block-astrea-case-item
 	}
 
 	$heading_html = '' !== $heading ? '<h2>' . esc_html( $heading ) . '</h2>' : '';

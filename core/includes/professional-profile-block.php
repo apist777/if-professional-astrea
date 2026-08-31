@@ -88,8 +88,16 @@ function render_representative_block( array $attributes = array() ): string {
 	$body      = '<div class="wp-block-astrea-representative' . ( $has_photo ? ' has-photo' : ' no-photo' ) . '">';
 
 	if ( $has_photo ) {
-		$body .= '<div class="wp-block-astrea-representative-photo">' . wp_get_attachment_image( $representative['photo_id'], 'medium' ) . '</div>';
+		// Construction Order 016C: 'large' (not 'medium') — Visual v3 makes
+		// this photo the Section's dominant element (~55-60% of the row
+		// width), not a small avatar; wp_get_attachment_image() still emits
+		// a full srcset/sizes pair from whatever intermediate sizes exist,
+		// so this only raises the requested base size, not a fixed pixel
+		// image.
+		$body .= '<div class="wp-block-astrea-representative-photo">' . wp_get_attachment_image( $representative['photo_id'], 'large' ) . '</div>';
 	}
+
+	$permalink = get_permalink( $representative['id'] );
 
 	$body .= '<div class="wp-block-astrea-representative-body">';
 	$body .= '<h3 class="wp-block-astrea-representative-name">' . esc_html( $representative['name'] ) . '</h3>';
@@ -102,6 +110,15 @@ function render_representative_block( array $attributes = array() ): string {
 	if ( '' !== $bio_excerpt ) {
 		$body .= '<p class="wp-block-astrea-representative-bio">' . esc_html( $bio_excerpt ) . '</p>';
 	}
+
+	// Construction Order 016C: Visual v3 (Design Direction §8) calls for a
+	// Link alongside Role/Name/Statement; the Professional Single page
+	// (theme/templates/single-astrea_professional.html) already exists and
+	// was simply never linked to from this teaser.
+	$body .= '<p class="wp-block-astrea-representative-action"><a href="' . esc_url( $permalink ) . '">' . esc_html__( '詳しく見る', 'astrea-core' ) . '<span class="screen-reader-text">' .
+		/* translators: %s: Representative name, appended to a "詳しく見る" link's accessible name only — not shown visually. */
+		sprintf( esc_html__( '（%sについて）', 'astrea-core' ), esc_html( $representative['name'] ) ) .
+		'</span></a></p>';
 
 	$body .= '</div>';
 	$body .= '</div>';
