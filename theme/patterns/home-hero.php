@@ -99,7 +99,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 <span aria-hidden="true" class="wp-block-cover__background has-contrast-background-color has-background-dim-100 has-background-dim"></span>
 <div class="wp-block-cover__inner-container is-position-center-left has-custom-content-position">
 
-<!-- wp:group {"className":"astrea-hero-text","textColor":"base","layout":{"type":"constrained","contentSize":"660px"}} -->
+<!-- wp:group {"className":"astrea-hero-text","textColor":"base"} -->
 <div class="wp-block-group astrea-hero-text has-base-color has-text-color">
 
 <!-- wp:heading {"level":1,"className":"astrea-hero-kicker","metadata":{"bindings":{"content":{"source":"astrea-core/office-profile","args":{"key":"office_name"}}}}} -->

@@ -1,8 +1,8 @@
 # 07. ASTREA Visual v3 — Design Direction (B+C)
 
-- **Status**: PHASE 1（Header/Hero/First View）・Phase 2（Services/Results/Professional/CASE）とも実装済み（016B → 016B-R1 → 016B-R2 → 016C）。Owner確認待ち。
-- **Construction Order**: 016A → 016A-R1 → 016B（Phase 1実装）→ 016B-R1（Typography Revision）→ 016B-R2（First View Reconstruction）→ 016C（Content Sections）
-- **Date**: 2026-08-29（016A/016A-R1）/ 2026-08-30（016B / 016B-R1）/ 2026-08-31（016B-R2 / 016C）
+- **Status**: PHASE 1・Phase 2実装済み、Shared Wide Grid統合済み（016B → 016B-R1 → 016B-R2 → 016C → 016D）。**AWAITING OWNER VISUAL ACCEPTANCE**。
+- **Construction Order**: 016A → 016A-R1 → 016B（Phase 1実装）→ 016B-R1（Typography Revision）→ 016B-R2（First View Reconstruction）→ 016C（Content Sections）→ 016D（Grid Fidelity / Icon System）
+- **Date**: 2026-08-29（016A/016A-R1）/ 2026-08-30（016B / 016B-R1）/ 2026-08-31（016B-R2 / 016C）/ 2026-09-01（016D）
 - **Functional Baseline**: RC1 (1.0.0-rc1) — 変更なし
 
 ## 0. 位置づけ
@@ -241,3 +241,15 @@ Construction Order 016Cで、本書§6〜9（Services/Results/Professional/CASE�
 > - **CSS Gridで複数要素を同一行に配置する場合は`grid-row`を明示する。** `grid-column`だけを指定して`grid-row`を自動判定に任せると、要素の出現順序によっては意図しない行へ配置される場合がある（Chromiumで実証済み）。
 > - **Full-bleed（`width:100%`等）とPaddingを同時に指定する要素には`box-sizing:border-box`を明示する。** 既定の`content-box`ではPaddingがWidthに加算され、意図しないOverflowを生む。
 > - **静的なラッピングGroup（背景色・Full-bleed装飾等）を、0件時に自己非表示するDynamic Blockの直接の親として使わない。** Decision 028の「0件ならSection全体が消える」という前提が壊れる（空の色付き帯が残る）。装飾は、Dynamic Blockが実際に描画する要素自身へ直接CSSを当てて実現すること。
+
+## 19. 016D実装確定事項 — Shared Wide Grid（恒久原則）
+
+Construction Order 016Dで、Header/Hero/Services/CASE/RESULTS/Professionalが「別々の座標系に見える」というOwner指摘を受け、共有Wide Gridを導入した。詳細は`docs/research/2026-09-01_construction_016d_visual_geometry_grid_fidelity_report.md`参照。
+
+**恒久原則**:
+
+> **Shared Wide Grid**
+> - `--astrea-v3-grid-max`（既存`wideSize`の値、1200px）・`--astrea-v3-grid-gutter`（既存`medium`spacing、32px）を`:root`で一度だけ定義し、`padding-inline:max(var(--astrea-v3-grid-gutter),calc((100% - var(--astrea-v3-grid-max)) / 2))`という共通Formulaを、Header/Hero/Services/CASE/RESULTS/Professional等、Visual v3の主要な横方向配置要素すべてに適用する。個別に`600px`や`720px`等の異なる中央寄せ幅を独自に持たせない。
+> - **Background(Full-bleed) と Content(Shared Grid) を区別する。** `align:full`やFull-bleed背景色/写真自体は引き続きViewport端まで到達させてよいが、その内部のテキスト・数字・ボタン等は必ず共有Gridへ揃える。「Full-bleedにする」＝「文字までViewport端に広げる」ではない。
+> - **Header/Hero/Content Sectionで異なる中央寄せロジックが独立して存在する状態を作らない。** 新しいSectionを追加する際は、まず共有Grid Formulaを使えるか検討し、独自の`contentSize`/`max-width`を発明する前にこの原則へ立ち返ること。
+> - **Position:absoluteでSite-wide Template Part（Header等）をOverlay化する場合、可変長コンテンツ（長い事務所名等）でOverlayの高さが伸びても、下に重なるHero等のコンテンツと衝突しないことを、極端な長さの実データで必ず実機検証する。** Header/Heroのように独立してPositioningされる要素同士は、片方が伸びても他方が組版として追従しないため、この確認を省略しない。
