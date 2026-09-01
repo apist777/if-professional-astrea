@@ -41,6 +41,27 @@
  *   CSS, no Markup) is preserved from 016B — still applies to the outer
  *   wrapper, still has no hardcoded section name.
  *
+ * Construction Order 016E implementation notes (Owner Reference Fidelity
+ * Final Pass — see docs/research/2026-09-01_016e_reference_measurements.md
+ * and docs/research/2026-09-01_construction_016e_reference_fidelity_report.md):
+ *
+ * - The straight vertical Text Plane / Photo Plane split is replaced by a
+ *   diagonal boundary (CSS `clip-path` on the Text Plane, which now sits
+ *   `position:relative` above a `position:absolute` full-bleed Photo
+ *   Plane) — measured from the Reference image (top boundary ~56% of
+ *   Hero width, bottom boundary ~42%). Markup structure (two children of
+ *   one flex/relative Group) is otherwise unchanged; Mobile resets the
+ *   clip-path back to a plain rectangle (simple stack), per Order §14
+ *   ("Hero diagonal may simplify on mobile if necessary").
+ * - A small decorative vertical label (`.astrea-hero-vertical`,
+ *   `aria-hidden="true"`) was added, bound to the SAME `office_name`
+ *   Office Profile data already announced by the real H1 — not invented
+ *   data, just a second (hidden-from-AT) decorative presentation of data
+ *   that already exists, matching the Reference's vertical side text
+ *   motif without hard-coding a brand string that would be wrong for a
+ *   different site owner. Hidden on Mobile (matches Order §14's
+ *   "decorative vertical text may hide on small screens").
+ *
  * @package Astrea\Theme
  */
 
@@ -50,6 +71,10 @@ if ( ! defined( 'ABSPATH' ) ) {
 ?>
 <!-- wp:group {"align":"full","className":"astrea-hero-v3","layout":{"type":"flex","flexWrap":"nowrap","verticalAlignment":"stretch"}} -->
 <div class="wp-block-group alignfull astrea-hero-v3">
+
+<!-- wp:paragraph {"className":"astrea-hero-vertical","metadata":{"bindings":{"content":{"source":"astrea-core/office-profile","args":{"key":"office_name"}}}}} -->
+<p class="astrea-hero-vertical" aria-hidden="true">ASTREA</p>
+<!-- /wp:paragraph -->
 
 <!-- wp:group {"className":"astrea-hero-textplane","backgroundColor":"base","textColor":"contrast","layout":{"type":"constrained"}} -->
 <div class="wp-block-group astrea-hero-textplane has-contrast-color has-base-background-color has-text-color has-background">
