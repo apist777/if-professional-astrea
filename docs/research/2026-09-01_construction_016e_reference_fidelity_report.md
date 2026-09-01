@@ -3,7 +3,8 @@
 - **Status**: AWAITING OWNER VISUAL ACCEPTANCE（RELEASE HOLD維持）
 - **Who**: クロエ (Chloe)
 - **Start**: 2026-09-01 16:40 JST
-- **End**: 2026-09-01 23:55 JST（見込み、git push/CI確認後に確定）
+- **End**: 2026-09-01 23:55 JST
+- **Commit**: `8980591`（CI green確認済み: PHPUnit / Theme-Core independence smoke test / PHP syntax+Coding Standards、全Job成功）
 - **Measurement Audit**: `docs/research/2026-09-01_016e_reference_measurements.md`（本Order §2の要求通り、CSS変更前に作成・使用）
 - **Owner Directive**: 「Referenceは模範であり、翻訳・再解釈の対象ではない」——本Orderでは既存実装の合理性・従来仕様との整合性を理由にReferenceから離れることを避け、Referenceに写っている箇所は一方向でReference→Implementationへ合わせた。
 
