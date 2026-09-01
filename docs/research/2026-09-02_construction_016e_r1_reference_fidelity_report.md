@@ -3,7 +3,8 @@
 - **Status**: AWAITING OWNER VISUAL ACCEPTANCE（RELEASE HOLD維持）
 - **Who**: クロエ (Chloe)
 - **Start**: 2026-09-02 00:05 JST
-- **End**: 2026-09-02 09:00 JST（見込み、git push/CI確認後に確定）
+- **End**: 2026-09-02 09:00 JST
+- **Commit**: `0d060b5`（CI green確認済み: PHPUnit / Theme-Core independence smoke test / PHP syntax+Coding Standards、全Job成功）
 - **Measurement Audit**: `docs/research/2026-09-02_016e-r1_reference_fidelity_measurements.md`
 - **Owner Directive**: 016E REVISE。「さらに格好よくする」ではなく、016E Actualに残っているComposition/Scale/Density/Typography/Section HeightのReference差を計測し収束させる。「良く見えると思ったので」は理由にしない。
 
