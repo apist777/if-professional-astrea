@@ -3,7 +3,8 @@
 - **Status**: AWAITING OWNER VISUAL ACCEPTANCE（RELEASE HOLD維持）
 - **Who**: クロエ (Chloe)
 - **Start**: 2026-09-01 14:19 JST
-- **End**: 2026-09-01 16:40 JST（見込み、git push/CI確認後に確定）
+- **End**: 2026-09-01 16:40 JST
+- **Commit**: `061e53f`（CI green確認済み: PHPUnit / Theme-Core independence smoke test / PHP syntax+Coding Standards、全Job成功）
 - **Owner Reference**: `docs/research/references/visual-v3-owner-reference.png`（872×1804px、HOMEの上から「まずはお気軽にご相談ください」CTA直後まで。FAQ/Voice/Flowは写っていない）
 
 ## 0. 本Orderの前提と、016D-R1との違い
