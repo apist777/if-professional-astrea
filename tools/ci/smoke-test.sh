@@ -1645,7 +1645,11 @@ fi
 RESULTS_TEASER_PAGE=$(wp_cli post create --post_type=page --post_title="Smoke010 Results Teaser" --post_status=publish --post_content='<!-- wp:astrea/results-list {"heading":"実績"} /-->' --porcelain)
 RESULTS_TEASER_PATH="/$(wp_cli post get "$RESULTS_TEASER_PAGE" --field=post_name)/"
 check_no_fatal "CJ: RESULTS Teaser page (1 RESULTS already exists)" "$RESULTS_TEASER_PATH"
-if ! grep -qF "実績" "$BODY_FILE" || ! grep -qF "1,000件以上" "$BODY_FILE"; then
+# Construction Order 016D-R1: render_value() now splits a leading number
+# from its unit ("1,000件以上" -> "1,000" + a separate <span> for "件以上")
+# for Typography purposes, so the two are no longer one contiguous string
+# in the output — check for both parts instead of the old literal whole.
+if ! grep -qF "実績" "$BODY_FILE" || ! grep -qF "1,000" "$BODY_FILE" || ! grep -qF "件以上" "$BODY_FILE"; then
 	echo "FAIL [CJ]: RESULTS Teaser did not render heading+content with an existing RESULTS entry"
 	exit 1
 fi
