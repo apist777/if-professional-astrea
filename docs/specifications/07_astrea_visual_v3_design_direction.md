@@ -268,3 +268,20 @@ Construction Order 016D-R1で、HeroをOverlay（写真の上に文字）からT
 > - 装飾Iconをitemごとに変える場合、post_title等のContent文字列を解析してIconを自動推測する実装は禁止（Fragileであり、Ownerの想定しない結果を生みうる）。CPTにIcon選択用のpostmeta（固定Slugのenum、Sanitize Callbackで許可Slug以外を既定値へFallback）を追加し、Site Ownerが明示的に選ぶ。
 > - 複数のCPTが同じ種類のIcon（装飾SVG）を必要とする場合は、**Icon本体を1箇所のRegistryへ集約**（本Orderでは`Astrea\Core\IconSystem`）し、各CPTは「許可Slug一覧」「既定Slug」をそのRegistryから取得する。許可Slug一覧とSanitizeロジックが別々の場所に重複すると、片方だけ更新されて乖離するリスクがある。
 > - **Classic Meta Box（`update_post_meta()`直接呼び出し）は`register_post_meta()`のsanitize_callbackを通らない**（RESTのみ）。Icon等のenum値をMeta Box側でも保存する場合は、Meta Box自身の`save_meta()`でも同じ許可Slugリストによる再検証を行うこと。
+
+## 21. 016D-R2実装確定事項 — Section Heading Kicker、Shared Wide Gridの下半分への拡張
+
+Construction Order 016D-R2で、Owner Reference実画像（`docs/research/references/visual-v3-owner-reference.png`）を正本として、Professional/Price/FAQ/Voice/Flow/Final CTA（HOME下半分）を016D/016D-R1確立のEditorial言語へ揃えた。詳細は`docs/research/2026-09-01_construction_016d_r2_reference_fidelity_polish_report.md`参照。
+
+**恒久原則**:
+
+> **Section Heading Kicker（英語Kicker + 追従罫線）**
+> - 各Section見出し（H2）に、Owner Referenceが示す「SERVICE / CASE / RESULTS / ABOUT / PRICE / FAQ / VOICE」という英語Kicker語 + 見出しテキスト末尾に続くGold細罫線を追加した。実装は**CSSのみ**（Markup変更ゼロ）——`h2:has(+ .wp-block-astrea-X-list)`という既存Decision 028自己非表示Selectorへ`::before`（Kicker文字列）・`::after`（罫線、`flex`ベース）を追加しただけであり、H2自体が「対応するDynamic Blockが実際に描画された時にしか存在しない」ため、0件時のSelf-hideに新たな抜け穴は生まれない（Selectorの数学的性質上、H2が存在しない=Kickerも存在しない）。
+> - 新しいSectionを追加する際、この一覧にKicker語を追加するだけで同じ視覚言語へ自動的に揃う（Flowの`h2.astrea-flow-heading`のようにClass Selectorで参加させることも可能——`h2:has(+ .wp-block-astrea-X)`の対象になれないStatic Pattern見出しでも同じ扱いにできる）。
+>
+> **Shared Wide GridはHOME全体（上半分・下半分の区別なし）に適用する**
+> - 016Dで確立した`--astrea-v3-grid-max`/`--astrea-v3-grid-gutter`のPadding Formulaを、Price/FAQ/Voice/Flowへも適用し、`contentSize:600–720px`のような独自の中央寄せ幅を新設しないこと。「HeroからResultsまではEditorial、そこから下は普通のWordPress」という二層構造を生まないことが本Orderの主眼だった。
+> - `--astrea-v3-grid-max`の実際の値は、Owner Referenceの実測（Playwright Canvas Pixel Samplingによる左右余白測定）に基づき`1200px`→`1440px`へ改定した（Reference側の一貫した左右余白比率 約11.5%に対し、1200pxは1920px幅で約18.75%となり明らかに狭かった）。Reference画像を新たに入手した場合は、この係数を再計測し、必要なら再度調整すること——固定した「正解値」ではない。
+>
+> **CSS同一Selectorの重複定義に注意する（Source Order依存の再発防止）**
+> - 本Orderで、`.wp-block-astrea-price-list--compact`関連のSelectorが、theme.jsonの離れた2箇所（Compact変種の主定義ブロックと、Price詳細ページ用の別ブロック内にある古いCompact上書き）に**同じ詳細度で重複定義**されており、後方に書かれた古い方が常に勝つ状態になっていた（`display:none`にしたはずのGroup Labelが表示され続ける等、実機Screenshotで発見）。同様の理由で、Mobile Media Query（`@media`）をStylesheetの前方（既存782pxブロックの内部）に追記したところ、詳細度が同じ後方の無条件ルールに常に負け、320px幅で実際に25pxの横Overflowが発生する実害も確認した——**新しいResponsive Overrideは、対象の無条件ベースルールより後方（Stylesheet末尾が安全）に配置すること。** これらはいずれも「動くはずのCSSが動かない」系の不具合であり、Selectorを書いた時点では気づけない——**新しいSection CSSを書いたら、必ず実機（Playwright等）で対象箇所をScreenshotし、意図通りの見た目になっているか確認してから次のSectionへ進むこと**を本Order以降の標準手順とする（意図と実際のRenderが一致しているかを毎回確認しないと、この種のSource Order事故は再現し続ける）。

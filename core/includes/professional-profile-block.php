@@ -115,8 +115,16 @@ function render_representative_block( array $attributes = array() ): string {
 	// Link alongside Role/Name/Statement; the Professional Single page
 	// (theme/templates/single-astrea_professional.html) already exists and
 	// was simply never linked to from this teaser.
-	$body .= '<p class="wp-block-astrea-representative-action"><a href="' . esc_url( $permalink ) . '">' . esc_html__( '詳しく見る', 'astrea-core' ) . '<span class="screen-reader-text">' .
-		/* translators: %s: Representative name, appended to a "詳しく見る" link's accessible name only — not shown visually. */
+	//
+	// Construction Order 016D-R2 §3: label changed from the generic
+	// "詳しく見る" (shared verbatim by CASE's own, independently-defined
+	// action link) to "プロフィールを見る" and given an Outline CTA
+	// button treatment (see .wp-block-astrea-representative-action in
+	// theme.json) — this is Professional's own distinct string, so this
+	// does not affect CASE's identical-looking but separately defined
+	// "詳しく見る" link in case-list-block.php.
+	$body .= '<p class="wp-block-astrea-representative-action"><a href="' . esc_url( $permalink ) . '">' . esc_html__( 'プロフィールを見る', 'astrea-core' ) . '<span class="screen-reader-text">' .
+		/* translators: %s: Representative name, appended to a "プロフィールを見る" link's accessible name only — not shown visually. */
 		sprintf( esc_html__( '（%sについて）', 'astrea-core' ), esc_html( $representative['name'] ) ) .
 		'</span></a></p>';
 

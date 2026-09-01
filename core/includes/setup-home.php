@@ -61,10 +61,16 @@ const HOME_PATTERN_SLUGS = array(
 	'astrea/home-results-teaser',
 	'astrea/home-professional-teaser',
 	'astrea/home-price',
+	// Construction Order 016D-R2 §5: Final CTA repositioned to sit
+	// immediately after Price (Owner Reference shows the closing CTA
+	// band directly beneath the price table, not at the very bottom of
+	// the page) — FAQ/Voice/Flow now follow the CTA instead of
+	// preceding it. No new Pattern/Block; same 'astrea/home-cta'
+	// content, only its position in this list changed.
+	'astrea/home-cta',
 	'astrea/home-faq',
 	'astrea/home-voice-teaser',
 	'astrea/home-flow',
-	'astrea/home-cta',
 );
 
 const GENERATE_HOME_ACTION = 'astrea_setup_generate_home';
