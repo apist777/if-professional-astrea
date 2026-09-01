@@ -135,6 +135,10 @@ Order §13の目標配色（Hero明/Services白/CASE淡/Results濃紺/Profession
 
 Trust（Default）/Natural/Modern、いずれも新Hero構造（Text Plane+Photo Plane）・新CASE Card・新Price Gridが正しく機能することを実機確認（Screenshot取得済み）。Trustへ復元済み。
 
+## 14.1 CI（smoke-test.sh）で発見・修正した回帰
+
+初回Push時、CIの`tools/ci/smoke-test.sh`（Clean環境、Ownerの port-8888 Fixtureとは別）が1件失敗した: `RESULTS Teaser did not render heading+content with an existing RESULTS entry`。原因は§6の数字/単位分離——smoke-test.sh側が`grep -qF "1,000件以上"`という連続文字列を期待していたが、実装は`1,000<span class="wp-block-astrea-result-unit">件以上</span>`という分離Markupを出力するため一致しなくなっていた。ローカルではOwner Fixture保護のためsmoke-test.shを実行していないため、**この回帰はCI側で初めて検出された**——検出後、`grep -qF "1,000"`と`grep -qF "件以上"`の2つに分けてチェックする形へ修正し、再PushでCI greenを確認した（既存PHPUnitテストへ加えた同種の修正と同じ考え方）。
+
 ## 15. Changed Files
 
 ```
@@ -151,6 +155,7 @@ core/includes/price-admin.php              (Icon選択UI追加)
 core/includes/price-list-block.php         (Icon描画追加)
 theme/patterns/home-hero.php               (全面書き換え: Text Plane+Photo Plane)
 theme/theme.json                           (Header/Hero/CASE/Price CSS全面改修)
+tools/ci/smoke-test.sh                     (CJ: RESULTS Teaserの数字/単位分離に伴うAssertion修正)
 tests/IconSystemTest.php                   (新規)
 tests/ServiceTest.php / ResultTest.php / PriceTest.php （Icon関連テスト追加）
 ```
@@ -185,7 +190,8 @@ tests/ServiceTest.php / ResultTest.php / PriceTest.php （Icon関連テスト追
 
 ## 19. Commit Hashes
 
-（本Report作成後にコミット、次のセクションで確定）
+- `a6af16d` — Construction 016D-R1実装コミット（初回CI failure、§14.1参照）
+- `1dee932` — smoke-test.sh CJ Assertion修正コミット（CI green確認済み）
 
 ## 20. HISTORY.csv Update
 
