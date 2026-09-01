@@ -181,12 +181,121 @@ class ResultTest extends WP_UnitTestCase {
 
 		$this->assertStringContainsString( '<h2>実績</h2>', $html );
 		$this->assertStringContainsString( '相談実績', $html );
-		$this->assertStringContainsString( '1,000件以上', $html );
+		// Construction Order 016D-R1 §9: the number/unit typography split
+		// means the raw string "1,000件以上" is no longer contiguous in
+		// the output — see render_value()'s own dedicated tests below for
+		// that behaviour; this only re-confirms both parts are present.
+		$this->assertStringContainsString( '1,000', $html );
+		$this->assertStringContainsString( '件以上', $html );
 	}
 
 	public function test_results_list_block_heading_is_not_emitted_alone_with_zero_items() {
 		$html = Result\render_results_list_block( array( 'heading' => '実績' ) );
 
 		$this->assertSame( '', $html, 'A heading must never be emitted alone when there are zero RESULTS entries.' );
+	}
+
+	// -- Icon (Construction Order 016D-R1) -----------------------------------
+
+	public function test_icon_defaults_to_result_check_when_never_set() {
+		$id = $this->create_result();
+
+		$this->assertSame( 'result-check', Result\get_result( $id )['icon'] );
+	}
+
+	public function test_icon_reflects_a_valid_stored_value() {
+		$id = $this->create_result();
+		update_post_meta( $id, Result\META_ICON, 'result-company' );
+
+		$this->assertSame( 'result-company', Result\get_result( $id )['icon'] );
+	}
+
+	public function test_existing_result_created_before_016d_r1_still_works() {
+		$id = $this->create_result( array( 'post_title' => '既存の実績' ) );
+		update_post_meta( $id, Result\META_VALUE, '1,000件以上' );
+
+		$result = Result\get_result( $id );
+
+		$this->assertSame( 'result-check', $result['icon'] );
+		$this->assertSame( '1,000件以上', $result['value'] );
+	}
+
+	public function test_save_meta_keeps_a_valid_icon() {
+		$admin_id = self::factory()->user->create( array( 'role' => 'administrator' ) );
+		wp_set_current_user( $admin_id );
+		$id = $this->create_result();
+
+		$_POST[ ResultAdmin\NONCE_FIELD ] = wp_create_nonce( ResultAdmin\NONCE_ACTION );
+		$_POST[ Result\META_ICON ]        = 'result-consultation';
+
+		ResultAdmin\save_meta( $id );
+
+		$this->assertSame( 'result-consultation', Result\get_result( $id )['icon'] );
+	}
+
+	public function test_save_meta_rejects_an_arbitrary_icon_string() {
+		$admin_id = self::factory()->user->create( array( 'role' => 'administrator' ) );
+		wp_set_current_user( $admin_id );
+		$id = $this->create_result();
+
+		$_POST[ ResultAdmin\NONCE_FIELD ] = wp_create_nonce( ResultAdmin\NONCE_ACTION );
+		$_POST[ Result\META_ICON ]        = 'not-a-real-icon';
+
+		ResultAdmin\save_meta( $id );
+
+		$this->assertSame( 'result-check', Result\get_result( $id )['icon'] );
+	}
+
+	public function test_save_meta_rejects_an_icon_slug_belonging_to_a_different_context() {
+		$admin_id = self::factory()->user->create( array( 'role' => 'administrator' ) );
+		wp_set_current_user( $admin_id );
+		$id = $this->create_result();
+
+		$_POST[ ResultAdmin\NONCE_FIELD ] = wp_create_nonce( ResultAdmin\NONCE_ACTION );
+		$_POST[ Result\META_ICON ]        = 'folder'; // a real slug, just Service-only.
+
+		ResultAdmin\save_meta( $id );
+
+		$this->assertSame( 'result-check', Result\get_result( $id )['icon'] );
+	}
+
+	// -- Value / unit typography split (Construction Order 016D-R1 §9) ------
+
+	public function test_render_value_splits_a_leading_number_from_its_unit() {
+		$html = Result\render_value( '200社以上' );
+
+		$this->assertSame( '200<span class="wp-block-astrea-result-unit">社以上</span>', $html );
+	}
+
+	public function test_render_value_splits_a_percentage() {
+		$this->assertSame( '98<span class="wp-block-astrea-result-unit">%</span>', Result\render_value( '98%' ) );
+	}
+
+	public function test_render_value_with_no_leading_number_renders_unsplit() {
+		// Backward-compatible: existing free-text values with no leading
+		// digit (e.g. authored before this Order) render exactly as
+		// before, no split markup.
+		$this->assertSame( '全国対応', Result\render_value( '全国対応' ) );
+	}
+
+	public function test_render_value_with_only_a_number_renders_unsplit() {
+		$this->assertSame( '2015', Result\render_value( '2015' ) );
+	}
+
+	public function test_render_value_escapes_html() {
+		$html = Result\render_value( '<script>alert(1)</script>200社以上' );
+
+		$this->assertStringNotContainsString( '<script>', $html );
+	}
+
+	public function test_results_list_block_renders_split_value_and_icon() {
+		$id = $this->create_result( array( 'post_title' => '会社設立支援' ) );
+		update_post_meta( $id, Result\META_VALUE, '200社以上' );
+		update_post_meta( $id, Result\META_ICON, 'result-company' );
+
+		$html = Result\render_results_list_block();
+
+		$this->assertStringContainsString( '200<span class="wp-block-astrea-result-unit">社以上</span>', $html );
+		$this->assertStringContainsString( 'wp-block-astrea-result-item-icon', $html );
 	}
 }

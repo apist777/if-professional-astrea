@@ -14,10 +14,12 @@
 namespace Astrea\Core\Price\Admin;
 
 use function Astrea\Core\Price\meta_sanitizers;
+use function Astrea\Core\IconSystem\allowed_slugs;
 use const Astrea\Core\Price\POST_TYPE;
 use const Astrea\Core\Price\META_AMOUNT;
 use const Astrea\Core\Price\META_NOTES;
 use const Astrea\Core\Price\META_GROUP;
+use const Astrea\Core\Price\META_ICON;
 
 if ( ! defined( 'ABSPATH' ) ) {
 	exit; // Disallow direct access.
@@ -25,6 +27,24 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 const NONCE_ACTION = 'astrea_price_save_meta';
 const NONCE_FIELD  = 'astrea_price_meta_nonce';
+
+/**
+ * Human-readable labels for each allowed icon slug, for the admin
+ * `<select>` only — the stored value is always the slug itself.
+ *
+ * @return array<string,string>
+ */
+function icon_labels(): array {
+	return array(
+		'company'     => __( '会社（company）', 'astrea-core' ),
+		'contract'    => __( '契約書（contract）', 'astrea-core' ),
+		'document'    => __( '書類（document）', 'astrea-core' ),
+		'folder'      => __( 'フォルダ／汎用（folder）', 'astrea-core' ),
+		'inheritance' => __( '相続（inheritance）', 'astrea-core' ),
+		'permit'      => __( '許可・許認可（permit）', 'astrea-core' ),
+		'price-yen'   => __( '料金（price-yen）', 'astrea-core' ),
+	);
+}
 
 add_action( 'add_meta_boxes', __NAMESPACE__ . '\\add_meta_boxes' );
 
@@ -53,9 +73,11 @@ function add_meta_boxes() {
 function render_meta_box( \WP_Post $post ) {
 	wp_nonce_field( NONCE_ACTION, NONCE_FIELD );
 
-	$amount = get_post_meta( $post->ID, META_AMOUNT, true );
-	$notes  = get_post_meta( $post->ID, META_NOTES, true );
-	$group  = get_post_meta( $post->ID, META_GROUP, true );
+	$amount      = get_post_meta( $post->ID, META_AMOUNT, true );
+	$notes       = get_post_meta( $post->ID, META_NOTES, true );
+	$group       = get_post_meta( $post->ID, META_GROUP, true );
+	$icon        = get_post_meta( $post->ID, META_ICON, true );
+	$icon_labels = icon_labels();
 	?>
 	<p>
 		<label for="astrea_price_amount"><strong><?php esc_html_e( '金額', 'astrea-core' ); ?></strong></label><br />
@@ -87,6 +109,16 @@ function render_meta_box( \WP_Post $post ) {
 			value="<?php echo esc_attr( $group ); ?>"
 			class="widefat"
 		/>
+	</p>
+	<p>
+		<label for="astrea_price_icon"><strong><?php esc_html_e( 'アイコン', 'astrea-core' ); ?></strong></label><br />
+		<select id="astrea_price_icon" name="<?php echo esc_attr( META_ICON ); ?>" class="widefat">
+			<?php foreach ( allowed_slugs( 'price' ) as $slug ) : ?>
+				<option value="<?php echo esc_attr( $slug ); ?>" <?php selected( $icon, $slug ); ?>>
+					<?php echo esc_html( $icon_labels[ $slug ] ?? $slug ); ?>
+				</option>
+			<?php endforeach; ?>
+		</select>
 	</p>
 	<p class="description">
 		<?php esc_html_e( 'すべての項目は任意です。未入力のまま公開しても問題ありません。', 'astrea-core' ); ?>

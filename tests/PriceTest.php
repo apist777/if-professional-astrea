@@ -221,4 +221,77 @@ class PriceTest extends WP_UnitTestCase {
 
 		$this->assertSame( '', $html, 'A heading must never be emitted alone when there are zero Price entries.' );
 	}
+
+	// -- Icon (Construction Order 016D-R1) -----------------------------------
+
+	public function test_icon_defaults_to_price_yen_when_never_set() {
+		$id = $this->create_price();
+
+		$this->assertSame( 'price-yen', Price\get_price( $id )['icon'] );
+	}
+
+	public function test_icon_reflects_a_valid_stored_value() {
+		$id = $this->create_price();
+		update_post_meta( $id, Price\META_ICON, 'company' );
+
+		$this->assertSame( 'company', Price\get_price( $id )['icon'] );
+	}
+
+	public function test_price_re_uses_the_service_icon_set() {
+		// Order §11: company/permit/inheritance (Service icons) are valid
+		// Price icon choices, not just price-yen.
+		$id = $this->create_price();
+		update_post_meta( $id, Price\META_ICON, 'permit' );
+
+		$this->assertSame( 'permit', Price\get_price( $id )['icon'] );
+	}
+
+	public function test_existing_price_created_before_016d_r1_still_works() {
+		$id = $this->create_price( array( 'post_title' => '既存の料金' ) );
+		update_post_meta( $id, Price\META_AMOUNT, '5万円〜' );
+
+		$price = Price\get_price( $id );
+
+		$this->assertSame( 'price-yen', $price['icon'] );
+		$this->assertSame( '5万円〜', $price['amount'] );
+	}
+
+	public function test_save_meta_keeps_a_valid_icon() {
+		$admin_id = self::factory()->user->create( array( 'role' => 'administrator' ) );
+		wp_set_current_user( $admin_id );
+		$id = $this->create_price();
+
+		$_POST[ PriceAdmin\NONCE_FIELD ] = wp_create_nonce( PriceAdmin\NONCE_ACTION );
+		$_POST[ Price\META_ICON ]        = 'inheritance';
+
+		PriceAdmin\save_meta( $id );
+
+		$this->assertSame( 'inheritance', Price\get_price( $id )['icon'] );
+	}
+
+	public function test_save_meta_rejects_an_arbitrary_icon_string() {
+		$admin_id = self::factory()->user->create( array( 'role' => 'administrator' ) );
+		wp_set_current_user( $admin_id );
+		$id = $this->create_price();
+
+		$_POST[ PriceAdmin\NONCE_FIELD ] = wp_create_nonce( PriceAdmin\NONCE_ACTION );
+		$_POST[ Price\META_ICON ]        = 'not-a-real-icon';
+
+		PriceAdmin\save_meta( $id );
+
+		$this->assertSame( 'price-yen', Price\get_price( $id )['icon'] );
+	}
+
+	public function test_save_meta_rejects_an_icon_slug_belonging_to_a_different_context() {
+		$admin_id = self::factory()->user->create( array( 'role' => 'administrator' ) );
+		wp_set_current_user( $admin_id );
+		$id = $this->create_price();
+
+		$_POST[ PriceAdmin\NONCE_FIELD ] = wp_create_nonce( PriceAdmin\NONCE_ACTION );
+		$_POST[ Price\META_ICON ]        = 'result-check'; // a real slug, just Result-only.
+
+		PriceAdmin\save_meta( $id );
+
+		$this->assertSame( 'price-yen', Price\get_price( $id )['icon'] );
+	}
 }

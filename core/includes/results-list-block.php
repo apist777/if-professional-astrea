@@ -10,15 +10,15 @@
  * value is never assumed numeric and is output as free text (no
  * structured data — see the file header of result.php).
  *
- * Construction Order 016D: a decorative "check" icon is shown on every
- * Result item, matching Service's own uniform-icon precedent
- * (service-list-block.php) for the exact same reason — `astrea_result`
- * has no icon-selection field, and guessing an icon from the Result's
- * free-text label/value (e.g. "200社以上" -> a company icon) would be
- * exactly the "fragile content-sniffing" the Order explicitly forbids.
- * A single generic "achievement/success" glyph is used uniformly instead;
- * per-item icon selection is a future Design Decision, not implemented
- * here (see the 016D report).
+ * Construction Order 016D added a decorative icon on every Result item,
+ * uniform across all items (matching Service's own precedent) because
+ * `astrea_result` had no icon-selection field and guessing one from the
+ * Result's free-text label/value (e.g. "200社以上" -> a company icon)
+ * would be exactly the "fragile content-sniffing" that Order forbade.
+ * 016D-R1 added a real `META_ICON` field (see result.php) — same reasoning
+ * as Service's — so `$result['icon']` now reflects a per-item choice made
+ * by a site owner, rendered via the shared
+ * `Astrea\Core\IconSystem\render()` registry (`icon-system.php`).
  *
  * @package Astrea\Core
  */
@@ -28,15 +28,6 @@ namespace Astrea\Core\Result;
 if ( ! defined( 'ABSPATH' ) ) {
 	exit; // Disallow direct access.
 }
-
-/**
- * Sourced from `theme/assets/icons/results/result-check.svg` (Owner-
- * created ASTREA Icon System asset — see the 016D report for the audit).
- * Inlined with `currentColor` (not an `<img src>`) so it recolours per
- * Style Variation, the same technique `results/result-check.svg`'s own
- * sibling README documents and Service's ICON_SVG already established.
- */
-const ICON_SVG = '<svg viewBox="0 0 48 48" role="img" aria-hidden="true" focusable="false" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="24" cy="24" r="16"/><path d="m16 24 5 5 11-12" stroke-width="2.2" class="wp-block-astrea-result-item-icon-accent"/></svg>';
 
 add_action( 'init', __NAMESPACE__ . '\\register_list_block' );
 
@@ -89,8 +80,8 @@ function render_results_list_block( array $attributes = array() ): string {
 
 	foreach ( $results as $result ) {
 		$items .= '<div class="wp-block-astrea-result-item">';
-		$items .= '<span class="wp-block-astrea-result-item-icon">' . ICON_SVG . '</span>';
-		$items .= '<p class="wp-block-astrea-result-value">' . esc_html( $result['value'] ) . '</p>';
+		$items .= \Astrea\Core\IconSystem\render( $result['icon'], 'wp-block-astrea-result-item-icon' );
+		$items .= '<p class="wp-block-astrea-result-value">' . render_value( $result['value'] ) . '</p>';
 		$items .= '<p class="wp-block-astrea-result-label">' . esc_html( $result['label'] ) . '</p>';
 		$items .= '</div>';
 	}
@@ -98,4 +89,31 @@ function render_results_list_block( array $attributes = array() ): string {
 	$heading_html = '' !== $heading ? '<h2>' . esc_html( $heading ) . '</h2>' : '';
 
 	return $heading_html . '<div class="wp-block-astrea-results-list">' . $items . '</div>';
+}
+
+/**
+ * Construction Order 016D-R1 §9: split a leading number from its trailing
+ * unit ("200社以上" -> "200" + "社以上") so the unit can be styled smaller
+ * than the big number (Reference composition). `value` stays free text
+ * (never assumed numeric — see result.php's own docblock), so this is a
+ * purely presentational, backward-compatible enhancement: any value with
+ * no leading digit (e.g. "全国対応", "多数") renders exactly as before,
+ * as one plain escaped string, no split markup at all.
+ *
+ * @param string $value Free-text RESULTS value.
+ * @return string Escaped HTML — safe to echo directly.
+ */
+function render_value( string $value ): string {
+	if ( ! preg_match( '/^([0-9,.]+)(.*)$/u', $value, $matches ) || '' === $matches[1] ) {
+		return esc_html( $value );
+	}
+
+	$number = $matches[1];
+	$unit   = $matches[2];
+
+	if ( '' === $unit ) {
+		return esc_html( $number );
+	}
+
+	return esc_html( $number ) . '<span class="wp-block-astrea-result-unit">' . esc_html( $unit ) . '</span>';
 }

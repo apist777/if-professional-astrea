@@ -31,11 +31,23 @@ if ( ! defined( 'ABSPATH' ) ) {
 /** Post type slug (also the Theme/Core public contract — see archive-astrea_service.html). */
 const POST_TYPE = 'astrea_service';
 
+/**
+ * Postmeta key: which ASTREA Icon System glyph (see icon-system.php)
+ * this Service displays. Construction Order 016D-R1 — added because
+ * Owner explicitly forbade guessing an icon from the Service's title
+ * string; a site owner picks one from a fixed, curated list instead
+ * (see service-admin.php). Allowed values / default come from
+ * `Astrea\Core\IconSystem\allowed_slugs('service')` /
+ * `default_slug('service')` — the single source of truth also used by
+ * the admin `<select>` and this field's own sanitize_callback below, so
+ * the two can never drift apart.
+ */
+const META_ICON = 'astrea_service_icon';
+
 add_action( 'init', __NAMESPACE__ . '\\register_post_type_and_meta' );
 
 /**
- * Registers the astrea_service post type. No custom postmeta: Service has
- * no fields beyond the standard title/content WordPress already provides.
+ * Registers the astrea_service post type and its icon postmeta.
  *
  * @return void
  */
@@ -61,6 +73,21 @@ function register_post_type_and_meta() {
 			'hierarchical' => false,
 			'supports'     => array( 'title', 'editor', 'page-attributes' ),
 			'menu_icon'    => 'dashicons-portfolio',
+		)
+	);
+
+	register_post_meta(
+		POST_TYPE,
+		META_ICON,
+		array(
+			'type'              => 'string',
+			'single'            => true,
+			'default'           => \Astrea\Core\IconSystem\default_slug( 'service' ),
+			'sanitize_callback' => \Astrea\Core\IconSystem\make_sanitizer( 'service' ),
+			'show_in_rest'      => true,
+			'auth_callback'     => function () {
+				return current_user_can( 'edit_posts' );
+			},
 		)
 	);
 }
@@ -113,9 +140,16 @@ function get_services(): array {
  * @return array
  */
 function to_array( \WP_Post $post ): array {
+	$icon = get_post_meta( $post->ID, META_ICON, true );
+
 	return array(
 		'id'          => $post->ID,
 		'name'        => $post->post_title,
 		'description' => $post->post_content,
+		// Belt-and-suspenders: fall back explicitly even though
+		// register_post_meta()'s own 'default' already covers an unset
+		// key, in case this value ever reaches to_array() through a path
+		// that bypassed the sanitize_callback (e.g. direct DB import).
+		'icon'        => '' !== $icon ? $icon : \Astrea\Core\IconSystem\default_slug( 'service' ),
 	);
 }

@@ -101,6 +101,10 @@ function render_price_list_block( array $attributes = array() ): string {
 
 	foreach ( $prices as $price ) {
 		$items .= '<div class="wp-block-astrea-price-item">';
+		// Construction Order 016D-R1: a decorative icon per Price item —
+		// see price.php's META_ICON (same design as Service/Result:
+		// picked from a fixed list, never guessed from the item name).
+		$items .= \Astrea\Core\IconSystem\render( $price['icon'], 'wp-block-astrea-price-item-icon' );
 
 		if ( '' !== $price['group'] ) {
 			// Per-item kicker label, not a sorted/bucketed section grouping —

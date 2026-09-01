@@ -1,8 +1,8 @@
 # 07. ASTREA Visual v3 — Design Direction (B+C)
 
-- **Status**: PHASE 1・Phase 2実装済み、Shared Wide Grid統合済み（016B → 016B-R1 → 016B-R2 → 016C → 016D）。**AWAITING OWNER VISUAL ACCEPTANCE**。
-- **Construction Order**: 016A → 016A-R1 → 016B（Phase 1実装）→ 016B-R1（Typography Revision）→ 016B-R2（First View Reconstruction）→ 016C（Content Sections）→ 016D（Grid Fidelity / Icon System）
-- **Date**: 2026-08-29（016A/016A-R1）/ 2026-08-30（016B / 016B-R1）/ 2026-08-31（016B-R2 / 016C）/ 2026-09-01（016D）
+- **Status**: PHASE 1・Phase 2実装済み、Shared Wide Grid統合済み、Owner Reference Fidelity再構成済み（016B → 016B-R1 → 016B-R2 → 016C → 016D → 016D-R1）。**AWAITING OWNER VISUAL ACCEPTANCE**。
+- **Construction Order**: 016A → 016A-R1 → 016B（Phase 1実装）→ 016B-R1（Typography Revision）→ 016B-R2（First View Reconstruction）→ 016C（Content Sections）→ 016D（Grid Fidelity / Icon System）→ 016D-R1（Reference Fidelity / Hero Reconstruction / Icon Semantic Data）
+- **Date**: 2026-08-29（016A/016A-R1）/ 2026-08-30（016B / 016B-R1）/ 2026-08-31（016B-R2 / 016C）/ 2026-09-01（016D / 016D-R1）
 - **Functional Baseline**: RC1 (1.0.0-rc1) — 変更なし
 
 ## 0. 位置づけ
@@ -253,3 +253,18 @@ Construction Order 016Dで、Header/Hero/Services/CASE/RESULTS/Professionalが�
 > - **Background(Full-bleed) と Content(Shared Grid) を区別する。** `align:full`やFull-bleed背景色/写真自体は引き続きViewport端まで到達させてよいが、その内部のテキスト・数字・ボタン等は必ず共有Gridへ揃える。「Full-bleedにする」＝「文字までViewport端に広げる」ではない。
 > - **Header/Hero/Content Sectionで異なる中央寄せロジックが独立して存在する状態を作らない。** 新しいSectionを追加する際は、まず共有Grid Formulaを使えるか検討し、独自の`contentSize`/`max-width`を発明する前にこの原則へ立ち返ること。
 > - **Position:absoluteでSite-wide Template Part（Header等）をOverlay化する場合、可変長コンテンツ（長い事務所名等）でOverlayの高さが伸びても、下に重なるHero等のコンテンツと衝突しないことを、極端な長さの実データで必ず実機検証する。** Header/Heroのように独立してPositioningされる要素同士は、片方が伸びても他方が組版として追従しないため、この確認を省略しない。
+
+## 20. 016D-R1実装確定事項 — Text Plane + Photography、Icon Semantic Data
+
+Construction Order 016D-R1で、HeroをOverlay（写真の上に文字）からText Plane（独立した明るいPanel）+ Photography（独立した大きな写真）の2枚のVisual Planeへ再構成し、Service/Result/PriceへIcon選択のためのCore Semantic Dataを新設した。詳細は`docs/research/2026-09-01_construction_016d_r1_reference_fidelity_report.md`参照。
+
+**恒久原則**:
+
+> **Text Plane + Photography（Overlay Heroを既定としない）**
+> - HeroのようなPhotography主体のSectionを設計する際、「写真を全面背景にして文字をScrimで浮かせる」がPhotography Robustnessの既定パターンではない。**文字が専用の背景Planeを持ち、写真とは独立して配置される構成**の方が、任意の将来の写真の明暗・構図に依存しないため、Robustness面で優れている。写真の上に白文字を乗せる設計を選ぶ場合は、それが積極的な意匠判断であることを明記すること。
+> - No-photo Fallback（`core/cover`にurlが無い場合の単色描画）は、写真Planeが「全面」でも「半分」でも同じ仕組みがそのまま使える——Section全体をCoverにする必要はなく、Photography担当のPlaneだけをCoverにすればよい。
+>
+> **Icon Semantic Data（Content文字列からの推測を禁止）**
+> - 装飾Iconをitemごとに変える場合、post_title等のContent文字列を解析してIconを自動推測する実装は禁止（Fragileであり、Ownerの想定しない結果を生みうる）。CPTにIcon選択用のpostmeta（固定Slugのenum、Sanitize Callbackで許可Slug以外を既定値へFallback）を追加し、Site Ownerが明示的に選ぶ。
+> - 複数のCPTが同じ種類のIcon（装飾SVG）を必要とする場合は、**Icon本体を1箇所のRegistryへ集約**（本Orderでは`Astrea\Core\IconSystem`）し、各CPTは「許可Slug一覧」「既定Slug」をそのRegistryから取得する。許可Slug一覧とSanitizeロジックが別々の場所に重複すると、片方だけ更新されて乖離するリスクがある。
+> - **Classic Meta Box（`update_post_meta()`直接呼び出し）は`register_post_meta()`のsanitize_callbackを通らない**（RESTのみ）。Icon等のenum値をMeta Box側でも保存する場合は、Meta Box自身の`save_meta()`でも同じ許可Slugリストによる再検証を行うこと。

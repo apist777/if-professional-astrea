@@ -13,11 +13,18 @@
  */
 
 use Astrea\Core\Service;
+use Astrea\Core\Service\Admin as ServiceAdmin;
+use Astrea\Core\IconSystem;
 
 /**
  * @covers \Astrea\Core\Service
  */
 class ServiceTest extends WP_UnitTestCase {
+
+	public function tear_down() {
+		$_POST = array();
+		parent::tear_down();
+	}
 
 	private function create_service( array $args = array() ): int {
 		return self::factory()->post->create(
@@ -188,5 +195,93 @@ class ServiceTest extends WP_UnitTestCase {
 
 		$this->assertStringNotContainsString( '<script>', $html );
 		$this->assertStringContainsString( '安全な説明文です。', $html );
+	}
+
+	// -- Icon (Construction Order 016D-R1) -----------------------------------
+
+	public function test_icon_defaults_to_folder_when_never_set() {
+		$id = $this->create_service();
+
+		$this->assertSame( 'folder', Service\get_service( $id )['icon'], 'register_post_meta()\'s own default should apply for an unset key.' );
+	}
+
+	public function test_icon_reflects_a_valid_stored_value() {
+		$id = $this->create_service();
+		update_post_meta( $id, Service\META_ICON, 'company' );
+
+		$this->assertSame( 'company', Service\get_service( $id )['icon'] );
+	}
+
+	public function test_existing_service_created_before_016d_r1_still_works() {
+		// Simulates data written before this Order existed: no icon
+		// postmeta row at all (not even an empty string) — must not fatal
+		// and must fall back to the safe default.
+		$id = $this->create_service( array( 'post_title' => '既存の業務' ) );
+
+		$service = Service\get_service( $id );
+
+		$this->assertSame( 'folder', $service['icon'] );
+		$this->assertSame( '既存の業務', $service['name'] );
+	}
+
+	public function test_save_meta_keeps_a_valid_icon_for_capable_user() {
+		$admin_id = self::factory()->user->create( array( 'role' => 'administrator' ) );
+		wp_set_current_user( $admin_id );
+		$id = $this->create_service();
+
+		$_POST[ ServiceAdmin\NONCE_FIELD ] = wp_create_nonce( ServiceAdmin\NONCE_ACTION );
+		$_POST[ Service\META_ICON ]        = 'permit';
+
+		ServiceAdmin\save_meta( $id );
+
+		$this->assertSame( 'permit', Service\get_service( $id )['icon'] );
+	}
+
+	public function test_save_meta_rejects_an_arbitrary_string_and_falls_back_to_default() {
+		$admin_id = self::factory()->user->create( array( 'role' => 'administrator' ) );
+		wp_set_current_user( $admin_id );
+		$id = $this->create_service();
+
+		$_POST[ ServiceAdmin\NONCE_FIELD ] = wp_create_nonce( ServiceAdmin\NONCE_ACTION );
+		$_POST[ Service\META_ICON ]        = '<script>alert(1)</script>not-a-real-icon';
+
+		ServiceAdmin\save_meta( $id );
+
+		$this->assertSame( 'folder', Service\get_service( $id )['icon'], 'A hand-crafted POST value outside allowed_slugs() must never be stored as-is — the classic meta-box save path re-validates against the same whitelist as the REST sanitize_callback.' );
+	}
+
+	public function test_save_meta_rejects_an_icon_slug_belonging_to_a_different_context() {
+		$admin_id = self::factory()->user->create( array( 'role' => 'administrator' ) );
+		wp_set_current_user( $admin_id );
+		$id = $this->create_service();
+
+		$_POST[ ServiceAdmin\NONCE_FIELD ] = wp_create_nonce( ServiceAdmin\NONCE_ACTION );
+		$_POST[ Service\META_ICON ]        = 'result-check'; // a real slug, just not Service-valid.
+
+		ServiceAdmin\save_meta( $id );
+
+		$this->assertSame( 'folder', Service\get_service( $id )['icon'] );
+	}
+
+	public function test_save_meta_rejects_missing_nonce_for_icon() {
+		$admin_id = self::factory()->user->create( array( 'role' => 'administrator' ) );
+		wp_set_current_user( $admin_id );
+		$id = $this->create_service();
+
+		$_POST[ Service\META_ICON ] = 'company';
+		// No nonce field set at all.
+
+		ServiceAdmin\save_meta( $id );
+
+		$this->assertSame( 'folder', Service\get_service( $id )['icon'] );
+	}
+
+	public function test_service_list_block_renders_the_selected_icon() {
+		$id = $this->create_service( array( 'post_title' => '相続手続き' ) );
+		update_post_meta( $id, Service\META_ICON, 'inheritance' );
+
+		$html = Service\render_service_list_block();
+
+		$this->assertStringContainsString( 'wp-block-astrea-service-item-icon', $html );
 	}
 }

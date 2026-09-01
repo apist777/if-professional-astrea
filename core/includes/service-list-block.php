@@ -19,6 +19,12 @@
  * sorting UI, pagination UI, category filtering, AJAX, or search — none of
  * that is needed for FREE v1 (Construction Order 011 kickoff, "やらないこと").
  *
+ * Construction Order 016C added a decorative icon per item; 016D-R1
+ * replaced the single hardcoded "folder" glyph with `$service['icon']`
+ * (see `service.php`'s `META_ICON` — a site owner picks one from a fixed
+ * list, never guessed from the title string) rendered via the shared
+ * `Astrea\Core\IconSystem\render()` registry (`icon-system.php`).
+ *
  * @package Astrea\Core
  */
 
@@ -28,20 +34,6 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit; // Disallow direct access.
 }
 
-/**
- * Construction Order 016C: a decorative "folder" icon shown on every
- * Service item. `astrea_service` has no icon-selection field of its own
- * (adding one — new postmeta, new Admin UI, migration — is out of this
- * Order's scope), so a single generic, profession-agnostic glyph is used
- * uniformly rather than guessing which of the Owner's curated icon set
- * (`docs/research/visual-v3/assets/icons/astrea/`) matches an arbitrary
- * user-authored Service name. Inlined (not an `<img>`) so its stroke can
- * be recoloured per Style Variation via `currentColor` — the exact
- * technique the icon set's own README recommends. `aria-hidden` +
- * `focusable="false"`: purely decorative, the Service name itself is the
- * accessible content.
- */
-const ICON_SVG = '<svg viewBox="0 0 48 48" role="img" aria-hidden="true" focusable="false" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M6 14h14l4 5h18v19H6z"/><path d="M6 14v-4h13l4 4"/><path d="M10 31h28" class="wp-block-astrea-service-item-icon-accent"/></svg>';
 
 add_action( 'init', __NAMESPACE__ . '\\register_list_block' );
 
@@ -138,7 +130,7 @@ function render_service_list_block( array $attributes = array() ): string {
 		$permalink = get_permalink( $service['id'] );
 
 		$items .= '<div class="wp-block-astrea-service-item">';
-		$items .= '<span class="wp-block-astrea-service-item-icon">' . ICON_SVG . '</span>';
+		$items .= \Astrea\Core\IconSystem\render( $service['icon'], 'wp-block-astrea-service-item-icon' );
 		$items .= '<h3><a href="' . esc_url( $permalink ) . '">' . esc_html( $service['name'] ) . '</a></h3>';
 
 		$excerpt = wp_trim_words( wp_strip_all_tags( $service['description'] ), 40 );

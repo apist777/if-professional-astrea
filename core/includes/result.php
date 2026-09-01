@@ -33,6 +33,15 @@ const POST_TYPE = 'astrea_result';
 /** Postmeta key. Public contract for anything reading this directly. */
 const META_VALUE = 'astrea_result_value';
 
+/**
+ * Postmeta key: which ASTREA Icon System glyph (see icon-system.php)
+ * this RESULT displays. Construction Order 016D-R1 — same reasoning as
+ * Service's META_ICON (service.php): Owner forbade guessing an icon from
+ * this entry's free-text label/value, so a site owner picks one from a
+ * fixed list instead (see result-admin.php).
+ */
+const META_ICON = 'astrea_result_icon';
+
 add_action( 'init', __NAMESPACE__ . '\\register_post_type_and_meta' );
 
 /**
@@ -75,6 +84,21 @@ function register_post_type_and_meta() {
 			'single'            => true,
 			'default'           => '',
 			'sanitize_callback' => 'sanitize_text_field',
+			'show_in_rest'      => true,
+			'auth_callback'     => function () {
+				return current_user_can( 'edit_posts' );
+			},
+		)
+	);
+
+	register_post_meta(
+		POST_TYPE,
+		META_ICON,
+		array(
+			'type'              => 'string',
+			'single'            => true,
+			'default'           => \Astrea\Core\IconSystem\default_slug( 'result' ),
+			'sanitize_callback' => \Astrea\Core\IconSystem\make_sanitizer( 'result' ),
 			'show_in_rest'      => true,
 			'auth_callback'     => function () {
 				return current_user_can( 'edit_posts' );
@@ -129,9 +153,12 @@ function get_results(): array {
  * @return array
  */
 function to_array( \WP_Post $post ): array {
+	$icon = get_post_meta( $post->ID, META_ICON, true );
+
 	return array(
 		'id'    => $post->ID,
 		'label' => $post->post_title,
 		'value' => get_post_meta( $post->ID, META_VALUE, true ),
+		'icon'  => '' !== $icon ? $icon : \Astrea\Core\IconSystem\default_slug( 'result' ),
 	);
 }

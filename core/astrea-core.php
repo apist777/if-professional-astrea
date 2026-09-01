@@ -27,6 +27,7 @@ define( 'ASTREA_CORE_FILE', __FILE__ );
 define( 'ASTREA_CORE_DIR', plugin_dir_path( __FILE__ ) );
 
 require ASTREA_CORE_DIR . 'includes/shared.php';
+require ASTREA_CORE_DIR . 'includes/icon-system.php';
 require ASTREA_CORE_DIR . 'includes/editor-blocks.php';
 require ASTREA_CORE_DIR . 'includes/office-profile.php';
 require ASTREA_CORE_DIR . 'includes/office-profile-admin.php';
@@ -39,6 +40,7 @@ require ASTREA_CORE_DIR . 'includes/professional-profile-admin.php';
 require ASTREA_CORE_DIR . 'includes/professional-profile-block.php';
 require ASTREA_CORE_DIR . 'includes/professional-field-block.php';
 require ASTREA_CORE_DIR . 'includes/service.php';
+require ASTREA_CORE_DIR . 'includes/service-admin.php';
 require ASTREA_CORE_DIR . 'includes/service-list-block.php';
 require ASTREA_CORE_DIR . 'includes/price.php';
 require ASTREA_CORE_DIR . 'includes/price-admin.php';

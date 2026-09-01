@@ -47,6 +47,13 @@ const META_NOTES  = 'astrea_price_notes';
 const META_GROUP  = 'astrea_price_group';
 
 /**
+ * Postmeta key: which ASTREA Icon System glyph (see icon-system.php)
+ * this Price item displays. Construction Order 016D-R1 — same reasoning
+ * as Service's META_ICON (service.php).
+ */
+const META_ICON = 'astrea_price_icon';
+
+/**
  * All Price meta keys and how to sanitize each.
  *
  * @return array<string,callable>
@@ -56,6 +63,7 @@ function meta_sanitizers(): array {
 		META_AMOUNT => 'sanitize_textarea_field',
 		META_NOTES  => 'sanitize_textarea_field',
 		META_GROUP  => 'sanitize_text_field',
+		META_ICON   => \Astrea\Core\IconSystem\make_sanitizer( 'price' ),
 	);
 }
 
@@ -164,11 +172,18 @@ function get_prices(): array {
  * @return array
  */
 function to_array( \WP_Post $post ): array {
+	$icon = get_post_meta( $post->ID, META_ICON, true );
+
 	return array(
 		'id'     => $post->ID,
 		'name'   => $post->post_title,
 		'amount' => get_post_meta( $post->ID, META_AMOUNT, true ),
 		'notes'  => get_post_meta( $post->ID, META_NOTES, true ),
 		'group'  => get_post_meta( $post->ID, META_GROUP, true ),
+		// meta_sanitizers()'s shared registration loop gives every key
+		// (including META_ICON) the same '' default, so this key's
+		// context-aware default (price-yen) is applied here on read
+		// rather than at registration.
+		'icon'   => '' !== $icon ? $icon : \Astrea\Core\IconSystem\default_slug( 'price' ),
 	);
 }
