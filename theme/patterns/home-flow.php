@@ -14,6 +14,24 @@
  * (`h2.astrea-flow-heading`, see theme.json's Kicker system) so the
  * Editorial language stays consistent all the way to the page bottom.
  *
+ * Construction Order 016E-R2 §8: the wrapping Group's `layout:constrained`
+ * was silently capping the Heading/List to a narrow (~625px, not
+ * viewport-responsive) column via WordPress Core's own
+ * `.is-layout-constrained > *` contentSize logic — switched to
+ * `layout:{"type":"flow"}` (no automatic child width constraint) as a
+ * first pass, but that alone did not fix it: the deeper cause is one
+ * level further up. This Group itself (not just its children) has no
+ * `align:full`, so the PAGE template's own constrained post-content
+ * layout (front-page.html's `wp:post-content`, `align:full` +
+ * `layout:inherit` since Construction 016B-R2) caps the `<section>`
+ * element itself to the theme's default contentSize (720px) — no CSS
+ * on the children can widen a box whose own parent is already capped.
+ * `align:full` here (matching Hero's own outer Group) lifts that cap;
+ * the section's own background stays full-bleed while its H2/OL
+ * content is inset via this Pattern's own Shared Wide Grid CSS, exactly
+ * like Services/CASE/Price/etc (bare Dynamic Blocks that sit directly
+ * in post-content and were never subject to this problem at all).
+ *
  * @package Astrea\Theme
  */
 
@@ -21,8 +39,8 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit; // Disallow direct access.
 }
 ?>
-<!-- wp:group {"tagName":"section","className":"astrea-home-flow","style":{"spacing":{"padding":{"top":"var:preset|spacing|large","bottom":"var:preset|spacing|large"}}},"backgroundColor":"base","layout":{"type":"constrained"}} -->
-<section class="wp-block-group astrea-home-flow has-base-background-color has-background">
+<!-- wp:group {"align":"full","tagName":"section","className":"astrea-home-flow","style":{"spacing":{"padding":{"top":"var:preset|spacing|large","bottom":"var:preset|spacing|large"}}},"backgroundColor":"base","layout":{"type":"flow"}} -->
+<section class="wp-block-group alignfull astrea-home-flow has-base-background-color has-background">
 
 <!-- wp:heading {"className":"astrea-flow-heading","fontFamily":"heading"} -->
 <h2 class="astrea-flow-heading has-heading-font-family">ご相談の流れ</h2>

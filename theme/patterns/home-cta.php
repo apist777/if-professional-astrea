@@ -17,6 +17,19 @@
  *   Visual v3 (e.g. the Hero kicker, Section Heading kickers), not a new
  *   convention.
  *
+ * Construction Order 016E-R2 §7: this Group had no `align:full`, so the
+ * page template's own constrained post-content layout capped the
+ * `<section>` itself (background included) to the theme's default
+ * contentSize (720px) — the whole "band" was really a narrow card
+ * floating mid-page with white space either side, not a full-width
+ * band at all (the same bug found and fixed in Flow, §8, this same
+ * Order). `align:full` makes the dark background genuinely edge-to-edge;
+ * `contentSize` widened 600px->720px so the heading/buttons read as a
+ * deliberately-centered inner container inside that band (Plane
+ * A/B separation, §11) rather than shrinking back to a card — not an
+ * invitation to stretch the heading/buttons to the band's full width,
+ * which would look wrong for two lines of centered content.
+ *
  * @package Astrea\Theme
  */
 
@@ -24,8 +37,8 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit; // Disallow direct access.
 }
 ?>
-<!-- wp:group {"tagName":"section","className":"astrea-final-cta","style":{"spacing":{"padding":{"top":"var:preset|spacing|x-large","bottom":"var:preset|spacing|x-large"}}},"backgroundColor":"contrast","textColor":"base","layout":{"type":"constrained","contentSize":"600px"}} -->
-<section class="wp-block-group astrea-final-cta has-base-color has-contrast-background-color has-text-color has-background">
+<!-- wp:group {"align":"full","tagName":"section","className":"astrea-final-cta","style":{"spacing":{"padding":{"top":"var:preset|spacing|x-large","bottom":"var:preset|spacing|x-large"}}},"backgroundColor":"contrast","textColor":"base","layout":{"type":"constrained","contentSize":"720px"}} -->
+<section class="wp-block-group alignfull astrea-final-cta has-base-color has-contrast-background-color has-text-color has-background">
 
 <!-- wp:heading {"textAlign":"center","fontFamily":"heading"} -->
 <h2 class="has-text-align-center has-heading-font-family">まずはお気軽にご相談ください</h2>
