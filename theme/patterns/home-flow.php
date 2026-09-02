@@ -39,7 +39,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit; // Disallow direct access.
 }
 ?>
-<!-- wp:group {"align":"full","tagName":"section","className":"astrea-home-flow","style":{"spacing":{"padding":{"top":"var:preset|spacing|large","bottom":"var:preset|spacing|large"}}},"backgroundColor":"base","layout":{"type":"flow"}} -->
+<!-- wp:group {"align":"full","tagName":"section","className":"astrea-home-flow","style":{"spacing":{"padding":{"top":"var:preset|spacing|medium","bottom":"var:preset|spacing|medium"}}},"backgroundColor":"base","layout":{"type":"flow"}} -->
 <section class="wp-block-group alignfull astrea-home-flow has-base-background-color has-background">
 
 <!-- wp:heading {"className":"astrea-flow-heading","fontFamily":"heading"} -->

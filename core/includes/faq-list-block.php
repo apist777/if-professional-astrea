@@ -100,6 +100,23 @@ function render_faq_list_block( array $attributes = array() ): string {
 	}
 
 	$heading_html = '' !== $heading ? '<h2>' . esc_html( $heading ) . '</h2>' : '';
+	$list_html    = '<div class="wp-block-astrea-faq-list">' . $items . '</div>';
 
-	return $heading_html . '<div class="wp-block-astrea-faq-list">' . $items . '</div>';
+	if ( '' === $heading ) {
+		// Dedicated FAQ Archive/Taxonomy display (Construction Order 004)
+		// never sets `heading` — completely unaffected by the wrapper below.
+		return $list_html;
+	}
+
+	// Construction Order 016E-R3 §10: the HOME-teaser context (heading
+	// set) gets an extra wrapping container so Theme CSS can lay the
+	// Heading and the FAQ list out as a genuine two-column Editorial
+	// composition instead of two stacked full-width blocks with a dead
+	// right half. Same "heading-gated structural variant" convention
+	// already used by astrea/price-list's `--compact` class — the H2
+	// stays an immediate DOM sibling of `.wp-block-astrea-faq-list`
+	// (just nested one level deeper), so the existing
+	// `h2:has(+ .wp-block-astrea-faq-list)` Kicker System selector still
+	// matches unchanged.
+	return '<div class="wp-block-astrea-faq-list-wrapper">' . $heading_html . $list_html . '</div>';
 }
