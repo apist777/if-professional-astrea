@@ -3,7 +3,8 @@
 - **Status**: AWAITING OWNER VISUAL ACCEPTANCE（RELEASE HOLD維持）
 - **Who**: クロエ (Chloe)
 - **Start**: 2026-09-02 22:55 JST
-- **End**: 2026-09-03 06:40 JST（見込み、git push/CI確認後に確定）
+- **End**: 2026-09-03 06:50 JST
+- **Commit**: `b2b986f`（CI green確認済み: PHPUnit / Theme-Core independence smoke test / PHP syntax+Coding Standards、全Job成功）
 
 ## 0. 総括
 
