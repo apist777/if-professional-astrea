@@ -222,6 +222,23 @@ class PriceTest extends WP_UnitTestCase {
 		$this->assertSame( '', $html, 'A heading must never be emitted alone when there are zero Price entries.' );
 	}
 
+	/**
+	 * Construction Order 016G: `limit` matches the convention already
+	 * established by service-list/case-list/voice-list/faq-list — a HOME
+	 * teaser must stay a teaser regardless of how many Price entries exist.
+	 */
+	public function test_price_list_block_respects_limit() {
+		$this->create_price( array( 'post_title' => '料金1' ) );
+		$this->create_price( array( 'post_title' => '料金2' ) );
+		$this->create_price( array( 'post_title' => '料金3' ) );
+
+		$html = Price\render_price_list_block( array( 'limit' => 2 ) );
+
+		$this->assertStringContainsString( '料金1', $html );
+		$this->assertStringContainsString( '料金2', $html );
+		$this->assertStringNotContainsString( '料金3', $html );
+	}
+
 	// -- Icon (Construction Order 016D-R1) -----------------------------------
 
 	public function test_icon_defaults_to_price_yen_when_never_set() {

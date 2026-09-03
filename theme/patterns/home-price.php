@@ -15,4 +15,4 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit; // Disallow direct access.
 }
 ?>
-<!-- wp:astrea/price-list {"heading":"料金"} /-->
+<!-- wp:astrea/price-list {"limit":4,"heading":"料金"} /-->

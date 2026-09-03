@@ -65,6 +65,10 @@ function register_block() {
 			'render_callback'       => __NAMESPACE__ . '\\render_price_list_block',
 			'editor_script_handles' => array( \Astrea\Core\EditorBlocks\SCRIPT_HANDLE ),
 			'attributes'            => array(
+				'limit'        => array(
+					'type'    => 'number',
+					'default' => 0,
+				),
 				'heading'      => array(
 					'type'    => 'string',
 					'default' => '',
@@ -81,13 +85,25 @@ function register_block() {
 /**
  * Renders the Price list as plain semantic HTML.
  *
- * @param array $attributes Block attributes (`heading`, `emptyMessage`), see the file docblock.
+ * @param array $attributes Block attributes: `limit` (0 = no limit), `heading`, `emptyMessage` — see the file docblock.
  * @return string
  */
 function render_price_list_block( array $attributes = array() ): string {
 	$prices        = get_prices();
+	$limit         = isset( $attributes['limit'] ) ? (int) $attributes['limit'] : 0;
 	$heading       = isset( $attributes['heading'] ) ? (string) $attributes['heading'] : '';
 	$empty_message = isset( $attributes['emptyMessage'] ) ? (string) $attributes['emptyMessage'] : '';
+
+	// Construction Order 016G: matches the `limit` convention already
+	// established by service-list/case-list/voice-list/faq-list — a
+	// HOME teaser must stay a teaser regardless of how many Price entries
+	// the Owner has published. Applied before the empty-state check so a
+	// non-empty list that limit reduces to zero (limit itself is always
+	// >= 0, so this cannot happen, but keeps the ordering consistent with
+	// the sibling blocks) is handled the same way.
+	if ( $limit > 0 ) {
+		$prices = array_slice( $prices, 0, $limit );
+	}
 
 	if ( empty( $prices ) ) {
 		if ( '' === $empty_message ) {

@@ -9,27 +9,27 @@ License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 Tags: business, custom-post-type, forms, seo, translation-ready
 
-If Professional ASTREA — ASTREA Theme の公式推奨Plugin（任意）。事務所情報・専門家プロフィール・取扱業務・料金・FAQ・対応事例・実績・お客様の声・お問い合わせ・SEO補助・Setup補助を提供します。
+The official recommended (optional) plugin for the ASTREA Theme (If Professional ASTREA). Provides office profile, professional profiles, services, pricing, FAQ, case studies, results, testimonials, a contact form, SEO assistance, and setup assistance.
 
 == Description ==
 
-**ASTREA Core**は、WordPress Theme「ASTREA」（If Professional ASTREA）の公式推奨Pluginです。テーマを変更しても保持すべき事務所の情報や、サイト共通の機能を担当します。
+**ASTREA Core** is the official recommended plugin for the "ASTREA" WordPress Theme (If Professional ASTREA). It manages the office information that should survive a theme change, and site-wide functionality shared across the Theme.
 
-ASTREA Coreは任意のPluginです。ASTREA Themeは、Coreがインストールされていない、または無効化されている状態でも、安全に動作します（Fatal Errorを発生させません）。「Coreは推奨する。しかしThemeを人質にしない。」という方針で設計されています。
+ASTREA Core is optional. The ASTREA Theme works safely (no fatal errors) whether Core is installed, not installed, or deactivated. It is designed around the principle: "Core is recommended -- but the Theme is never held hostage by it."
 
-= 主な機能（FREE v1で実際に提供される機能のみを記載） =
+= Main features (FREE v1 -- only features actually shipped are listed) =
 
-* 事務所情報（Office Profile）の入力・表示
-* 専門家プロフィール（Professional Profile）の管理・表示
-* 取扱業務（Service）・料金（Price）の管理・表示
-* よくある質問（FAQ）の管理・表示
-* 対応事例（CASE）・実績（RESULTS）・お客様の声（VOICE）の管理・表示
-* お問い合わせフォームと問い合わせデータの一時保存（保存期間：10 / 30 / 60 / 90日、初期設定30日）
-* SEO補助（meta description、OGP、Organization / Person構造化データ、BreadcrumbList構造化データ、Search Console確認用メタタグ）
-* 既知のSEO Plugin（Yoast SEO、All in One SEO、Rank Math、SEOPress）との重複回避
-* Google Analytics 4（GA4）測定IDの登録（登録しない限り外部への計測タグは出力されません）
-* ASTREA Setup（初期ページ・メニューの一括作成支援）
-* 管理画面からの明示的な確認操作による、Core管理データの完全削除機能
+* Office Profile: input and display of office information
+* Professional Profile: management and display of professional profiles
+* Service and Price: management and display of services and pricing
+* FAQ: management and display of frequently asked questions
+* CASE, RESULTS and VOICE: management and display of case studies, results, and testimonials
+* A contact form with temporary storage of inquiry data (retention: 10 / 30 / 60 / 90 days, default 30 days)
+* SEO assistance (meta description, OGP, Organization / Person structured data, BreadcrumbList structured data, Search Console verification meta tag)
+* Avoids duplication with known SEO plugins (Yoast SEO, All in One SEO, Rank Math, SEOPress)
+* Google Analytics 4 (GA4) measurement ID registration (no tracking tag is output unless a measurement ID is registered)
+* ASTREA Setup: assisted bulk creation of initial pages and menus
+* Complete deletion of Core-managed data via an explicit, confirmed action in the admin screen
 
 == Installation ==
 
