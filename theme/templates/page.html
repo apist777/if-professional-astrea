@@ -1,7 +1,19 @@
 <!-- wp:template-part {"slug":"header"} /-->
 
-<!-- wp:group {"tagName":"main","layout":{"type":"constrained"}} -->
-<main class="wp-block-group">
+<!-- Construction Order 016F: `align:full` added to `<main>` across every
+internal-page Template (page/single/archive/search/404/taxonomy — HOME's
+own front-page.html is Locked and unaffected). Same root cause found and
+fixed three times on HOME during Construction 016E-R2/R3 (Hero Text
+Plane, Final CTA, Flow): without `align:full`, WordPress Core's own
+`.is-layout-constrained > *` rule silently caps `<main>` itself — not
+just its children — to the theme's default contentSize (720px), which
+is what made every internal page read as an old-style narrow-column
+WordPress site regardless of any Wide Grid CSS applied inside it. The
+Breadcrumb/Page Title/Content below now rely on their own
+`padding-inline` (Shared Wide Grid formula, see theme.json) for inset
+instead of an ambient `main` constraint. -->
+<!-- wp:group {"align":"full","tagName":"main","layout":{"type":"constrained"}} -->
+<main class="wp-block-group alignfull">
 <!-- wp:astrea/breadcrumb /-->
 <!-- wp:post-title {"level":1} /-->
 <!-- wp:post-content /-->

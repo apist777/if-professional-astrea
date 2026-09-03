@@ -285,3 +285,20 @@ Construction Order 016D-R2で、Owner Reference実画像（`docs/research/refere
 >
 > **CSS同一Selectorの重複定義に注意する（Source Order依存の再発防止）**
 > - 本Orderで、`.wp-block-astrea-price-list--compact`関連のSelectorが、theme.jsonの離れた2箇所（Compact変種の主定義ブロックと、Price詳細ページ用の別ブロック内にある古いCompact上書き）に**同じ詳細度で重複定義**されており、後方に書かれた古い方が常に勝つ状態になっていた（`display:none`にしたはずのGroup Labelが表示され続ける等、実機Screenshotで発見）。同様の理由で、Mobile Media Query（`@media`）をStylesheetの前方（既存782pxブロックの内部）に追記したところ、詳細度が同じ後方の無条件ルールに常に負け、320px幅で実際に25pxの横Overflowが発生する実害も確認した——**新しいResponsive Overrideは、対象の無条件ベースルールより後方（Stylesheet末尾が安全）に配置すること。** これらはいずれも「動くはずのCSSが動かない」系の不具合であり、Selectorを書いた時点では気づけない——**新しいSection CSSを書いたら、必ず実機（Playwright等）で対象箇所をScreenshotし、意図通りの見た目になっているか確認してから次のSectionへ進むこと**を本Order以降の標準手順とする（意図と実際のRenderが一致しているかを毎回確認しないと、この種のSource Order事故は再現し続ける）。
+
+## 22. 016F実装確定事項 — Internal Page Header System、`<main>`自身のCore崩壊
+
+Construction Order 016Fで、HOME以外の内部ページ全種（Office / Professional Archive+Single / Service Archive+Single / CASE Archive+Single / Price / Contact / FAQ Archive / VOICE Archive / Search / 404）をVisual v3のDNAへ揃えた。詳細は`docs/research/2026-09-03_construction_016f_internal_pages_report.md`参照。
+
+**恒久原則**:
+
+> **`<main>`自身も`.is-layout-constrained > *`崩壊の対象になる（HOMEの教訓の再確認、より広い射程）**
+> - 016E-R2で「CTA/FlowのようなSection自身も、`align:full`を持たない限りCoreのグローバルスタイルにより`max-width:720px`へ収縮しうる」と学んだのと**全く同じバグクラス**が、内部ページでは`<main>`そのもの、および`<main>`の直接の子要素（Page Title・Post Content・Breadcrumb・Query Loop本体・Featured Image・Dynamic Block（Closing CTA等））のそれぞれ独立に発生しうる。1つの`<main>`に`align:full`を足しただけでは終わらない——**その中の直接の子要素ひとつひとつについても、Coreのデフォルト収縮の対象になっていないか、実機のcomputed widthを測定して確認すること。** 「HOMEで直したから内部ページは大丈夫」という推測は成立しない。テンプレートが変われば衝突する子要素の組み合わせも変わる。
+> - 同じCSSクラスを共有する複数のコンテキスト（本Orderでは`.wp-block-query`をSearch結果とArchive Listingの両方が共有していた）に片方専用のCSSを書く場合、`body.search`のようなコンテキスト限定のPrefixを必ず付けること。無Scopeの上書きは、意図しない別ページの回帰を生む。
+
+> **Internal Page Header System（Kicker + Title + trailing rule、016D-R2 Section Heading Kickerの内部ページへの水平展開）**
+> - 016D-R2で確立したH2向けKicker+罫線の仕組みを、内部ページのH1（Archive見出し・Single Post Title・Search結果見出し・404見出し）へそのまま転用した。Kicker文言は新規データを一切追加せず、**WordPress Core自身が自動付与するbody class**（`post-type-archive-astrea_service`、`single-astrea_case`、`search`、`error404`等）で駆動する。これはDecision 028の「対応する実体が存在する時にしか表示されない」という自己非表示の安全性と同じ性質を持つ——CPTが登録されていなければbody classも付かず、Kickerも出ない。
+> - 汎用の静的Page（Office/Price/Contact）には、Fixture固有のPage IDに依存する新規の仕組みを作ってまでKicker文言を出す判断はしなかった（Page IDは環境ごとに異なりうるFixture依存値であり、Decision 028の精神に反する）。これらのページはKicker文言なし・trailing ruleのみで統一しており、意図的な判断であって実装漏れではない。
+
+> **Priceページの`astrea/price-list`アイコン**
+> - `astrea/price-list` Dynamic Blockは、本Order以前から各Item内にSVGアイコン（`wp-block-astrea-price-item-icon`）を出力していたが、Priceページ本体で使われるデフォルト（非compact）Variantには対応するCSSが存在せず、視覚的に非表示化されていた。新しいDynamic Blockを追加せずとも、既存の出力に対応するCSSを書くだけでIcon表示が実現できる場合があるため、「Iconが無い」ように見えても、対応するBlockの実際のHTML出力を先に確認すること（新規Block追加は最後の手段）。
