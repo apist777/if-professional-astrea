@@ -8,10 +8,43 @@
 <!-- /wp:heading -->
 
 <!-- wp:paragraph -->
-<p>お探しのページは移動または削除された可能性があります。</p>
+<p>お探しのページは移動または削除された可能性があります。下記のいずれかをご利用ください。</p>
 <!-- /wp:paragraph -->
 
-<!-- wp:home-link {"content":"トップページに戻る"} /-->
+<!-- wp:group {"className":"astrea-404-recovery","layout":{"type":"flex","flexWrap":"wrap"}} -->
+<div class="wp-block-group astrea-404-recovery">
+
+<!-- wp:group {"className":"astrea-404-recovery-item","layout":{"type":"constrained"}} -->
+<div class="wp-block-group astrea-404-recovery-item">
+<!-- wp:paragraph {"className":"astrea-404-recovery-label"} -->
+<p class="astrea-404-recovery-label">トップページ</p>
+<!-- /wp:paragraph -->
+<!-- wp:home-link {"content":"ホームへ戻る"} /-->
+</div>
+<!-- /wp:group -->
+
+<!-- wp:group {"className":"astrea-404-recovery-item","layout":{"type":"constrained"}} -->
+<div class="wp-block-group astrea-404-recovery-item">
+<!-- wp:paragraph {"className":"astrea-404-recovery-label"} -->
+<p class="astrea-404-recovery-label">サイト内をさがす</p>
+<!-- /wp:paragraph -->
+<!-- wp:navigation {"overlayMenu":"never","className":"astrea-404-nav","ariaLabel":"404ページからのご案内"} /-->
+</div>
+<!-- /wp:group -->
+
+<!-- wp:group {"className":"astrea-404-recovery-item","layout":{"type":"constrained"}} -->
+<div class="wp-block-group astrea-404-recovery-item">
+<!-- wp:paragraph {"className":"astrea-404-recovery-label"} -->
+<p class="astrea-404-recovery-label">お電話でのご相談</p>
+<!-- /wp:paragraph -->
+<!-- wp:button {"className":"is-style-outline","metadata":{"bindings":{"url":{"source":"astrea-core/office-profile","args":{"key":"phone_tel"}},"text":{"source":"astrea-core/office-profile","args":{"key":"phone"}}}}} -->
+<div class="wp-block-button is-style-outline"><a class="wp-block-button__link wp-element-button" href="#">お電話でのご相談</a></div>
+<!-- /wp:button -->
+</div>
+<!-- /wp:group -->
+
+</div>
+<!-- /wp:group -->
 
 </main>
 <!-- /wp:group -->

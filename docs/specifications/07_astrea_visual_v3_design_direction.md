@@ -302,3 +302,21 @@ Construction Order 016Fで、HOME以外の内部ページ全種（Office / Profe
 
 > **Priceページの`astrea/price-list`アイコン**
 > - `astrea/price-list` Dynamic Blockは、本Order以前から各Item内にSVGアイコン（`wp-block-astrea-price-item-icon`）を出力していたが、Priceページ本体で使われるデフォルト（非compact）Variantには対応するCSSが存在せず、視覚的に非表示化されていた。新しいDynamic Blockを追加せずとも、既存の出力に対応するCSSを書くだけでIcon表示が実現できる場合があるため、「Iconが無い」ように見えても、対応するBlockの実際のHTML出力を先に確認すること（新規Block追加は最後の手段）。
+
+## 23. 016F-R1実装確定事項 — Editorial Max幅、不可視Boxの限界、404 Safe Recovery Links
+
+Construction 016F-R1で、016F Owner Visual AcceptanceのCorrection（FAQ/Search/Professional Single/404の4ページ限定）を行った。詳細は`docs/research/2026-09-03_construction_016f_r1_internal_pages_final_visual_balance_report.md`参照。
+
+**恒久原則**:
+
+> **単一カラムの読み物ページには`--astrea-v3-editorial-max`（`min(880px,68%)`）を使う（`--astrea-v3-reading-max`640pxとの使い分け）**
+> - FAQ/Search結果のように「1カラムで読ませるが、Wide Gridの中で意図的に幅広く扱いたい」構成には、本文段落用の`--astrea-v3-reading-max`（640px、最適な行長重視）ではなく、新設した`--astrea-v3-editorial-max`（880px上限、Viewportの68%を超えない）を使う。同じ「1カラム」でもTypographyの最適行長を優先するか、Wide Grid上でのComposition上の存在感を優先するかで、使うTokenを変えること。
+
+> **見えないBoxのサイズを変えても、見た目は変わらない**
+> - Flex Itemの`max-width`/`flex-grow`をどれだけ調整しても、そのBox自体に背景色・枠線などの可視境界が無ければ、周囲の余白の見え方は一切変化しない（余白はBoxの外にあるのではなく、単にPageの背景がそのまま見えているだけであるため）。「余白が気になる＝コンテナを縮める／広げる」という直感的な対応は、可視要素が無い構成では効果が無い。実際に視覚効果を持つのは、その中の**可視要素（写真・背景色付きBox・罫線等）自体のサイズ**を変えることであり、まずDevToolsやスクリーンショットで「本当にそのBoxは見えているのか」を確認してから対応すること（016E-R4のProfessional Balanceで学んだ「テキストを幅拡大しても空白は消えない」という教訓を、本Orderで「不可視Boxの境界調整も同様に無意味」という、より一般化した形で再確認した）。
+> - 逆に、写真のような本来的に伸縮可能な可視要素であれば、`clamp()`等で大胆に拡大幅を持たせることで、テキスト自体を一切変えずにComposition全体の視覚的重量を増やせる（本Orderの解決策）。
+
+> **404ページ等、Fixture非依存で「安全な」内部リンクを増やす際の判断基準**
+> - 新しいDynamic Block／新しいBlock Bindings Sourceを追加せずに、Fixture固有のPage ID（`astrea_core_generated_pages`で動的採番される値等）へ安全にリンクする一般的な方法は、本Order時点のASTREAには存在しない。CPT Archiveへは`get_post_type_archive_link()`相当の解決が可能だが、個別Pageへの直接リンクは無い。
+> - 安全に再利用できるのは、（1）`wp:home-link`、（2）`ref`属性なしの`wp:navigation`（Header等で既に使われているものと同一のMenuが解決される、WordPress Core標準機能でありCore Plugin状態に非依存）、（3）既存のBlock Bindings Source（`astrea-core/office-profile`の`phone`/`phone_tel`等、許可されたKeyのみ）の3種のみである。これらの外側（新Bindings Key・ID直書き・Fixture文字列の直接埋め込み）が必要になった場合は、「安全に解決できないので省略する」が正しい判断であり、無理に動かないリンクを追加しないこと。
+> - 同じNavigationブロックを1ページに複数配置する場合は、`"ariaLabel"`属性で明示的に区別すること（Landmarkの曖昧さを避けるため）。
