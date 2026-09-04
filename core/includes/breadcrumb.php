@@ -115,7 +115,27 @@ function get_breadcrumb_items(): array {
 		);
 	}
 
-	if ( is_archive() || is_search() || is_404() ) {
+	if ( is_search() ) {
+		// Construction Order 017 (Historical Finding 7): get_the_archive_title()
+		// has no is_search() branch of its own (it only special-cases
+		// category/tag/author/date/post-type/tax archives), so it silently
+		// fell through to Core's generic "Archives" string here — the same
+		// request already renders a proper "「%s」の検索結果" title via
+		// Core's own Query Title block. Matching that instead of the
+		// generic fallback so the breadcrumb (and the BreadcrumbList
+		// JSON-LD built from this same function) actually says what the
+		// visitor searched for.
+		return array(
+			$home,
+			array(
+				/* translators: %s: the searched keyword. */
+				'label' => sprintf( __( '「%s」の検索結果', 'astrea-core' ), get_search_query() ),
+				'url'   => null,
+			),
+		);
+	}
+
+	if ( is_archive() || is_404() ) {
 		return array(
 			$home,
 			array(

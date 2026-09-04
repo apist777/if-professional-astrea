@@ -9,7 +9,7 @@ License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 Tags: business, custom-post-type, forms, seo, translation-ready
 
-The official recommended (optional) plugin for the ASTREA Theme (If Professional ASTREA). Provides office profile, professional profiles, services, pricing, FAQ, case studies, results, testimonials, a contact form, SEO assistance, and setup assistance.
+The official recommended plugin for the ASTREA Theme. Office profile, services, pricing, FAQ, case studies, testimonials, contact form, and SEO.
 
 == Description ==
 

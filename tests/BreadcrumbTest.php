@@ -73,6 +73,20 @@ class BreadcrumbTest extends WP_UnitTestCase {
 		$this->assertNull( $items[2]['url'] );
 	}
 
+	public function test_search_breadcrumb_shows_the_query_not_the_generic_archive_label() {
+		// Construction Order 017 (Historical Finding 7): get_the_archive_title()
+		// has no is_search() branch, so it silently fell through to Core's
+		// generic "Archives" (アーカイブ) string here — indistinguishable from
+		// an ordinary archive and useless for orientation.
+		$this->go_to( home_url( '/?s=会社設立' ) );
+
+		$items = Seo\get_breadcrumb_items();
+
+		$this->assertCount( 2, $items );
+		$this->assertSame( '「会社設立」の検索結果', $items[1]['label'] );
+		$this->assertNull( $items[1]['url'] );
+	}
+
 	public function test_page_with_ancestor_breadcrumb() {
 		$parent_id = self::factory()->post->create(
 			array(
