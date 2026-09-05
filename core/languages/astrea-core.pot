@@ -2,14 +2,14 @@
 # This file is distributed under the GPL v2 or later.
 msgid ""
 msgstr ""
-"Project-Id-Version: ASTREA Core 1.0.0-rc1\n"
+"Project-Id-Version: ASTREA Core 1.0.0-rc2\n"
 "Report-Msgid-Bugs-To: https://wordpress.org/support/plugin/astrea-core\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"POT-Creation-Date: 2026-08-28T23:16:12+00:00\n"
+"POT-Creation-Date: 2026-09-05T00:23:27+00:00\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "X-Generator: WP-CLI 2.12.0\n"
 "X-Domain: astrea-core\n"
@@ -43,7 +43,7 @@ msgstr ""
 msgid "ASTREA — 事務所情報"
 msgstr ""
 
-#: includes/breadcrumb.php:61
+#: includes/breadcrumb.php:76
 #: includes/faq.php:56
 #: includes/faq.php:59
 #: includes/faq.php:60
@@ -51,8 +51,14 @@ msgstr ""
 msgid "FAQ"
 msgstr ""
 
-#: includes/breadcrumb.php:190
-#: assets/js/editor-blocks.js:180
+#. translators: %s: the searched keyword.
+#: includes/breadcrumb.php:132
+#, php-format
+msgid "「%s」の検索結果"
+msgstr ""
+
+#: includes/breadcrumb.php:225
+#: assets/js/editor-blocks.js:188
 msgid "パンくずリスト"
 msgstr ""
 
@@ -68,6 +74,21 @@ msgstr ""
 
 #: includes/case-admin.php:75
 msgid "任意です。未選択のまま公開しても問題ありません。"
+msgstr ""
+
+#: includes/case-list-block.php:138
+#: includes/service-list-block.php:141
+msgid "詳しく見る"
+msgstr ""
+
+#. translators: %s: Case title, appended to a "詳しく見る" link's accessible name only — not shown visually.
+#. translators: %s: Representative name, appended to a "プロフィールを見る" link's accessible name only — not shown visually.
+#. translators: %s: Service name, appended to a "詳しく見る" link's accessible name only — not shown visually.
+#: includes/case-list-block.php:140
+#: includes/professional-profile-block.php:128
+#: includes/service-list-block.php:143
+#, php-format
+msgid "（%sについて）"
 msgstr ""
 
 #: includes/case.php:58
@@ -91,6 +112,16 @@ msgstr ""
 #: includes/case.php:65
 #: assets/js/editor-blocks.js:121
 msgid "対応事例一覧"
+msgstr ""
+
+#: includes/closing-cta-block.php:74
+#: includes/setup-navigation.php:128
+#: includes/setup-pages.php:86
+msgid "お問い合わせ"
+msgstr ""
+
+#: includes/closing-cta-block.php:84
+msgid "お問い合わせはこちら"
 msgstr ""
 
 #: includes/contact-form-block.php:68
@@ -118,6 +149,7 @@ msgstr ""
 
 #: includes/contact-form-block.php:177
 #: includes/office-profile-admin.php:85
+#: includes/office-summary-block.php:98
 msgid "電話番号"
 msgstr ""
 
@@ -294,9 +326,9 @@ msgstr ""
 #: includes/inquiry-admin.php:326
 #: includes/inquiry-admin.php:351
 #: includes/inquiry-admin.php:375
-#: includes/setup-home.php:173
+#: includes/setup-home.php:179
 #: includes/setup-navigation.php:366
-#: includes/setup-pages.php:146
+#: includes/setup-pages.php:207
 msgid "この操作を行う権限がありません。"
 msgstr ""
 
@@ -319,7 +351,7 @@ msgid "重要FAQとして扱う"
 msgstr ""
 
 #: includes/faq-admin.php:91
-#: includes/price-admin.php:92
+#: includes/price-admin.php:124
 #: includes/professional-profile-admin.php:132
 msgid "すべての項目は任意です。未入力のまま公開しても問題ありません。"
 msgstr ""
@@ -557,6 +589,7 @@ msgid "ASTREA"
 msgstr ""
 
 #: includes/office-profile-admin.php:62
+#: assets/js/editor-blocks.js:164
 msgid "事務所基本情報"
 msgstr ""
 
@@ -565,12 +598,13 @@ msgid "事務所名"
 msgstr ""
 
 #: includes/office-profile-admin.php:77
+#: includes/office-summary-block.php:90
 msgid "所在地"
 msgstr ""
 
 #: includes/office-profile-admin.php:93
-#: includes/setup-pages.php:71
-#: assets/js/editor-blocks.js:164
+#: includes/setup-pages.php:76
+#: assets/js/editor-blocks.js:172
 msgid "営業時間"
 msgstr ""
 
@@ -583,12 +617,12 @@ msgid "臨時休業・年末年始・夏季休業など"
 msgstr ""
 
 #: includes/office-profile-admin.php:116
-#: includes/setup-pages.php:72
+#: includes/setup-pages.php:77
 msgid "SNS"
 msgstr ""
 
 #: includes/office-profile-admin.php:123
-#: assets/js/editor-blocks.js:172
+#: assets/js/editor-blocks.js:180
 msgid "SNSリンク"
 msgstr ""
 
@@ -750,42 +784,82 @@ msgid "日曜日"
 msgstr ""
 
 #: includes/price-admin.php:39
+#: includes/service-admin.php:34
+msgid "会社（company）"
+msgstr ""
+
+#: includes/price-admin.php:40
+#: includes/service-admin.php:35
+msgid "契約書（contract）"
+msgstr ""
+
+#: includes/price-admin.php:41
+#: includes/service-admin.php:36
+msgid "書類（document）"
+msgstr ""
+
+#: includes/price-admin.php:42
+#: includes/service-admin.php:37
+msgid "フォルダ／汎用（folder）"
+msgstr ""
+
+#: includes/price-admin.php:43
+#: includes/service-admin.php:38
+msgid "相続（inheritance）"
+msgstr ""
+
+#: includes/price-admin.php:44
+#: includes/service-admin.php:39
+msgid "許可・許認可（permit）"
+msgstr ""
+
+#: includes/price-admin.php:45
+msgid "料金（price-yen）"
+msgstr ""
+
+#: includes/price-admin.php:59
 msgid "料金情報"
 msgstr ""
 
-#: includes/price-admin.php:61
+#: includes/price-admin.php:83
 msgid "金額"
 msgstr ""
 
-#: includes/price-admin.php:69
+#: includes/price-admin.php:91
 msgid "例：3万円〜／月額5,000円／初回相談無料／個別見積 等、自由に記述してください。"
 msgstr ""
 
-#: includes/price-admin.php:73
+#: includes/price-admin.php:95
 msgid "補足（実費・追加費用等）"
 msgstr ""
 
-#: includes/price-admin.php:82
+#: includes/price-admin.php:104
 msgid "料金グループ"
 msgstr ""
 
-#: includes/price.php:73
-#: includes/price.php:75
-#: includes/price.php:76
+#: includes/price-admin.php:114
+#: includes/result-admin.php:85
+#: includes/service-admin.php:74
+msgid "アイコン"
+msgstr ""
+
+#: includes/price.php:81
+#: includes/price.php:83
+#: includes/price.php:84
 #: includes/setup-navigation.php:110
-#: includes/setup-pages.php:75
+#: includes/setup-pages.php:82
 msgid "料金"
 msgstr ""
 
-#: includes/price.php:77
+#: includes/price.php:85
 msgid "料金を追加"
 msgstr ""
 
-#: includes/price.php:78
+#: includes/price.php:86
 msgid "料金を編集"
 msgstr ""
 
-#: includes/price.php:79
+#: includes/price.php:87
 #: assets/js/editor-blocks.js:94
 msgid "料金一覧"
 msgstr ""
@@ -822,6 +896,10 @@ msgstr ""
 msgid "登録情報"
 msgstr ""
 
+#: includes/professional-profile-block.php:126
+msgid "プロフィールを見る"
+msgstr ""
+
 #: includes/professional-profile.php:94
 #: includes/professional-profile.php:97
 #: includes/professional-profile.php:98
@@ -845,32 +923,44 @@ msgid "専門家プロフィール一覧"
 msgstr ""
 
 #: includes/result-admin.php:34
+msgid "会社・実績（result-company）"
+msgstr ""
+
+#: includes/result-admin.php:35
+msgid "承認・成功（result-check）"
+msgstr ""
+
+#: includes/result-admin.php:36
+msgid "相談・顧客（result-consultation）"
+msgstr ""
+
+#: includes/result-admin.php:50
 msgid "実績情報"
 msgstr ""
 
-#: includes/result-admin.php:54
+#: includes/result-admin.php:72
 msgid "実績値"
 msgstr ""
 
-#: includes/result-admin.php:63
+#: includes/result-admin.php:81
 msgid "例：1,000件以上／2015年／全国対応／多数 等、数値でなくても自由に記述してください。「実績ラベル」（上部のタイトル欄）には「相談実績」「開業年」等を入力します。"
 msgstr ""
 
-#: includes/result.php:47
-#: includes/result.php:49
-#: includes/result.php:50
+#: includes/result.php:56
+#: includes/result.php:58
+#: includes/result.php:59
 msgid "実績"
 msgstr ""
 
-#: includes/result.php:51
+#: includes/result.php:60
 msgid "実績を追加"
 msgstr ""
 
-#: includes/result.php:52
+#: includes/result.php:61
 msgid "実績を編集"
 msgstr ""
 
-#: includes/result.php:53
+#: includes/result.php:62
 #: assets/js/editor-blocks.js:129
 msgid "実績一覧"
 msgstr ""
@@ -935,26 +1025,34 @@ msgstr ""
 msgid "GA4 測定IDの形式が正しくありません。Googleアナリティクスの「データストリーム」画面に表示される G- から始まる測定ID（例：G-XXXXXXXXXX）をそのまま貼り付けてください。"
 msgstr ""
 
-#: includes/service.php:46
-#: includes/service.php:49
-#: includes/service.php:50
+#: includes/service-admin.php:53
+msgid "取扱業務の表示設定"
+msgstr ""
+
+#: includes/service-admin.php:83
+msgid "HOME・アーカイブ等で取扱業務と一緒に表示する装飾アイコンです。内容と合うものを選んでください。迷った場合は「フォルダ／汎用」のままで問題ありません。"
+msgstr ""
+
+#: includes/service.php:58
+#: includes/service.php:61
+#: includes/service.php:62
 #: includes/setup-navigation.php:91
 msgid "取扱業務"
 msgstr ""
 
-#: includes/service.php:47
+#: includes/service.php:59
 msgid "取扱業務の一覧です。"
 msgstr ""
 
-#: includes/service.php:51
+#: includes/service.php:63
 msgid "取扱業務を追加"
 msgstr ""
 
-#: includes/service.php:52
+#: includes/service.php:64
 msgid "取扱業務を編集"
 msgstr ""
 
-#: includes/service.php:53
+#: includes/service.php:65
 #: assets/js/editor-blocks.js:145
 msgid "取扱業務一覧"
 msgstr ""
@@ -1099,34 +1197,29 @@ msgstr ""
 msgid "サイトのタイトルを設定する"
 msgstr ""
 
-#: includes/setup-home.php:101
+#: includes/setup-home.php:107
 msgid "ホームページは既に作成済みです。"
 msgstr ""
 
-#: includes/setup-home.php:106
+#: includes/setup-home.php:112
 msgid "既にホームページ（固定フロントページ）が設定されています。"
 msgstr ""
 
-#: includes/setup-home.php:111
+#: includes/setup-home.php:117
 msgid "HOME用のPatternが見つからないため、ホームページを作成できませんでした。ASTREA Themeが有効化されていることを確認してください。"
 msgstr ""
 
-#: includes/setup-home.php:118
+#: includes/setup-home.php:124
 msgid "ホーム"
 msgstr ""
 
 #: includes/setup-navigation.php:82
-#: includes/setup-pages.php:64
+#: includes/setup-pages.php:69
 msgid "事務所概要"
 msgstr ""
 
 #: includes/setup-navigation.php:101
 msgid "専門家紹介"
-msgstr ""
-
-#: includes/setup-navigation.php:128
-#: includes/setup-pages.php:79
-msgid "お問い合わせ"
 msgstr ""
 
 #: includes/setup-navigation.php:178
@@ -1137,7 +1230,7 @@ msgstr ""
 msgid "ASTREA 基本メニュー"
 msgstr ""
 
-#: includes/setup-pages.php:66
+#: includes/setup-pages.php:71
 msgid "ここに事務所の紹介文を入力してください。"
 msgstr ""
 
@@ -1213,21 +1306,33 @@ msgid "ASTREA Core — 現在の専門家プロフィールの1項目（資格�
 msgstr ""
 
 #: assets/js/editor-blocks.js:167
-msgid "ASTREA Core — 事務所の営業時間を表示します。"
+msgid "ASTREA Core — 事務所名・所在地・電話番号を表示します。"
 msgstr ""
 
 #: assets/js/editor-blocks.js:175
-msgid "ASTREA Core — 事務所のSNSリンク一覧を表示します。"
+msgid "ASTREA Core — 事務所の営業時間を表示します。"
 msgstr ""
 
 #: assets/js/editor-blocks.js:183
-msgid "ASTREA Core — 現在のページの位置を示すパンくずリストを表示します。"
-msgstr ""
-
-#: assets/js/editor-blocks.js:188
-msgid "お問い合わせフォーム"
+msgid "ASTREA Core — 事務所のSNSリンク一覧を表示します。"
 msgstr ""
 
 #: assets/js/editor-blocks.js:191
+msgid "ASTREA Core — 現在のページの位置を示すパンくずリストを表示します。"
+msgstr ""
+
+#: assets/js/editor-blocks.js:196
+msgid "お問い合わせフォーム"
+msgstr ""
+
+#: assets/js/editor-blocks.js:199
 msgid "ASTREA Core — お問い合わせフォームを表示します。"
+msgstr ""
+
+#: assets/js/editor-blocks.js:204
+msgid "お問い合わせへのご案内"
+msgstr ""
+
+#: assets/js/editor-blocks.js:207
+msgid "ASTREA Core — ページ末尾のお問い合わせ導線を表示します。"
 msgstr ""

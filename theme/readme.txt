@@ -4,7 +4,7 @@ Contributors: projectif
 Requires at least: 7.0
 Tested up to: 7.1
 Requires PHP: 8.3
-Stable tag: 1.0.0-rc1
+Stable tag: 1.0.0-rc2
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 Tags: full-site-editing, translation-ready
@@ -137,6 +137,14 @@ ASTREAはWordPressのSite Language設定を強制的に変更しません。Word
 WordPress 7.1環境において、WordPress標準の一部Block（core/group、core/cover）で、編集画面に「Block contains unexpected or invalid content」という警告が表示される場合があることを確認しています。これはWordPress Core自体の挙動によるものであり、ASTREA固有の不具合ではありません。実際にデータが失われることはないことを確認済みですが、警告画面に表示される「Attempt recovery（回復を試みる）」は、内容に心当たりがない場合は実行しないことをおすすめします。
 
 == Changelog ==
+
+= 1.0.0-rc2 =
+* HOME・内部ページのVisual Designおよびレスポンシブレイアウトを改善。
+* 内部ページ（Single/Archive）の見出し・余白表現の一貫性を改善。
+* HOME下部セクション（料金・FAQ・お客様の声・ご相談の流れ・お問い合わせ導線）のコンテンツ表現を改善。
+* 検索結果ページのパンくずリスト表示を改善（検索キーワードを反映するように修正）。
+* Release / Packageのmetadataおよびドキュメントを更新。
+* 全体的な安定性・アクセシビリティ・互換性の改善。
 
 = 1.0.0-rc1 =
 * Release Candidate 1。機能開発を終了し、配布・Documentation・Packagingの最終検査を実施した版。

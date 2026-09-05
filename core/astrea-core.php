@@ -3,7 +3,7 @@
  * Plugin Name: ASTREA Core
  * Plugin URI: https://project-if.com/astrea
  * Description: If Professional ASTREA — テーマを変更しても保持すべき情報とサイト共通機能を担当する、ASTREA Themeの公式推奨Plugin（任意）。「Coreは推奨する。しかしThemeを人質にしない。」（Decision 021）。
- * Version: 1.0.0-rc1
+ * Version: 1.0.0-rc2
  * Requires at least: 7.0
  * Requires PHP: 8.3
  * Author: Project-if
@@ -22,7 +22,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit; // Disallow direct access.
 }
 
-define( 'ASTREA_CORE_VERSION', '1.0.0-rc1' );
+define( 'ASTREA_CORE_VERSION', '1.0.0-rc2' );
 define( 'ASTREA_CORE_FILE', __FILE__ );
 define( 'ASTREA_CORE_DIR', plugin_dir_path( __FILE__ ) );
 

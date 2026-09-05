@@ -2,14 +2,14 @@
 # This file is distributed under the GNU General Public License v2 or later.
 msgid ""
 msgstr ""
-"Project-Id-Version: ASTREA 1.0.0-rc1\n"
+"Project-Id-Version: ASTREA 1.0.0-rc2\n"
 "Report-Msgid-Bugs-To: https://wordpress.org/support/theme/astrea\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"POT-Creation-Date: 2026-08-28T23:16:10+00:00\n"
+"POT-Creation-Date: 2026-09-05T00:23:24+00:00\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "X-Generator: WP-CLI 2.12.0\n"
 "X-Domain: astrea\n"
@@ -109,7 +109,7 @@ msgstr ""
 
 #: patterns/home-hero.php
 msgctxt "Pattern description"
-msgid "HOME冒頭のHero。事務所名（Office Profile）と、編集可能なキャッチコピー・電話CTAを配置する。"
+msgid "HOME冒頭のHero（Visual v3）。事務所名（Office Profile）と、編集可能なキャッチコピー・電話/お問い合わせCTAを配置する。写真は任意——写真が無い状態でも完成して見えることを標準状態とする。"
 msgstr ""
 
 #: patterns/home-price.php
@@ -179,7 +179,7 @@ msgstr ""
 
 #: patterns/office-info.php
 msgctxt "Pattern description"
-msgid "事務所名・所在地・電話番号（既存Block Bindings）に、営業時間・SNSリンク（Construction Order 011の新規Dynamic Block）を組み合わせた、事務所概要ページ等へ挿入可能なPattern。Professional Profile・ACCESS固有情報（最寄駅・徒歩時間・駐車場・地図等）は含まない（Decision 022の責任分離）。"
+msgid "事務所名・所在地・電話番号（astrea/office-summary Dynamic Block、Construction Order 015Eより）に、営業時間・SNSリンク（Construction Order 011の既存Dynamic Block）を組み合わせた、事務所概要ページ等へ挿入可能なPattern。Professional Profile・ACCESS固有情報（最寄駅・徒歩時間・駐車場・地図等）は含まない（Decision 022の責任分離）。"
 msgstr ""
 
 #: patterns/price-list.php
@@ -230,6 +230,22 @@ msgstr ""
 #: styles/trust.json
 msgctxt "Color name"
 msgid "Surface"
+msgstr ""
+
+#: theme.json
+#: styles/modern.json
+#: styles/natural.json
+#: styles/trust.json
+msgctxt "Color name"
+msgid "Border"
+msgstr ""
+
+#: theme.json
+#: styles/modern.json
+#: styles/natural.json
+#: styles/trust.json
+msgctxt "Color name"
+msgid "Accent"
 msgstr ""
 
 #: theme.json

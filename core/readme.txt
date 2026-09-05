@@ -4,7 +4,7 @@ Contributors: projectif
 Requires at least: 7.0
 Tested up to: 7.1
 Requires PHP: 8.3
-Stable tag: 1.0.0-rc1
+Stable tag: 1.0.0-rc2
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 Tags: business, custom-post-type, forms, seo, translation-ready
@@ -79,6 +79,10 @@ Yoast SEO、All in One SEO、Rank Math、SEOPressのいずれかが有効な場�
 「ASTREA > SEO」の設定画面からGoogle Analytics 4（GA4）の測定IDを登録できます。未登録の状態では、外部への計測タグは一切出力されません。
 
 == Changelog ==
+
+= 1.0.0-rc2 =
+* 検索結果ページのパンくずリスト（およびBreadcrumbList構造化データ）表示を改善（検索キーワードを反映するように修正）。
+* readme.txtのRelease Metadataを更新。
 
 = 1.0.0-rc1 =
 * Release Candidate 1。機能開発を終了し、配布・Documentation・Packagingの最終検査を実施した版。
