@@ -111,19 +111,48 @@ Construction 017のClean Install結果を流用せず、**今回生成したRC2 
 
 ## 9. Release Commit（§10）
 
-（Commit後に本セクションを更新——コミットハッシュ・push結果・CI状況を記録。）
+Release Commit: **`5a1f6b4`**（"Prepare ASTREA 1.0.0-rc2 release candidate"）。
+
+Push後、CI run [33933536109](https://github.com/apist777/if-professional-astrea/actions/runs/33933536109) — PHP syntax + Coding Standards / PHPUnit (ASTREA Core) / Theme・Core independence smoke test、3 Job全てGreenを確認。`git status --short`はCommit直後にclean（着工前から存在する無関係な未追跡ファイルのみ）。
 
 ## 10. Tag Safety Gate（§11）
 
-（CI Green確認後にのみ実施——本セクションを更新。）
+CI Green確認後、`5a1f6b4`上に注釈付きTag `v1.0.0-rc2` を作成。
+
+```
+$ git rev-parse v1.0.0-rc2^{commit}
+5a1f6b40426c5ce4c8a16132ea8f6f979cc8c126
+$ git rev-parse HEAD
+5a1f6b40426c5ce4c8a16132ea8f6f979cc8c126
+```
+
+一致を確認（`git show v1.0.0-rc2 --no-patch`でTag自身がRelease Commitそのものを指していることも確認済み）。`git push origin v1.0.0-rc2`でoriginへPush。Tag作成後、対象Commitへの書き換えは一切行っていない。
 
 ## 11. GitHub Release（§12）
 
-（本セクションを更新。）
+`gh release create v1.0.0-rc2` で作成。
+
+- Title: `ASTREA 1.0.0-rc2`
+- Tag: `v1.0.0-rc2`（既存Tagから、新規target_commitish指定は行わず——`gh`の`--target`はTagが既にRemoteに存在する場合は不要かつVALIDATION ERRORになることを確認したため、Tag自身を単一のSource of Truthとした）
+- Pre-release: **YES**（`prerelease: true`を`gh release view`で確認）
+- 添付Asset: `astrea-theme-1.0.0-rc2.zip`・`astrea-core-1.0.0-rc2.zip`・`SHA256SUMS.txt`（3件、`gh release view`で確認）
+- Release Notes: `docs/release/RC2_RELEASE_NOTES.md`の内容をそのまま使用
+- URL: https://github.com/apist777/if-professional-astrea/releases/tag/v1.0.0-rc2
+
+GitHubが自動生成するSource Code archive（zip/tar.gz）とは別に、上記3ファイルのみを配布Artifactとして明示的に添付した。
 
 ## 12. Download Verification（§13）
 
-（本セクションを更新。）
+`gh release download v1.0.0-rc2`で、公開直後のGitHub ReleaseからTheme/Core ZIP・SHA256SUMS.txtを再取得し、ローカルの`dist/`にある検査済みArtifactとSHA256を再照合した。
+
+```
+Theme (downloaded): 60519afd9cfa8221cc68be0094399bc372eae9ec5552987ed678acab03bb2afa
+Theme (local dist): 60519afd9cfa8221cc68be0094399bc372eae9ec5552987ed678acab03bb2afa  → MATCH
+Core  (downloaded): b3eaed92d65c479bd636db24b5fe5ce6972eda0e3405636b9b999b8b5811c10e
+Core  (local dist): b3eaed92d65c479bd636db24b5fe5ce6972eda0e3405636b9b999b8b5811c10e  → MATCH
+```
+
+**GitHub上のRelease Assetと、本Orderで検査したArtifactは、1 byte単位で同一であることを確認した。**
 
 ## 13. 変更ファイル（§21）
 
@@ -138,11 +167,63 @@ Construction 017で確認された非Blocker事項（Professional Archive空exce
 - Version Bump作業中、`core/readme.txt`のStable tag行の更新を一度失念し、Plugin Checkの`stable_tag_mismatch`ERRORで検出、即座に修正・再検査でクリアを確認した（本Report内で正直に記録する自己発見の手順ミス。Release ZIP生成前に修正済みであり、実際のArtifactには影響していない）。
 - `wp i18n make-pot`実行時の`translators:`コメント重複WARNING（§4）は、Version Bump/POT同期の範囲を超えるためコード修正は行わなかった。
 
-## 16. 測定値・Commit
+## 16. 最終Git状態（§24）
 
-- Start: 2026-09-05（本Order着手、Construction 017完了直後）
-- End / Duration / Release Commit / Tag / CI: 後続セクションで確定次第記録。
+```
+$ git status --short
+?? "docs/research/references/ChatGPT Image 2026年8月29日 21_14_16.png:Zone.Identifier"   ← 着工前から存在する無関係ファイル、Construction 018の対象外
+$ git log -1 --oneline
+5a1f6b4 Prepare ASTREA 1.0.0-rc2 release candidate
+$ git rev-list --left-right --count main...origin/main
+0	0
+```
+
+working tree clean（許可範囲外のTracked変更なし）、main/origin完全同期。
+
+**重要な注記**：本Report自身とHISTORY.csvの確定値は、Tag `v1.0.0-rc2` の作成・Push・GitHub Release公開・Download Verificationが全て完了した**後**に、別Commitとして追加する。したがって、その別Commit（HISTORY確認Commit）は **Tag `v1.0.0-rc2` の対象ではない**——Tagが指すのは、実際にVersion/Metadata/POTを変更した唯一のCommit `5a1f6b4` のみである。この後続CommitでProduct Code・Release Metadata・Artifactへの変更は一切行っていない（Report本文の追記とHISTORY.csvの更新のみ）。
+
+## 17. 測定値・Commit
+
+- Start: 2026-09-05 06:56 JST（Construction 017完了直後）
+- End: 2026-09-05 09:46 JST（Download Verification完了時点の実測）
+- Duration: 2h50m
+- Release Commit: `5a1f6b4`（Tag `v1.0.0-rc2` が指すCommit）
+- HISTORY確認Commit: 本Reportへの追記完了後に別途記録（Tag対象外）
+
+## 18. Acceptance Criteria チェック
+
+- [x] Theme = 1.0.0-rc2
+- [x] Core = 1.0.0-rc2
+- [x] metadata synchronized
+- [x] Changelog updated
+- [x] POT synchronized
+- [x] Source quality gates PASS（017 Baseline同一、悪化なし）
+- [x] final package.sh PASS
+- [x] final RC2 ZIP clean
+- [x] SHA256 generated + verified
+- [x] exact final ZIP clean-install PASS
+- [x] Release Commit CI Green
+- [x] v1.0.0-rc2 annotated tag created
+- [x] Tag points exact Release Commit
+- [x] GitHub Release created as Pre-release
+- [x] Theme/Core/SHA assets uploaded
+- [x] Downloaded assets SHA match
+- [x] HISTORY.csv updated（本Commit）
+- [x] Report complete
+- [x] working tree clean
+- [x] main/origin synchronized
+- [x] no Project-if deploy
+- [x] no WordPress.org submission
+- [x] no final 1.0.0
+
+## 19. Final Verdict
+
+**A. RC2 RELEASED — OWNER FINAL ACCEPTANCE REQUIRED**
+
+RC2は https://github.com/apist777/if-professional-astrea/releases/tag/v1.0.0-rc2 としてPre-release公開済み。GitHub上のAssetと検査したArtifactは1 byte単位で同一であることを確認した。Construction 019、final 1.0.0への自律進行は行っていない。Ownerが実際のRC2 Release（Tag/Asset/Release Notes）を確認するまで待機する。
 
 ---
 
-**Status: IN PROGRESS — Release Commit / Tag / GitHub Release preparation continuing.**
+**Status: AWAITING OWNER RC2 FINAL ACCEPTANCE**
+
+Construction 019・final 1.0.0への自律進行は行っていない。
