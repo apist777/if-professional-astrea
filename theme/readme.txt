@@ -4,7 +4,7 @@ Contributors: projectif
 Requires at least: 7.0
 Tested up to: 7.1
 Requires PHP: 8.3
-Stable tag: 1.0.0-rc2
+Stable tag: 1.0.0
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 Tags: full-site-editing, translation-ready
@@ -137,6 +137,10 @@ ASTREAはWordPressのSite Language設定を強制的に変更しません。Word
 WordPress 7.1環境において、WordPress標準の一部Block（core/group、core/cover）で、編集画面に「Block contains unexpected or invalid content」という警告が表示される場合があることを確認しています。これはWordPress Core自体の挙動によるものであり、ASTREA固有の不具合ではありません。実際にデータが失われることはないことを確認済みですが、警告画面に表示される「Attempt recovery（回復を試みる）」は、内容に心当たりがない場合は実行しないことをおすすめします。
 
 == Changelog ==
+
+= 1.0.0 =
+* 初回正式安定版リリース。士業・専門家向けBlock Themeとして、レスポンシブなVisual Design、Office/専門家/取扱業務/対応事例/実績/料金/FAQ/お客様の声の各表示、Setup支援、お問い合わせ導線、SEOメタデータ連携、複数のStyle Variationsを提供します。
+* Release Candidateで確認された内容を正式版として確定。
 
 = 1.0.0-rc2 =
 * HOME・内部ページのVisual Designおよびレスポンシブレイアウトを改善。
