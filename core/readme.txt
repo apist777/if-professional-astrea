@@ -4,7 +4,7 @@ Contributors: projectif
 Requires at least: 7.0
 Tested up to: 7.1
 Requires PHP: 8.3
-Stable tag: 1.0.0
+Stable tag: 1.0.1
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 Tags: business, custom-post-type, forms, seo, translation-ready
@@ -79,6 +79,9 @@ Yoast SEO、All in One SEO、Rank Math、SEOPressのいずれかが有効な場�
 「ASTREA > SEO」の設定画面からGoogle Analytics 4（GA4）の測定IDを登録できます。未登録の状態では、外部への計測タグは一切出力されません。
 
 == Changelog ==
+
+= 1.0.1 =
+* Plugin URI・Author URIの誤ったドメイン記載を、正しいProject-if公式サイトのURLへ修正しました。機能面の変更はありません。
 
 = 1.0.0 =
 * 初回正式安定版リリース。ASTREA Themeの公式推奨Pluginとして、事務所情報・専門家プロフィール・取扱業務・料金・FAQ・対応事例・実績・お客様の声・お問い合わせフォーム・SEOメタデータ管理機能を提供します。

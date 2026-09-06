@@ -1,13 +1,13 @@
 <?php
 /**
  * Plugin Name: ASTREA Core
- * Plugin URI: https://project-if.com/astrea
+ * Plugin URI: https://project-if.jp/if-thema/astrea/
  * Description: If Professional ASTREA — テーマを変更しても保持すべき情報とサイト共通機能を担当する、ASTREA Themeの公式推奨Plugin（任意）。「Coreは推奨する。しかしThemeを人質にしない。」（Decision 021）。
- * Version: 1.0.0
+ * Version: 1.0.1
  * Requires at least: 7.0
  * Requires PHP: 8.3
  * Author: Project-if
- * Author URI: https://project-if.com/
+ * Author URI: https://project-if.jp/
  * License: GPL v2 or later
  * License URI: https://www.gnu.org/licenses/gpl-2.0.html
  * Text Domain: astrea-core
@@ -22,7 +22,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit; // Disallow direct access.
 }
 
-define( 'ASTREA_CORE_VERSION', '1.0.0' );
+define( 'ASTREA_CORE_VERSION', '1.0.1' );
 define( 'ASTREA_CORE_FILE', __FILE__ );
 define( 'ASTREA_CORE_DIR', plugin_dir_path( __FILE__ ) );
 

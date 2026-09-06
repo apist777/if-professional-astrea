@@ -4,7 +4,7 @@ Contributors: projectif
 Requires at least: 7.0
 Tested up to: 7.1
 Requires PHP: 8.3
-Stable tag: 1.0.0
+Stable tag: 1.0.1
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 Tags: full-site-editing, translation-ready
@@ -137,6 +137,10 @@ ASTREAはWordPressのSite Language設定を強制的に変更しません。Word
 WordPress 7.1環境において、WordPress標準の一部Block（core/group、core/cover）で、編集画面に「Block contains unexpected or invalid content」という警告が表示される場合があることを確認しています。これはWordPress Core自体の挙動によるものであり、ASTREA固有の不具合ではありません。実際にデータが失われることはないことを確認済みですが、警告画面に表示される「Attempt recovery（回復を試みる）」は、内容に心当たりがない場合は実行しないことをおすすめします。
 
 == Changelog ==
+
+= 1.0.1 =
+* Theme URI・Author URIの誤ったドメイン記載を、正しいProject-if公式サイトのURLへ修正しました。
+* 標準のFooterに、編集・削除が可能な「Theme by Project-if」というテーマ制作者クレジット（初期状態でのみ表示）を追加しました。Site Editorから自由に編集・削除できます。
 
 = 1.0.0 =
 * 初回正式安定版リリース。士業・専門家向けBlock Themeとして、レスポンシブなVisual Design、Office/専門家/取扱業務/対応事例/実績/料金/FAQ/お客様の声の各表示、Setup支援、お問い合わせ導線、SEOメタデータ連携、複数のStyle Variationsを提供します。
