@@ -15,8 +15,6 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit; // Disallow direct access.
 }
 
-const VERSION = '0.1.0';
-
 add_action( 'after_setup_theme', __NAMESPACE__ . '\\setup' );
 
 /**

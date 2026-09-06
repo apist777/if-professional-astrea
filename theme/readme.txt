@@ -4,7 +4,7 @@ Contributors: projectif
 Requires at least: 7.0
 Tested up to: 7.1
 Requires PHP: 8.3
-Stable tag: 1.0.1
+Stable tag: 1.0.2
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 Tags: full-site-editing, translation-ready
@@ -137,6 +137,11 @@ ASTREAはWordPressのSite Language設定を強制的に変更しません。Word
 WordPress 7.1環境において、WordPress標準の一部Block（core/group、core/cover）で、編集画面に「Block contains unexpected or invalid content」という警告が表示される場合があることを確認しています。これはWordPress Core自体の挙動によるものであり、ASTREA固有の不具合ではありません。実際にデータが失われることはないことを確認済みですが、警告画面に表示される「Attempt recovery（回復を試みる）」は、内容に心当たりがない場合は実行しないことをおすすめします。
 
 == Changelog ==
+
+= 1.0.2 =
+* WordPress.org提出準備のための最終点検。Site EditorでHOME（Front Pageテンプレート）を開いた際に発生していた、実際には無害な「ブロックの内容が想定外です」という編集画面の警告を修正しました（表示・機能に影響はありません）。
+* 未使用の内部コードを削除しました。
+* 公開用のテーマ説明文から、内部開発文書への参照を削除しました。
 
 = 1.0.1 =
 * Theme URI・Author URIの誤ったドメイン記載を、正しいProject-if公式サイトのURLへ修正しました。

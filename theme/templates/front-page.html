@@ -1,9 +1,5 @@
 <!-- wp:template-part {"slug":"header"} /-->
 
-<!-- wp:group {"tagName":"main","layout":{"type":"constrained"}} -->
-<main class="wp-block-group">
-<!-- wp:astrea/breadcrumb /-->
-
 <!-- Construction Order 016B-R2 root-cause fix: a bare `wp:post-content`
 (no explicit `align`/`layout`) is a DIRECT CHILD of this `main` Group's
 own `is-layout-constrained` layout. WordPress Core's own constrained-
@@ -18,7 +14,16 @@ constrained layout logic INSIDE post-content so its own non-full/wide
 children (Services, Results, etc.) still correctly center at
 contentSize/wideSize. See
 docs/research/2026-08-30_construction_016b_r2_first_view_reconstruction_report.md
-§2 for the full DOM/CSS investigation. -->
+§2 for the full DOM/CSS investigation.
+
+Construction Order 022: this comment was moved here, outside the
+core/group block's own boundary, because sitting between two of the
+group's child block delimiters (as it did previously) made the Block
+Parser treat it as unexpected inner content of that group, causing a
+reproducible "Block validation failed" warning in the Site Editor. -->
+<!-- wp:group {"tagName":"main","layout":{"type":"constrained"}} -->
+<main class="wp-block-group">
+<!-- wp:astrea/breadcrumb /-->
 <!-- wp:post-content {"align":"full","layout":{"inherit":true}} /-->
 </main>
 <!-- /wp:group -->
