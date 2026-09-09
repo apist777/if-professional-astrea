@@ -16,7 +16,7 @@
 <!-- 7. WordPress will then import each of the posts, pages, comments, categories, etc. -->
 <!--    contained in this file into your site. -->
 
-	<!-- generator="WordPress/7.1" created="2026-09-08 09:32" -->
+	<!-- generator="WordPress/7.1" created="2026-09-09 16:50" -->
 <rss version="2.0"
 	xmlns:excerpt="http://wordpress.org/export/1.2/excerpt/"
 	xmlns:content="http://purl.org/rss/1.0/modules/content/"
@@ -29,7 +29,7 @@
 	<title>やまだ行政書士事務所</title>
 	<link>http://127.0.0.1:8895</link>
 	<description></description>
-	<pubDate>Tue, 08 Sep 2026 09:32:05 +0000</pubDate>
+	<pubDate>Wed, 09 Sep 2026 16:50:05 +0000</pubDate>
 	<language>en-US</language>
 	<wp:wxr_version>1.2</wp:wxr_version>
 	<wp:base_site_url>http://127.0.0.1:8895</wp:base_site_url>
@@ -94,7 +94,7 @@
 		</wp:postmeta>
 							<wp:postmeta>
 		<wp:meta_key><![CDATA[_thumbnail_id]]></wp:meta_key>
-		<wp:meta_value><![CDATA[6]]></wp:meta_value>
+		<wp:meta_value><![CDATA[40]]></wp:meta_value>
 		</wp:postmeta>
 							</item>
 					<item>
@@ -210,7 +210,7 @@
 		</wp:postmeta>
 							<wp:postmeta>
 		<wp:meta_key><![CDATA[_thumbnail_id]]></wp:meta_key>
-		<wp:meta_value><![CDATA[11]]></wp:meta_value>
+		<wp:meta_value><![CDATA[41]]></wp:meta_value>
 		</wp:postmeta>
 							</item>
 					<item>
@@ -1115,6 +1115,80 @@
 		<wp:post_password><![CDATA[]]></wp:post_password>
 		<wp:is_sticky>0</wp:is_sticky>
 														</item>
+					<item>
+		<title><![CDATA[代表者 山田太郎 ポートレート（正式版）]]></title>
+		<link>http://127.0.0.1:8895/professionals/%e5%b1%b1%e7%94%b0-%e5%a4%aa%e9%83%8e/%e4%bb%a3%e8%a1%a8%e8%80%85-%e5%b1%b1%e7%94%b0%e5%a4%aa%e9%83%8e-%e3%83%9d%e3%83%bc%e3%83%88%e3%83%ac%e3%83%bc%e3%83%88%ef%bc%88%e6%ad%a3%e5%bc%8f%e7%89%88%ef%bc%89/</link>
+		<pubDate>Wed, 09 Sep 2026 16:47:15 +0000</pubDate>
+		<dc:creator><![CDATA[]]></dc:creator>
+		<guid isPermaLink="false">http://127.0.0.1:8895/professionals/%e5%b1%b1%e7%94%b0-%e5%a4%aa%e9%83%8e/%e4%bb%a3%e8%a1%a8%e8%80%85-%e5%b1%b1%e7%94%b0%e5%a4%aa%e9%83%8e-%e3%83%9d%e3%83%bc%e3%83%88%e3%83%ac%e3%83%bc%e3%83%88%ef%bc%88%e6%ad%a3%e5%bc%8f%e7%89%88%ef%bc%89/</guid>
+		<description></description>
+		<content:encoded><![CDATA[]]></content:encoded>
+		<excerpt:encoded><![CDATA[]]></excerpt:encoded>
+		<wp:post_id>40</wp:post_id>
+		<wp:post_date><![CDATA[2026-09-09 16:47:15]]></wp:post_date>
+		<wp:post_date_gmt><![CDATA[2026-09-09 16:47:15]]></wp:post_date_gmt>
+		<wp:post_modified><![CDATA[2026-09-09 16:47:15]]></wp:post_modified>
+		<wp:post_modified_gmt><![CDATA[2026-09-09 16:47:15]]></wp:post_modified_gmt>
+		<wp:comment_status><![CDATA[open]]></wp:comment_status>
+		<wp:ping_status><![CDATA[closed]]></wp:ping_status>
+		<wp:post_name><![CDATA[%e4%bb%a3%e8%a1%a8%e8%80%85-%e5%b1%b1%e7%94%b0%e5%a4%aa%e9%83%8e-%e3%83%9d%e3%83%bc%e3%83%88%e3%83%ac%e3%83%bc%e3%83%88%ef%bc%88%e6%ad%a3%e5%bc%8f%e7%89%88%ef%bc%89]]></wp:post_name>
+		<wp:status><![CDATA[inherit]]></wp:status>
+		<wp:post_parent>5</wp:post_parent>
+		<wp:menu_order>0</wp:menu_order>
+		<wp:post_type><![CDATA[attachment]]></wp:post_type>
+		<wp:post_password><![CDATA[]]></wp:post_password>
+		<wp:is_sticky>0</wp:is_sticky>
+						<wp:attachment_url><![CDATA[http://127.0.0.1:8895/wp-content/uploads/2026/09/astrea-demo-yamada-professional-portrait.jpg]]></wp:attachment_url>
+											<wp:postmeta>
+		<wp:meta_key><![CDATA[_wp_attached_file]]></wp:meta_key>
+		<wp:meta_value><![CDATA[2026/09/astrea-demo-yamada-professional-portrait.jpg]]></wp:meta_value>
+		</wp:postmeta>
+							<wp:postmeta>
+		<wp:meta_key><![CDATA[_wp_attachment_metadata]]></wp:meta_key>
+		<wp:meta_value><![CDATA[a:6:{s:5:"width";i:1616;s:6:"height";i:951;s:4:"file";s:52:"2026/09/astrea-demo-yamada-professional-portrait.jpg";s:8:"filesize";i:148046;s:5:"sizes";a:5:{s:6:"medium";a:5:{s:4:"file";s:52:"astrea-demo-yamada-professional-portrait-300x177.jpg";s:5:"width";i:300;s:6:"height";i:177;s:9:"mime-type";s:10:"image/jpeg";s:8:"filesize";i:11862;}s:5:"large";a:5:{s:4:"file";s:53:"astrea-demo-yamada-professional-portrait-1024x603.jpg";s:5:"width";i:1024;s:6:"height";i:603;s:9:"mime-type";s:10:"image/jpeg";s:8:"filesize";i:65909;}s:9:"thumbnail";a:5:{s:4:"file";s:52:"astrea-demo-yamada-professional-portrait-150x150.jpg";s:5:"width";i:150;s:6:"height";i:150;s:9:"mime-type";s:10:"image/jpeg";s:8:"filesize";i:6175;}s:12:"medium_large";a:5:{s:4:"file";s:52:"astrea-demo-yamada-professional-portrait-768x452.jpg";s:5:"width";i:768;s:6:"height";i:452;s:9:"mime-type";s:10:"image/jpeg";s:8:"filesize";i:43331;}s:9:"1536x1536";a:5:{s:4:"file";s:53:"astrea-demo-yamada-professional-portrait-1536x904.jpg";s:5:"width";i:1536;s:6:"height";i:904;s:9:"mime-type";s:10:"image/jpeg";s:8:"filesize";i:120359;}}s:10:"image_meta";a:13:{s:8:"aperture";s:1:"0";s:6:"credit";s:0:"";s:6:"camera";s:0:"";s:7:"caption";s:0:"";s:17:"created_timestamp";s:1:"0";s:9:"copyright";s:0:"";s:12:"focal_length";s:1:"0";s:3:"iso";s:1:"0";s:13:"shutter_speed";s:1:"0";s:5:"title";s:0:"";s:11:"orientation";s:1:"0";s:8:"keywords";a:0:{}s:3:"alt";s:0:"";}}]]></wp:meta_value>
+		</wp:postmeta>
+							<wp:postmeta>
+		<wp:meta_key><![CDATA[_wp_attachment_image_alt]]></wp:meta_key>
+		<wp:meta_value><![CDATA[代表 山田太郎（行政書士）のポートレート]]></wp:meta_value>
+		</wp:postmeta>
+							</item>
+					<item>
+		<title><![CDATA[対応事例#1 建設業許可申請イメージ（正式版）]]></title>
+		<link>http://127.0.0.1:8895/cases/%e5%bb%ba%e8%a8%ad%e6%a5%ad%e8%a8%b1%e5%8f%af%e3%82%92%e5%88%9d%e5%9b%9e%e7%94%b3%e8%ab%8b%e3%81%a7%e5%8f%96%e5%be%97/%e5%af%be%e5%bf%9c%e4%ba%8b%e4%be%8b1-%e5%bb%ba%e8%a8%ad%e6%a5%ad%e8%a8%b1%e5%8f%af%e7%94%b3%e8%ab%8b%e3%82%a4%e3%83%a1%e3%83%bc%e3%82%b8%ef%bc%88%e6%ad%a3%e5%bc%8f%e7%89%88%ef%bc%89/</link>
+		<pubDate>Wed, 09 Sep 2026 16:47:15 +0000</pubDate>
+		<dc:creator><![CDATA[]]></dc:creator>
+		<guid isPermaLink="false"></guid>
+		<description></description>
+		<content:encoded><![CDATA[]]></content:encoded>
+		<excerpt:encoded><![CDATA[]]></excerpt:encoded>
+		<wp:post_id>41</wp:post_id>
+		<wp:post_date><![CDATA[2026-09-09 16:47:15]]></wp:post_date>
+		<wp:post_date_gmt><![CDATA[2026-09-09 16:47:15]]></wp:post_date_gmt>
+		<wp:post_modified><![CDATA[2026-09-09 16:47:15]]></wp:post_modified>
+		<wp:post_modified_gmt><![CDATA[2026-09-09 16:47:15]]></wp:post_modified_gmt>
+		<wp:comment_status><![CDATA[open]]></wp:comment_status>
+		<wp:ping_status><![CDATA[closed]]></wp:ping_status>
+		<wp:post_name><![CDATA[%e5%af%be%e5%bf%9c%e4%ba%8b%e4%be%8b1-%e5%bb%ba%e8%a8%ad%e6%a5%ad%e8%a8%b1%e5%8f%af%e7%94%b3%e8%ab%8b%e3%82%a4%e3%83%a1%e3%83%bc%e3%82%b8%ef%bc%88%e6%ad%a3%e5%bc%8f%e7%89%88%ef%bc%89]]></wp:post_name>
+		<wp:status><![CDATA[inherit]]></wp:status>
+		<wp:post_parent>10</wp:post_parent>
+		<wp:menu_order>0</wp:menu_order>
+		<wp:post_type><![CDATA[attachment]]></wp:post_type>
+		<wp:post_password><![CDATA[]]></wp:post_password>
+		<wp:is_sticky>0</wp:is_sticky>
+						<wp:attachment_url><![CDATA[http://127.0.0.1:8895/wp-content/uploads/2026/09/astrea-demo-yamada-case-01-construction-permit.jpg]]></wp:attachment_url>
+											<wp:postmeta>
+		<wp:meta_key><![CDATA[_wp_attached_file]]></wp:meta_key>
+		<wp:meta_value><![CDATA[2026/09/astrea-demo-yamada-case-01-construction-permit.jpg]]></wp:meta_value>
+		</wp:postmeta>
+							<wp:postmeta>
+		<wp:meta_key><![CDATA[_wp_attachment_metadata]]></wp:meta_key>
+		<wp:meta_value><![CDATA[a:6:{s:5:"width";i:1774;s:6:"height";i:887;s:4:"file";s:58:"2026/09/astrea-demo-yamada-case-01-construction-permit.jpg";s:8:"filesize";i:176253;s:5:"sizes";a:5:{s:6:"medium";a:5:{s:4:"file";s:58:"astrea-demo-yamada-case-01-construction-permit-300x150.jpg";s:5:"width";i:300;s:6:"height";i:150;s:9:"mime-type";s:10:"image/jpeg";s:8:"filesize";i:12351;}s:5:"large";a:5:{s:4:"file";s:59:"astrea-demo-yamada-case-01-construction-permit-1024x512.jpg";s:5:"width";i:1024;s:6:"height";i:512;s:9:"mime-type";s:10:"image/jpeg";s:8:"filesize";i:70662;}s:9:"thumbnail";a:5:{s:4:"file";s:58:"astrea-demo-yamada-case-01-construction-permit-150x150.jpg";s:5:"width";i:150;s:6:"height";i:150;s:9:"mime-type";s:10:"image/jpeg";s:8:"filesize";i:7343;}s:12:"medium_large";a:5:{s:4:"file";s:58:"astrea-demo-yamada-case-01-construction-permit-768x384.jpg";s:5:"width";i:768;s:6:"height";i:384;s:9:"mime-type";s:10:"image/jpeg";s:8:"filesize";i:46739;}s:9:"1536x1536";a:5:{s:4:"file";s:59:"astrea-demo-yamada-case-01-construction-permit-1536x768.jpg";s:5:"width";i:1536;s:6:"height";i:768;s:9:"mime-type";s:10:"image/jpeg";s:8:"filesize";i:126557;}}s:10:"image_meta";a:13:{s:8:"aperture";s:1:"0";s:6:"credit";s:0:"";s:6:"camera";s:0:"";s:7:"caption";s:0:"";s:17:"created_timestamp";s:1:"0";s:9:"copyright";s:0:"";s:12:"focal_length";s:1:"0";s:3:"iso";s:1:"0";s:13:"shutter_speed";s:1:"0";s:5:"title";s:0:"";s:11:"orientation";s:1:"0";s:8:"keywords";a:0:{}s:3:"alt";s:0:"";}}]]></wp:meta_value>
+		</wp:postmeta>
+							<wp:postmeta>
+		<wp:meta_key><![CDATA[_wp_attachment_image_alt]]></wp:meta_key>
+		<wp:meta_value><![CDATA[建設業許可申請に関する書類・打ち合わせのイメージ]]></wp:meta_value>
+		</wp:postmeta>
+							</item>
 				</channel>
 </rss>
 	
