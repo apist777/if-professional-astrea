@@ -150,3 +150,105 @@ function handle_dismiss_core_notice() {
 	wp_safe_redirect( wp_get_referer() ? wp_get_referer() : admin_url() );
 	exit;
 }
+
+/**
+ * Construction Order 025-CLOSEOUT-H — Header CTA link resolution.
+ *
+ * `theme/parts/header.html`'s "お問い合わせ" (Contact) button binds its
+ * `url` to this Theme-owned (NOT Core-owned) Block Bindings source, so the
+ * link a real visitor receives is always resolved fresh, at every render,
+ * from the current site's own home_url()/get_permalink() — the same
+ * WordPress-native mechanism already proven by the Header/Hero phone
+ * button's `astrea-core/office-profile` binding, just registered by the
+ * Theme itself so it works with zero ASTREA Core dependency.
+ *
+ * This is a Theme-native solution (Order §7 priority 2), not a Core
+ * change: it never reads or modifies anything Core doesn't already expose
+ * as a normal WordPress option, and it degrades safely (Decision 013/021)
+ * when Core is inactive.
+ *
+ * The static `href="#"` byte kept in header.html is never what a real
+ * visitor's browser receives — exactly like the pre-existing phone
+ * button, whose own static href is also `#` and is resolved to a real
+ * `tel:` link by its own binding before every render. Block Bindings
+ * resolution happens in a content filter that runs before the block's
+ * save()-comparison-based validation ever executes, so this cannot
+ * introduce a validation mismatch (verified empirically for both buttons
+ * — see the Construction 025-CLOSEOUT-H report).
+ */
+
+/** Public contract: this string is what theme/parts/header.html binds to. */
+const SITE_LINKS_SOURCE = 'astrea-theme/site-links';
+
+add_action( 'init', __NAMESPACE__ . '\\register_site_links_source' );
+
+/**
+ * Registers the `astrea-theme/site-links` Block Bindings source.
+ *
+ * @return void
+ */
+function register_site_links_source() {
+	if ( ! function_exists( 'register_block_bindings_source' ) ) {
+		return;
+	}
+
+	register_block_bindings_source(
+		SITE_LINKS_SOURCE,
+		array(
+			'label'              => __( 'ASTREA — サイトリンク', 'astrea' ),
+			'get_value_callback' => __NAMESPACE__ . '\\get_bound_site_link',
+		)
+	);
+}
+
+/**
+ * Value callback for the `astrea-theme/site-links` binding source.
+ *
+ * @param array     $source_args    Binding args, e.g. array( 'key' => 'contact_url' ).
+ * @param \WP_Block $block_instance Unused, required by the callback signature.
+ * @param string    $attribute_name Unused, required by the callback signature.
+ * @return string|null
+ */
+function get_bound_site_link( $source_args, $block_instance, $attribute_name ) { // phpcs:ignore Generic.CodeAnalysis.UnusedFunctionParameter.FoundAfterLastUsed
+	$key = isset( $source_args['key'] ) ? (string) $source_args['key'] : '';
+
+	if ( 'contact_url' !== $key ) {
+		return null;
+	}
+
+	return resolve_contact_url();
+}
+
+/**
+ * Resolves the site's own Contact page URL when ASTREA Core has generated
+ * one, falling back to the site's front page — which always exists —
+ * rather than ever producing a 404 link or leaving the button dead. Never
+ * hardcodes a host, port, IP or production URL: both branches build on
+ * WordPress's own home_url()/get_permalink(), so the result always tracks
+ * whatever environment (and subpath) the site is actually served from.
+ *
+ * @return string
+ */
+function resolve_contact_url(): string {
+	if ( is_core_active() && defined( '\Astrea\Core\Setup\GENERATED_PAGES_OPTION' ) ) {
+		$generated_pages = get_option( \Astrea\Core\Setup\GENERATED_PAGES_OPTION, array() );
+		$contact_id      = isset( $generated_pages['contact'] ) ? (int) $generated_pages['contact'] : 0;
+
+		if ( $contact_id > 0 ) {
+			$contact_post = get_post( $contact_id );
+			if ( $contact_post instanceof \WP_Post && 'publish' === $contact_post->post_status ) {
+				$permalink = get_permalink( $contact_id );
+				if ( $permalink ) {
+					return $permalink;
+				}
+			}
+		}
+	}
+
+	// Core inactive, or no Contact page generated yet: fall back to the
+	// site's own front page — it always exists, so this is never a 404,
+	// and a site owner can still freely re-point the button afterward via
+	// the Button block's standard Link UI (after disconnecting the
+	// binding, exactly as with the phone button).
+	return home_url( '/' );
+}
