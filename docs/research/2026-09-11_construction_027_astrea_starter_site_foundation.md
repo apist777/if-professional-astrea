@@ -222,7 +222,7 @@ Theme/Core側の変更: **0**（`git diff --stat -- theme/ core/`は空）。
 
 ---
 
-## Construction 027 — Visual Review Ready
+## Construction 027 — Visual Review Ready（初回、Owner Review前時点）
 
 - Site Name: ASTREA行政書士事務所
 - Representative: 伊府 伊夫男
@@ -236,5 +236,185 @@ Theme/Core側の変更: **0**（`git diff --stat -- theme/ core/`は空）。
 - Push: NOT DONE
 - Deploy: NOT DONE
 - Owner Review: REQUIRED
+
+---
+
+## 代表者名の最終調整（Owner Review後、2026-09-11）
+
+Owner Visual ReviewはPASSしたが、代表者名を最終確定させるための調整指示を受けた。
+
+| | 変更前 | 変更後 |
+| --- | --- | --- |
+| 代表者 | 伊府 伊夫男 | **伊吹 文人**（いぶき ふみと） |
+
+`build-content.php`・`integrate-final-images.php`・`README.md`内の該当箇所を更新し、ローカルclean rebuild（新規、port 8912）で以下を確認した:
+
+- Representative = 伊吹 文人 ✅
+- 旧「伊府 伊夫男」残存 = 0 ✅
+- 旧Yamada identity残存 = 0 ✅
+- Reproducibility PASS、Desktop/Mobile regression = 0 ✅
+
+英字表記「Fumito Ibuki」を追加すべき既存の英語名フィールドはStarter Siteデータ内に見つからなかったため、今回は追加していない（README内の経緯記録にのみ記載）。
+
+---
+
+## Construction 027 — FINALIZE / PUBLIC DEPLOY（2026-09-11 21:xx 〜 2026-09-12 08:13 JST）
+
+### 1. PRE-COMMIT CHECK
+
+```
+$ git status --short --branch
+## main...origin/main
+ M HISTORY.csv                                              ← Owner自身の編集、対象外
+RM docs/demo-assets/yamada-live-demo/... -> astrea-starter-site/...（Construction 027対象）
+ D docs/research/screenshots/012〜016系（多数）              ← Owner削除済み、復元せず対象外
+?? docs/research/2026-09-11_construction_024...等            ← 別Constructionの未commit報告書、対象外
+```
+
+**重要な発見**: `docs/demo-assets/yamada-live-demo/yamada-demo-export.wxr`は、ディレクトリ名変更に伴い`git mv`で新パスへ移動する必要があったが、この特定のファイルには**Construction 027着手前（2026-09-10 16:07）からのOwner自身の未コミット編集**が既に乗っていた。これをそのままcommitに含めると無関係な変更を混入させてしまうため、以下の方法で分離した:
+
+1. 現在の（Owner編集済みの）内容を一時退避。
+2. 新パスに、**HEAD時点（無変更）の内容**を書き込み、これが「ディレクトリ移動のみ、内容変更ゼロ」の純粋なrenameとしてstageされることを`git diff --cached`で確認（差分0行）。
+3. commit実行後、退避しておいたOwner編集済みの内容を新パスへ書き戻し、**Owner自身の差分は今回のcommitに一切含めず、未コミットのまま新しい場所に保持**した。
+
+Construction 027対象外の変更（HISTORY.csv、Owner削除済みscreenshots、他Constructionの未commit報告書、stray設定ファイル）はいずれもstageしていない。過去のConstruction reportは無変更。
+
+### 2. FINAL LOCAL VALIDATION
+
+上記「代表者名の最終調整」節のclean rebuildで再確認済み（PASS）。Theme 1.0.3 / Core 1.0.1、無変更。
+
+### 3. COMMIT
+
+```
+$ git add docs/demo-assets/astrea-starter-site/ docs/research/2026-09-11_construction_027_astrea_starter_site_foundation.md docs/research/screenshots/027/
+$ git commit -m "Promote ASTREA demo to starter site"
+[main 880011d] Promote ASTREA demo to starter site
+ 33 files changed, 351 insertions(+), 92 deletions(-)
+$ git status --short --branch
+## main...origin/main [ahead 1]
+ M HISTORY.csv
+ M docs/demo-assets/astrea-starter-site/yamada-demo-export.wxr   ← Owner自身の差分、意図的に新しい場所へ保持したまま
+```
+
+**Commit hash**: `880011d14a803bdfa6e9012744a2041443ddf983`
+
+### 4. PUSH
+
+```
+$ git push origin main
+   b2222bf..880011d  main -> main
+$ git rev-parse HEAD
+880011d14a803bdfa6e9012744a2041443ddf983
+$ git rev-parse origin/main
+880011d14a803bdfa6e9012744a2041443ddf983
+```
+
+**local HEAD = origin/main、一致確認済み。**
+
+### 5. LIVE DEMO DEPLOY
+
+Construction 024-R1で確立した経路（eureka権限、`php8.3`明示のWP-CLI、Theme/Core直接編集禁止、infrastructure無変更）を使用した。
+
+**重要な計画変更（安全のため）**: 当初「Starter Site正本から再構築」を文字通り実行するため`wp db reset`（既存DB・既存credentialのまま、テーブルのみ初期化）を計画したが、**Claude Code のauto mode安全分類器によってブロックされた**（未確認の破壊的操作と判定）。これは妥当な安全機構と判断し、回避を試みず、代替として**非破壊的な、WordPress標準APIによる対象を絞った更新方式**へ計画を変更した:
+
+1. `\Astrea\Core\OfficeProfile\sanitize()`/`update_option()`でOffice Profileの`office_name`のみ更新（住所・電話・営業時間は無変更）
+2. `blogname`オプション更新
+3. 既存のProfessional投稿（ID 5）の`post_title`を`wp_update_post()`で更新
+4. 更新済みスクリプト（`integrate-final-images.php`／`integrate-025b2-hero-and-cases.php`／`make-results-web-jpeg.php`／`integrate-025e1-results-background.php`）を`wp eval-file`で再実行し、新しい`astrea-demo-starter-*`ファイル名で画像を再アップロードし、Featured Image／Hero Cover／Results Coverの参照先を新しいattachmentへ切り替え（旧`yamada`ファイル名のattachmentは公開URLとして参照されなくなった）
+5. `fix-internal-link-portability.php`を再実行し、Navigation・Contact CTA・home/siteurlの整合性を最終確認
+
+**施工中に発見・修正したバグ**: `integrate-025e1-results-background.php`のidempotency判定（既存の`astrea-demo-yamada-results-background`という**旧ファイル名の文字列**をキーに「既に設定済みか」を判定するガード）が、ファイル名変更によって不成立となり、後続の「無画像→with-image」アップグレード処理が誤って発火。その内部ロジックが、**既にwith-image状態のCoverブロックの内部に埋め込まれた`<!-- wp:astrea/results-list {"heading":"実績"} /-->`という部分文字列**を「無画像の未ラップ状態」と誤検出し、既存のwith-imageブロックをもう一段Coverで包んでしまう**二重ネスト**を引き起こした（旧yamada画像のCoverが、新starter画像のCoverを内包する形）。
+
+WordPressの`parse_blocks()`/`serialize_blocks()`API（生HTML文字列の手編集ではなく）を使い、二重ネストされた外側（旧）のCoverブロックを検出して内側（新）のCoverブロックへ差し替える形で修正し、`post_content`を保存し直した。修正後、`astrea-results-photoplane`クラスの出現数が正しく2件（開始タグのJSON＋実HTML、通常のCoverブロック1個分）に戻ったことを確認した。**このスクリプト自体のidempotencyガード設計（ファイル名文字列に依存する判定）は、将来「同じ内容だがファイル名だけ変える」再実行シナリオに対して脆弱であるため、恒久的な改修が望ましいことをKnown Issuesに記録する**（今回はデータの直接修正のみで対応、スクリプト自体は今回変更していない）。
+
+**孤立した旧identity添付ファイルの削除**: Featured Image／Cover参照の切り替え後も、旧`yamada`名の添付ファイル投稿（ID 6・38・39・40・41・42・44）がメディアライブラリに孤立して残っていたため、いずれも「サムネイルとして未使用」「revision以外のどのpost_contentからも未参照」であることをDB照会で確認したうえで削除した（`wp post delete --force`、ファイルシステム上のyamada名ファイルも削除確認済み）。**WordPress自身が保持するrevision履歴（「ホーム」ページの過去5リビジョン）内には引き続きyamada等の旧記述が残るが、これはWordPress標準の内部変更履歴であり、Git commit historyと同様の「歴史的記録」として意図的に保持し、書き換えていない。**
+
+DB credentialの再作成、nginx変更、PHP変更、infrastructure変更はいずれも実施していない。robots.txt問題（`/astrea/robots.txt` 404）にも今回触れていない。
+
+### 6. PUBLIC QA
+
+```
+https://demo.project-if.jp/astrea/           200
+https://demo.project-if.jp/astrea/事務所概要/  200
+https://demo.project-if.jp/astrea/services/   200
+https://demo.project-if.jp/astrea/professionals/ 200
+https://demo.project-if.jp/astrea/faq/        200
+https://demo.project-if.jp/astrea/料金/        200
+https://demo.project-if.jp/astrea/お問い合わせ/ 200
+```
+
+HTTPS: リダイレクト1回のみ（`/astrea` → `/astrea/`、ループなし）、証明書問題なし。Mixed content: 0（全リソースHTTPS経由を確認）。internal 404 / broken image: 0（Desktop/Mobile全14組み合わせで確認）。
+
+表示確認（実機DOM全文検索、Desktop 1440）:
+
+| 項目 | 結果 |
+| --- | --- |
+| Site Name「ASTREA行政書士事務所」表示 | ✅ |
+| Representative「伊吹」「文人」表示 | ✅ |
+| 「山田」「やまだ」「Yamada」「伊府」「伊夫男」残存 | **0** |
+
+### 7. CTA QA
+
+| CTA | 遷移先 | subpath維持 |
+| --- | --- | --- |
+| Header「お問い合わせ」 | `https://demo.project-if.jp/astrea/お問い合わせ/`（title: お問い合わせ – ASTREA行政書士事務所） | ✅ |
+| Hero「お問い合わせはこちら」 | 同上 | ✅ |
+| Bottom「お問い合わせフォームへ」 | 同上 | ✅ |
+| Phone（3箇所） | `tel:03-9876-5432` | — |
+
+### 8. VISUAL QA
+
+Desktop 1440px／Mobile 390pxで実機スクリーンショットを取得（本会話内で提示）。Hero・Cases 01–03・Results background・Representative・Price・CTA・Footer、いずれもOwner承認済みローカル版から崩れなし。horizontal overflow = 0（全14組み合わせ）。
+
+### 9. EXISTING SITE REGRESSION
+
+```
+https://demo.project-if.jp/         200（無変化）
+https://demo.project-if.jp/modern/  200（無変化）
+```
+
+副作用 = 0。
+
+### 10. SECURITY / CLEANUP
+
+| 項目 | 結果 |
+| --- | --- |
+| temporary files | 0（docroot直下は標準WordPressファイルのみ） |
+| temporary probe | 0（今回probe作成なし） |
+| secret / credential exposure | 0（DB credentialは前回同様非公開、今回新規作成もなし） |
+| debug output | 0（`WP_DEBUG=false`確認済み） |
+| development URL leak | 0（Playwright実機で確認） |
+| directory listing | OFF（`/wp-content/uploads/`アクセス→403） |
+| VPS作業用一時ファイル | `/home/eureka/astrea-deploy/`（scripts・images）はdocroot外に配置、web公開領域には一切露出していないことを確認 |
+
+---
+
+## Known Issues（最終版）
+
+1. `yamada-demo-export.wxr`が旧identity・旧ファイル名のまま（従前記載の通り、意図的に不可触）。
+2. Professional Profileの読み仮名（ふりがな）を保持・表示する仕組みがASTREA Core側に存在しない（記録のみ、データ化せず）。
+3. **新規発見**: `integrate-025e1-results-background.php`のidempotencyガードが、ファイル名文字列に依存した判定のため、「同一内容だがファイル名のみ変更して再実行」するシナリオで二重ネストバグを起こす（今回は本番データを直接修正して解消、スクリプト自体は無変更）。将来的な恒久修正（ブロック構造そのものを見て判定する等）が望ましい。
+4. WordPress自身のrevision履歴（「ホーム」ページ過去5件）に旧Yamada identityの記述が残るが、意図的に保持している（歴史的記録）。
+5. Owner自身の未コミット`HISTORY.csv`・`yamada-demo-export.wxr`編集には一切触れていない。
+
+---
+
+## Construction 027 — CLOSED
+## ASTREA Starter Site Foundation — PUBLIC
+
+**Public URL**: `https://demo.project-if.jp/astrea/`
+**Site Name**: ASTREA行政書士事務所
+**Representative**: 伊吹 文人
+**Theme**: 1.0.3
+**Core**: 1.0.1
+**Reproducibility**: PASS
+**Existing-site regression**: 0
+**Known issue**: `/astrea/robots.txt` 404（Construction 024-R1からの既知事項、今回変更なし）
+
+---
+
+## 次工程への引継ぎ
+
+Construction 027では「完成済みStarter Siteの正本化」まで完了した。次工程候補として、**ASTREA Starter Site Import**機能の設計がある——ユーザーが「デモで見た完成サイト」を自分のWordPressへ導入し、事務所名・代表者名・電話・住所・写真・サービス・料金等を自分用に置き換えるだけでサイトを開始できる仕組み。Phase 6で分類した「Playground固有／通常WordPress処理との差異／共通化可能」の区分（本報告書参照）が、その設計の出発点として利用できる。Construction 027ではImport機能を実装していない。
 
 STOP
