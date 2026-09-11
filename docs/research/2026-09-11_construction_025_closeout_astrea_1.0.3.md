@@ -436,4 +436,37 @@ $ git diff --stat -- theme/
 
 ## Commit / Push 実行ログ
 
-（本セクションはcommit/push実行後に追記する。）
+```
+$ git commit -m "Release ASTREA 1.0.3 candidate"
+[main 8077074] Release ASTREA 1.0.3 candidate
+ 78 files changed, 3438 insertions(+), 220 deletions(-)
+
+$ git push origin main
+   f8f7a99..8077074  main -> main
+
+$ git rev-parse HEAD
+8077074a00713a00ff6d3ea0fe01a398d368c735
+$ git rev-parse origin/main
+8077074a00713a00ff6d3ea0fe01a398d368c735
+（一致確認済み）
+```
+
+コミット対象外として意図的に除外した既存の作業ツリー差分（Owner自身の過去スクリーンショット削除・`yamada-demo-export.wxr`・stray設定ファイル、§H10参照）は、commit後もすべて変更されないまま残っている（確認済み）。
+
+---
+
+## Final Report
+
+**Final Verdict**: A. CLOSED — COMMITTED AND PUSHED
+**Header CTA resolution method**: Theme-native Block Bindings（新規ソース`astrea-theme/site-links`、`theme/functions.php`に登録）。Core変更ゼロ。
+**Theme changed files**: `theme/functions.php`、`theme/languages/astrea.pot`、`theme/parts/header.html`、`theme/patterns/home-results-teaser.php`、`theme/readme.txt`、`theme/style.css`、`theme/theme.json`（計7ファイル、025-E1/025-CLOSEOUT分含む）
+**Core diff**: 0（`core/`への変更なし）
+**Commit SHA**: `8077074a00713a00ff6d3ea0fe01a398d368c735`
+**Push status**: 成功（`origin/main`へpush済み、local HEAD = origin/main を確認済み）
+**ASTREA Theme version**: 1.0.3
+**ASTREA Core version**: 1.0.1（無変更）
+**Construction 025 status**: **CLOSED**
+
+---
+
+**Construction 025 CLOSED.**
