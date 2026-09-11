@@ -2,7 +2,7 @@
 /**
  * Construction 025-L1 — Internal Link Portability Fix.
  *
- * Makes every Yamada Demo *internal* link follow whatever local URL / port
+ * Makes every ASTREA official Starter Site *internal* link follow whatever local URL / port
  * the environment is currently served at, so a rebuild (or a clone served
  * on a different port, or a WXR import into a subdirectory install such as
  * demo.project-if.jp/astrea/) never leaves a dead `http://127.0.0.1:88xx/…`

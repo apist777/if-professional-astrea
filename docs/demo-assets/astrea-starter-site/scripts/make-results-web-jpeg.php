@@ -8,15 +8,15 @@
  * the original. NOT cropped — the Cover Block's own object-fit:cover
  * frames it responsively at render time (same as the Hero photo).
  *
- * Expects /images (docs/demo-assets/yamada-live-demo/images) mounted.
+ * Expects /images (docs/demo-assets/astrea-starter-site/images) mounted.
  */
 
 require_once '/wordpress/wp-load.php';
 
 function line( $m ) { echo $m . "\n"; }
 
-$src_png  = '/images/astrea-demo-yamada-results-background.png';
-$dest_jpg = '/images/web/astrea-demo-yamada-results-background.jpg';
+$src_png  = '/images/astrea-demo-starter-results-background.png';
+$dest_jpg = '/images/web/astrea-demo-starter-results-background.jpg';
 
 $src = imagecreatefrompng( $src_png );
 if ( ! $src ) {

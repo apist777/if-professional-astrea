@@ -1,0 +1,15 @@
+{
+  "$schema": "https://playground.wordpress.net/blueprint-schema.json",
+  "landingPage": "/wp-admin/",
+  "steps": [
+    {
+      "step": "runPHP",
+      "code": "<?php require_once '/wordpress/wp-load.php'; if (!get_option('astrea_demo_theme_activated')) { switch_theme('astrea'); activate_plugin('astrea-core/astrea-core.php'); update_option('astrea_demo_theme_activated', 1); update_option('blogname', 'ASTREA行政書士事務所'); update_option('blog_public', 0); } echo 'ok';"
+    },
+    {
+      "step": "login",
+      "username": "admin",
+      "password": "password"
+    }
+  ]
+}

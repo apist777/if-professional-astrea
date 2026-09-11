@@ -1,6 +1,8 @@
 <?php
 /**
- * Construction 023 — local content build script for "やまだ行政書士事務所".
+ * Construction 023 — local content build script, originally for
+ * "やまだ行政書士事務所" (retargeted in Construction 027 to ASTREA's
+ * official Starter Site identity, "ASTREA行政書士事務所" / 伊吹 文人).
  *
  * Uses WordPress's own post/postmeta/option API exclusively (the same
  * capabilities ASTREA Core itself provides and the same Setup functions
@@ -18,7 +20,7 @@ function line( $msg ) { echo $msg . "\n"; }
 // ---------------------------------------------------------------------
 
 $office_input = array(
-	'office_name' => 'やまだ行政書士事務所',
+	'office_name' => 'ASTREA行政書士事務所',
 	'address'     => '東京都新宿区西新宿1-1-1 新宿タワー10F',
 	'phone'       => '03-9876-5432',
 );
@@ -26,7 +28,7 @@ $sanitized = \Astrea\Core\OfficeProfile\sanitize( $office_input );
 update_option( \Astrea\Core\OfficeProfile\OPTION_NAME, $sanitized );
 line( 'Office profile saved.' );
 
-update_option( 'blogname', 'やまだ行政書士事務所' );
+update_option( 'blogname', 'ASTREA行政書士事務所' );
 update_option( 'blog_public', 0 );
 
 // ---------------------------------------------------------------------
@@ -74,12 +76,12 @@ function attach_placeholder( string $label, int $w, int $h, int $parent_post_id,
 }
 
 // ---------------------------------------------------------------------
-// 2. Professional (山田太郎) — astrea_professional
+// 2. Professional (伊吹 文人) — astrea_professional
 // ---------------------------------------------------------------------
 
 $professional_id = wp_insert_post( array(
 	'post_type'    => \Astrea\Core\ProfessionalProfile\POST_TYPE,
-	'post_title'   => '山田 太郎',
+	'post_title'   => '伊吹 文人',
 	'post_content' => '行政書士として独立開業。建設業許可・相続手続きを中心に、丁寧なヒアリングを心がけています。',
 	'post_status'  => 'publish',
 	'menu_order'   => 0,
@@ -90,7 +92,7 @@ update_post_meta( $professional_id, \Astrea\Core\ProfessionalProfile\META_EDUCAT
 update_post_meta( $professional_id, \Astrea\Core\ProfessionalProfile\META_AFFILIATION, '東京都行政書士会 会員' );
 update_post_meta( $professional_id, \Astrea\Core\ProfessionalProfile\META_REGISTRATION_INFO, '行政書士登録番号：第98765432号（東京都行政書士会）' );
 update_post_meta( $professional_id, \Astrea\Core\ProfessionalProfile\META_IS_REPRESENTATIVE, '1' );
-$photo_id = attach_placeholder( '代表者 山田太郎 ポートレート', 900, 1200, $professional_id, 'yamada-professional-portrait.png' );
+$photo_id = attach_placeholder( '代表者 伊吹文人 ポートレート', 900, 1200, $professional_id, 'starter-professional-portrait-placeholder.png' );
 set_post_thumbnail( $professional_id, $photo_id );
 line( "Professional created: $professional_id (photo attachment $photo_id)" );
 

@@ -3,8 +3,8 @@
  * Construction 025-B2 — Hero + Case #2 + Case #3 final asset integration.
  *
  * Integrates the three newly-supplied assets (Hero office photo, Case #2
- * inheritance photo, Case #3 restaurant-incorporation photo) into a Yamada
- * Demo build using ONLY existing ASTREA Theme/Core standard-WordPress
+ * inheritance photo, Case #3 restaurant-incorporation photo) into the ASTREA
+ * official Starter Site build using ONLY existing ASTREA Theme/Core standard-WordPress
  * features:
  *   - Hero:  the astrea-hero-photoplane `core/cover` block's standard
  *            background-image + overlay-dim controls (same two controls a
@@ -21,9 +21,9 @@
  * (attachment IDs are looked up at runtime, never hardcoded).
  *
  * Expects, mounted at /images and /images/web respectively:
- *   /images/web/astrea-demo-yamada-hero-office.jpg
- *   /images/web/astrea-demo-yamada-case-02-inheritance.jpg
- *   /images/web/astrea-demo-yamada-case-03-restaurant-incorporation.jpg
+ *   /images/web/astrea-demo-starter-hero-office.jpg
+ *   /images/web/astrea-demo-starter-case-02-inheritance.jpg
+ *   /images/web/astrea-demo-starter-case-03-restaurant-incorporation.jpg
  * (Web-optimized JPEGs; see make-web-jpegs.php for how these are derived
  * from the PNG originals in /images.)
  */
@@ -177,24 +177,24 @@ function splice_cover_rebuild( array &$blocks ) {
 // ---------------------------------------------------------------------
 
 $hero_attach_id = upload_and_attach_idempotent(
-	'/images/web/astrea-demo-yamada-hero-office.jpg',
+	'/images/web/astrea-demo-starter-hero-office.jpg',
 	'Hero オフィス風景（正式版）',
 	'高層ビルのオフィスから見た都市の眺望とデスク',
-	'astrea-demo-yamada-hero-office.jpg'
+	'astrea-demo-starter-hero-office.jpg'
 );
 
 $case2_attach_id = upload_and_attach_idempotent(
-	'/images/web/astrea-demo-yamada-case-02-inheritance.jpg',
+	'/images/web/astrea-demo-starter-case-02-inheritance.jpg',
 	'対応事例#2 相続手続きイメージ（正式版）',
 	'相続手続きに関する打ち合わせのイメージ',
-	'astrea-demo-yamada-case-02-inheritance.jpg'
+	'astrea-demo-starter-case-02-inheritance.jpg'
 );
 
 $case3_attach_id = upload_and_attach_idempotent(
-	'/images/web/astrea-demo-yamada-case-03-restaurant-incorporation.jpg',
+	'/images/web/astrea-demo-starter-case-03-restaurant-incorporation.jpg',
 	'対応事例#3 飲食店の会社設立イメージ（正式版）',
 	'飲食店の会社設立に関する打ち合わせのイメージ',
-	'astrea-demo-yamada-case-03-restaurant-incorporation.jpg'
+	'astrea-demo-starter-case-03-restaurant-incorporation.jpg'
 );
 
 if ( ! $hero_attach_id || ! $case2_attach_id || ! $case3_attach_id ) {

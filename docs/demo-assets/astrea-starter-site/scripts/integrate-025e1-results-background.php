@@ -1,7 +1,7 @@
 <?php
 /**
  * Construction 025-E1 — set the official Results-section background photo
- * on the Yamada Demo HOME page, using ONLY the standard Cover Block
+ * on the ASTREA official Starter Site HOME page, using ONLY the standard Cover Block
  * background-image + overlay attributes that Theme 1.0.3's
  * `astrea/home-results-teaser` pattern now exposes.
  *
@@ -11,7 +11,7 @@
  * form to the with-image form. Re-running after the image is already set
  * is a no-op.
  *
- * Expects /images/web/astrea-demo-yamada-results-background.jpg to be
+ * Expects /images/web/astrea-demo-starter-results-background.jpg to be
  * mounted (produced by make-results-web-jpeg.php from the PNG original).
  */
 
@@ -23,7 +23,7 @@ function line( $m ) { echo $m . "\n"; }
 // --- 1. Idempotent attachment upload -------------------------------------
 
 global $wpdb;
-$filename  = 'astrea-demo-yamada-results-background.jpg';
+$filename  = 'astrea-demo-starter-results-background.jpg';
 $like      = '%' . $wpdb->esc_like( $filename ) . '%';
 $attach_id = (int) $wpdb->get_var( $wpdb->prepare(
 	"SELECT post_id FROM {$wpdb->postmeta} WHERE meta_key = '_wp_attached_file' AND meta_value LIKE %s LIMIT 1",
@@ -57,7 +57,7 @@ $url = wp_get_attachment_url( $attach_id );
 $home    = (int) get_option( 'page_on_front' );
 $content = get_post( $home )->post_content;
 
-if ( false !== strpos( $content, 'astrea-demo-yamada-results-background' ) ) {
+if ( false !== strpos( $content, 'astrea-demo-starter-results-background' ) ) {
 	line( 'Results background already set — nothing to do.' );
 	exit( 0 );
 }

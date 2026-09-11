@@ -61,16 +61,16 @@ function make_web_jpeg( string $src_png, string $dest_jpeg, float $target_ratio,
 // ---------------------------------------------------------------------
 
 $result1 = make_web_jpeg(
-	'/images/astrea-demo-yamada-professional-portrait.png',
-	'/images/web/astrea-demo-yamada-professional-portrait.jpg',
+	'/images/astrea-demo-starter-professional-portrait.png',
+	'/images/web/astrea-demo-starter-professional-portrait.jpg',
 	1.7,
 	85
 );
 line( 'Professional portrait web JPEG: ' . print_r( $result1, true ) );
 
 $result2 = make_web_jpeg(
-	'/images/astrea-demo-yamada-case-01-construction-permit.png',
-	'/images/web/astrea-demo-yamada-case-01-construction-permit.jpg',
+	'/images/astrea-demo-starter-case-01-construction-permit.png',
+	'/images/web/astrea-demo-starter-case-01-construction-permit.jpg',
 	2.0,
 	85
 );
@@ -106,10 +106,10 @@ $professional = get_posts( array( 'post_type' => 'astrea_professional', 'posts_p
 if ( $professional ) {
 	$old_thumb_id = get_post_thumbnail_id( $professional[0]->ID );
 	$new_id = upload_and_attach(
-		'/images/web/astrea-demo-yamada-professional-portrait.jpg',
-		'代表者 山田太郎 ポートレート（正式版）',
-		'代表 山田太郎（行政書士）のポートレート',
-		'astrea-demo-yamada-professional-portrait.jpg',
+		'/images/web/astrea-demo-starter-professional-portrait.jpg',
+		'代表者 伊吹文人 ポートレート（正式版）',
+		'代表 伊吹文人（行政書士）のポートレート',
+		'astrea-demo-starter-professional-portrait.jpg',
 		$professional[0]->ID
 	);
 	if ( $new_id ) {
@@ -122,10 +122,10 @@ $cases = get_posts( array( 'post_type' => 'astrea_case', 'posts_per_page' => -1,
 if ( isset( $cases[0] ) ) {
 	$old_thumb_id = get_post_thumbnail_id( $cases[0]->ID );
 	$new_id = upload_and_attach(
-		'/images/web/astrea-demo-yamada-case-01-construction-permit.jpg',
+		'/images/web/astrea-demo-starter-case-01-construction-permit.jpg',
 		'対応事例#1 建設業許可申請イメージ（正式版）',
 		'建設業許可申請に関する書類・打ち合わせのイメージ',
-		'astrea-demo-yamada-case-01-construction-permit.jpg',
+		'astrea-demo-starter-case-01-construction-permit.jpg',
 		$cases[0]->ID
 	);
 	if ( $new_id ) {
