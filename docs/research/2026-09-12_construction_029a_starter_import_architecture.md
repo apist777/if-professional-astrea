@@ -808,8 +808,8 @@ Construction 029-I — Integration / Repeatability / Safety Test
 - Core Modification: NONE
 - Starter Modification: NONE
 - Media Modification: NONE
-- Commit: `<COMMIT_HASH_PENDING>`
-- Push: PASS（予定）
+- Commit: `406632d77c6aa52c246366f910e3cc7e7702eeda`
+- Push: PASS
 - Deploy: NOT REQUIRED / NOT RUN
 - Next: Construction 029-B
 
