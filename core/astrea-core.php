@@ -76,6 +76,12 @@ require ASTREA_CORE_DIR . 'includes/setup-home.php';
 require ASTREA_CORE_DIR . 'includes/setup-navigation.php';
 require ASTREA_CORE_DIR . 'includes/setup-admin.php';
 require ASTREA_CORE_DIR . 'includes/data-deletion.php';
+require ASTREA_CORE_DIR . 'includes/starter-import-state.php';
+require ASTREA_CORE_DIR . 'includes/starter-import-marker.php';
+require ASTREA_CORE_DIR . 'includes/starter-import-evidence.php';
+require ASTREA_CORE_DIR . 'includes/starter-import-result.php';
+require ASTREA_CORE_DIR . 'includes/starter-import-domain.php';
+require ASTREA_CORE_DIR . 'includes/starter-import-detection.php';
 
 add_action( 'plugins_loaded', __NAMESPACE__ . '\\load_textdomain' );
 
