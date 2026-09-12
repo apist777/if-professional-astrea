@@ -82,7 +82,31 @@ line( 'Case #1 web JPEG: ' . print_r( $result2, true ) );
 //    upload/attachment API -- no direct DB row editing).
 // ---------------------------------------------------------------------
 
+/**
+ * Construction 028 hardening: idempotent by filename, matching the same
+ * pattern already used by integrate-025b2-hero-and-cases.php and
+ * integrate-025e1-results-background.php. Without this lookup, re-running
+ * the pipeline against an already-built site re-uploaded a fresh duplicate
+ * attachment on every run (attachment growth), which is exactly the class
+ * of bug this Construction hardens against.
+ */
+function find_existing_attachment_by_filename( string $filename ): int {
+	global $wpdb;
+	$like = '%' . $wpdb->esc_like( $filename ) . '%';
+	$id   = $wpdb->get_var( $wpdb->prepare(
+		"SELECT post_id FROM {$wpdb->postmeta} WHERE meta_key = '_wp_attached_file' AND meta_value LIKE %s LIMIT 1",
+		$like
+	) );
+	return $id ? (int) $id : 0;
+}
+
 function upload_and_attach( string $jpeg_path, string $title, string $alt, string $filename, int $parent_post_id ): int {
+	$existing = find_existing_attachment_by_filename( $filename );
+	if ( $existing ) {
+		line( "Reusing existing attachment $existing for $filename (no duplicate uploaded)." );
+		return $existing;
+	}
+
 	$bits = file_get_contents( $jpeg_path );
 	$upload = wp_upload_bits( $filename, null, $bits );
 	if ( $upload['error'] ) {
@@ -99,6 +123,7 @@ function upload_and_attach( string $jpeg_path, string $title, string $alt, strin
 	$meta = wp_generate_attachment_metadata( $attach_id, $upload['file'] );
 	wp_update_attachment_metadata( $attach_id, $meta );
 	update_post_meta( $attach_id, '_wp_attachment_image_alt', $alt );
+	line( "Uploaded new attachment $attach_id for $filename." );
 	return $attach_id;
 }
 

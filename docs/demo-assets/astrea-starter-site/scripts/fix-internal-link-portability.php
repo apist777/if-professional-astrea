@@ -277,6 +277,15 @@ function astrea_co_connect_contact_ctas( array &$blocks, string $contact_url, ar
 
 $contact_id = astrea_co_find_contact_page_id();
 if ( $contact_id > 0 ) {
+	// Construction 028 hardening: explicit `global $wpdb;` makes this block
+	// execution-context-agnostic. A plain top-level `include`/`require` (the
+	// original Playground runPHP model) already has $wpdb in scope without
+	// this, but any execution path that runs the script's "top level" code
+	// inside a PHP function (`wp eval-file`, or a WordPress hook callback
+	// that `include`s this file — both used by Construction 027/028's test
+	// harnesses) does not; `global $wpdb;` is a correct, harmless no-op in
+	// the former case and required in the latter.
+	global $wpdb;
 	$contact_url   = get_permalink( $contact_id );
 	$target_labels = array( 'お問い合わせはこちら', 'お問い合わせフォームへ' );
 

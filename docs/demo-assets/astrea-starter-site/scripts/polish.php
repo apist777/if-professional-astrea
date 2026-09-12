@@ -11,8 +11,14 @@ if ( $about ) {
 		$intro,
 		$post->post_content
 	);
-	wp_update_post( array( 'ID' => $post->ID, 'post_content' => $new_content ) );
-	echo "About page intro updated.\n";
+	// Construction 028 hardening: skip the write when the placeholder was
+	// already replaced (idempotent re-run), avoiding a needless revision.
+	if ( $new_content !== $post->post_content ) {
+		wp_update_post( array( 'ID' => $post->ID, 'post_content' => $new_content ) );
+		echo "About page intro updated.\n";
+	} else {
+		echo "About page intro already set — no change.\n";
+	}
 }
 
 // Fill in realistic business hours (weekday 9:00-18:00, weekend closed).

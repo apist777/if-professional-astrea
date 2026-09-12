@@ -232,8 +232,15 @@ if ( ! $found ) {
 splice_cover_rebuild( $blocks );
 $new_content = serialize_blocks( $blocks );
 
-wp_update_post( array( 'ID' => $home, 'post_content' => $new_content ) );
-line( "Hero cover block updated on HOME page $home (image id $hero_attach_id, dimRatio 20)." );
+// Construction 028 hardening: skip the write entirely when nothing would
+// actually change (already-correct re-runs), avoiding a needless revision
+// on every pipeline run.
+if ( trim( $new_content ) !== trim( $home_post->post_content ) ) {
+	wp_update_post( array( 'ID' => $home, 'post_content' => $new_content ) );
+	line( "Hero cover block updated on HOME page $home (image id $hero_attach_id, dimRatio 20)." );
+} else {
+	line( "Hero cover block already correct on HOME page $home — no change." );
+}
 
 // ---------------------------------------------------------------------
 // 3. Case #2 / #3: Featured Image (same standard mechanism as Case #1).

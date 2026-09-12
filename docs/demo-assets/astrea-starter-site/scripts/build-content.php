@@ -9,11 +9,36 @@
  * the real admin UI buttons call) — no raw SQL, no fabricated capability.
  * Run once via `wp-playground-cli php` against the mounted wordpress-data
  * directory while the `server` process is stopped (SQLite is single-writer).
+ *
+ * Construction 028 hardening — classified ONE-SHOT ONLY: unlike the
+ * integrate- and fix- scripts, this script has no per-item existing-content
+ * check before its wp_insert_post() calls (Professional/Service/Case/
+ * Result/Price/FAQ/Voice), so re-running it against an already-built site
+ * would create a full duplicate set of every one of those CPT entries.
+ * Retrofitting true idempotent merge/update semantics here would require
+ * deciding a content-identity model across seven different CPTs — that is
+ * a real Starter Import design question, not a safe local fix, so it is
+ * intentionally left as a Known Issue rather than attempted in this
+ * Construction. Instead, this guard converts "silently duplicates
+ * everything" into "safely refuses" if it detects the site is not empty.
  */
 
 require_once '/wordpress/wp-load.php';
 
 function line( $msg ) { echo $msg . "\n"; }
+
+// ---------------------------------------------------------------------
+// 0. Safety guard — refuse to run a second time rather than duplicate.
+// ---------------------------------------------------------------------
+
+$already_built = get_posts( array( 'post_type' => 'astrea_professional', 'posts_per_page' => 1, 'post_status' => 'any' ) );
+if ( $already_built ) {
+	line( 'ABORT: astrea_professional content already exists on this site.' );
+	line( 'build-content.php is ONE-SHOT ONLY (no per-item idempotency) — re-running it' );
+	line( 'would create a duplicate Professional/Service/Case/Result/Price/FAQ/Voice set.' );
+	line( 'Refusing to run. See Construction 028 report for the full pipeline audit.' );
+	exit( 1 );
+}
 
 // ---------------------------------------------------------------------
 // 1. Office Profile (Astrea\Core\OfficeProfile)
