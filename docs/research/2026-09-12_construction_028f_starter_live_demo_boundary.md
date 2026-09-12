@@ -451,7 +451,7 @@ Theme = 1.0.3、Core = 1.0.1、Theme/Core Modification = NONE を再確認した
 git commit -m "Separate ASTREA starter and live demo content"
 ```
 
-- Commit hash: `<COMMIT_HASH_PENDING_FOLLOWUP>`（push確認後、Construction 027/028の前例に倣いフォローアップコミットで本報告書に追記）
+- Commit hash: `a72ed138b8d9b8499bfb6d8951cee0d593a6e646`（push確認後、Construction 027/028の前例に倣いフォローアップコミットで本報告書に追記）
 
 ### §13 POST-COMMIT CHECK
 
@@ -486,7 +486,7 @@ push後、`git rev-parse HEAD`と`git rev-parse origin/main`が一致するこ�
 - Recommended Visual Option: 案A
 - Visual Option Implementation: NOT DONE
 - 029 Requirement: RECORDED
-- Commit: `<COMMIT_HASH_PENDING_FOLLOWUP>`
+- Commit: `a72ed138b8d9b8499bfb6d8951cee0d593a6e646`
 - Push: PASS
 - Deploy: NOT REQUIRED / NOT RUN
 - Live Demo: UNCHANGED
