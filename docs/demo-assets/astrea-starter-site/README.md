@@ -32,7 +32,8 @@ Construction 023（2026-09-08、ローカル構築）／023-A（画像仕様確�
   - `case-1-image.png`（1200×800）
 - `scripts/` — 構築に使用したPHPスクリプト一式（WordPress自身のpost/postmeta/option APIおよびASTREA Core自身のSetup関数のみ使用。生SQL不使用）。Construction 027で、office_name・Professional名・画像ファイル名参照を新identity（ASTREA行政書士事務所／伊吹 文人）へ更新済み。
   - `theme-core-activation-blueprint.json` — Theme/Core有効化用のWordPress Playground Blueprint（blogname更新済み）
-  - `build-content.php` — Office Profile・Professional・Service・Case・Result・Price・FAQ・Voice・Setup（pages/navigation/home）の投入（Construction 027でoffice_name／Professional名／画像ファイル名を更新）
+  - `build-content.php` — Office Profile・Professional・Service・Case・Result・Price・FAQ・Voice・Setup（pages/navigation/home）の投入（Construction 027でoffice_name／Professional名／画像ファイル名を更新）。**Construction 028-Fで、事務所概要ページ末尾へのfictional/demo disclosure追記処理を削除し、`add-live-demo-disclosure.php`へ分離した**（Starter SiteとLive Demo専用コンテンツの境界分離、下記参照）。
+  - `add-live-demo-disclosure.php` — **Construction 028-F、Live Demo専用ステップ。** 「このWebサイトは If Professional ASTREA のデモサイトです…」というfictional disclosureを事務所概要ページへ追記する。project-if.jpの公開Live Demoにのみ必要な文言であり、**ASTREA Starter Site本体（将来のStarter Importで生成されるユーザーサイト）には絶対に含めてはならない**ため、9-stepの標準パイプラインには含めず、Live Demoを構築する場合にのみ追加で実行する独立ステップとした。冪等（`astrea-demo-disclosure`className既存なら無変更）。
   - `polish.php` — 事務所概要ページの紹介文・営業時間の追加投入（人物名を含まない汎用文面のため無変更）
   - `fix-placeholders.php` — （履歴）プレースホルダー画像のラベル修正。無変更（履歴のため）。
   - `cleanup.php` — WordPress既定のサンプルコンテンツ削除

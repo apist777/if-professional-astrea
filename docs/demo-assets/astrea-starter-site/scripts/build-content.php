@@ -322,25 +322,15 @@ foreach ( $generated_pages as $p ) {
 }
 
 // ---------------------------------------------------------------------
-// 10. Fictional disclosure — appended to the 事務所概要 (About) page,
-//     the natural, always-reachable place for it (Order §3).
+// Construction 028-F boundary note: this script no longer appends the
+// fictional/demo disclosure. That text ("このWebサイトは...デモサイトです")
+// identifies the PUBLIC LIVE DEMO specifically (project-if.jp's own
+// disclosure requirement), not the ASTREA Starter Site product itself — a
+// future Starter Import must never carry it into a user's real site. The
+// disclosure step now lives in the separate, Live-Demo-only
+// `add-live-demo-disclosure.php`, run as an explicit additional step only
+// when building the public Live Demo, never as part of the Starter Site
+// pipeline proper. See docs/research/2026-09-12_construction_028f_starter_live_demo_boundary.md.
 // ---------------------------------------------------------------------
-
-$about_page = get_page_by_path( '事務所概要' );
-if ( ! $about_page ) {
-	// Fallback: find by title if slug differs.
-	$found = get_posts( array( 'post_type' => 'page', 'title' => '事務所概要', 'posts_per_page' => 1 ) );
-	$about_page = $found ? $found[0] : null;
-}
-if ( $about_page ) {
-	$disclosure = "\n\n<!-- wp:group {\"className\":\"astrea-demo-disclosure\",\"style\":{\"spacing\":{\"padding\":{\"top\":\"1.5rem\",\"bottom\":\"1.5rem\",\"left\":\"1.5rem\",\"right\":\"1.5rem\"}},\"border\":{\"width\":\"1px\",\"radius\":\"8px\"}},\"layout\":{\"type\":\"constrained\"}} -->\n<div class=\"wp-block-group astrea-demo-disclosure\" style=\"border-width:1px;border-radius:8px;padding-top:1.5rem;padding-right:1.5rem;padding-bottom:1.5rem;padding-left:1.5rem\">\n<!-- wp:paragraph {\"fontSize\":\"small\"} -->\n<p class=\"has-small-font-size\">このWebサイトは If Professional ASTREA のデモサイトです。掲載されている事務所・人物・サービス内容・実績・お客様の声等は、デモ用に作成された架空の情報です。実在の事務所・人物とは一切関係ありません。</p>\n<!-- /wp:paragraph -->\n</div>\n<!-- /wp:group -->\n";
-	wp_update_post( array(
-		'ID'           => $about_page->ID,
-		'post_content' => $about_page->post_content . $disclosure,
-	) );
-	line( 'Fictional disclosure appended to page ' . $about_page->ID );
-} else {
-	line( 'WARNING: 事務所概要 page not found — disclosure not added.' );
-}
 
 line( 'DONE.' );
