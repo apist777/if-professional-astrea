@@ -40,7 +40,7 @@ if ( false !== strpos( $about_page->post_content, 'astrea-demo-disclosure' ) ) {
 	exit( 0 );
 }
 
-$disclosure = "\n\n<!-- wp:group {\"className\":\"astrea-demo-disclosure\",\"style\":{\"spacing\":{\"padding\":{\"top\":\"1.5rem\",\"bottom\":\"1.5rem\",\"left\":\"1.5rem\",\"right\":\"1.5rem\"}},\"border\":{\"width\":\"1px\",\"radius\":\"8px\"}},\"layout\":{\"type\":\"constrained\"}} -->\n<div class=\"wp-block-group astrea-demo-disclosure\" style=\"border-width:1px;border-radius:8px;padding-top:1.5rem;padding-right:1.5rem;padding-bottom:1.5rem;padding-left:1.5rem\">\n<!-- wp:paragraph {\"fontSize\":\"small\"} -->\n<p class=\"has-small-font-size\">このWebサイトは If Professional ASTREA のデモサイトです。掲載されている事務所・人物・サービス内容・実績・お客様の声等は、デモ用に作成された架空の情報です。実在の事務所・人物とは一切関係ありません。</p>\n<!-- /wp:paragraph -->\n</div>\n<!-- /wp:group -->\n";
+$disclosure = "\n\n<!-- wp:group {\"align\":\"wide\",\"className\":\"astrea-demo-disclosure\",\"style\":{\"spacing\":{\"padding\":{\"top\":\"1.5rem\",\"bottom\":\"1.5rem\",\"left\":\"1.5rem\",\"right\":\"1.5rem\"}},\"border\":{\"width\":\"1px\",\"radius\":\"8px\"}},\"layout\":{\"type\":\"constrained\"}} -->\n<div class=\"wp-block-group alignwide astrea-demo-disclosure\" style=\"border-width:1px;border-radius:8px;padding-top:1.5rem;padding-right:1.5rem;padding-bottom:1.5rem;padding-left:1.5rem\">\n<!-- wp:paragraph {\"fontSize\":\"small\"} -->\n<p class=\"has-small-font-size\">このWebサイトは If Professional ASTREA のデモサイトです。掲載されている事務所・人物・サービス内容・実績・お客様の声等は、デモ用に作成された架空の情報です。実在の事務所・人物とは一切関係ありません。</p>\n<!-- /wp:paragraph -->\n</div>\n<!-- /wp:group -->\n";
 
 wp_update_post( array(
 	'ID'           => $about_page->ID,
