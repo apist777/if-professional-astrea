@@ -378,8 +378,8 @@ Theme 1.0.3・Core 1.0.1とも無変更。Version bumpは行っていない。
 - Theme Version: 1.0.3（無変更）
 - Core Modification: NONE
 - Core Version: 1.0.1（無変更）
-- Commit: `<COMMIT_HASH_PENDING_FOLLOWUP>`
-- Follow-up Commit: `<COMMIT_HASH_PENDING_FOLLOWUP>`
+- Commit: `2e90b9d7fc5addfab8c504f72618c9653f56d5ed`
+- Follow-up Commit: 本行を含む報告書更新のみのフォローアップコミット（push確認後に作成。ハッシュは完了報告および`git log`参照）
 - Push: PASS
 - Deploy: NOT RUN
 - Production Live Demo: UNCHANGED
