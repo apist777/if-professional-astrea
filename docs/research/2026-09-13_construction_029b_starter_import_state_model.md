@@ -459,9 +459,9 @@ Theme変更: 0／Starter Site content変更: 0／Media変更: 0／Live Demo変�
 - Core Modification: ACCEPTED
 - Core Version: 1.0.1
 - Core Version Bump: NOT DONE
-- Commit: `<COMMIT_HASH_PENDING_FOLLOWUP>`
-- Follow-up Commit: `<COMMIT_HASH_PENDING_FOLLOWUP>`
-- Push: PASS（予定）
+- Commit: `878dd9612c13bdca9ec166ceeecdf91c9c322f8d`
+- Follow-up Commit: 本行を含む報告書更新のみのフォローアップコミット（push確認後に作成。ハッシュは完了報告および`git log`参照）
+- Push: PASS
 - Deploy: NOT REQUIRED / NOT RUN
 - Production: UNCHANGED
 - Excluded Owner Changes: `HISTORY.csv`, `yamada-demo-export.wxr`（いずれも無変更のまま保持）、Owner削除済みscreenshot群（復元せず）、他Construction報告書（対象外）
