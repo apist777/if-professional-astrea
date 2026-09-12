@@ -438,7 +438,7 @@ Theme/Core への意図しない差分は0件。Theme = 1.0.3、Core = 1.0.1、T
 git commit -m "Harden ASTREA starter pipeline"
 ```
 
-- Commit hash: `<COMMIT_HASH_PENDING_FOLLOWUP>`（このコミット自身のハッシュは、Construction 027の前例に倣い、完了後のフォローアップ記録コミットで本報告書に追記する）
+- Commit hash: `3268bd95624a4efdd8a90420adf3fb5d107983df`（push確認後、Construction 027の前例に倣いフォローアップコミットで本報告書に追記）
 
 ### §10 POST-COMMIT CHECK
 
@@ -477,7 +477,7 @@ push後、`git rev-parse HEAD` と `git rev-parse origin/main` が一致する�
 - Theme/Core Modification: NONE
 - Theme: 1.0.3
 - Core: 1.0.1
-- Commit: `<COMMIT_HASH_PENDING_FOLLOWUP>`
+- Commit: `3268bd95624a4efdd8a90420adf3fb5d107983df`
 - Push: PASS
 - Deploy: NOT REQUIRED / NOT RUN
 - Live Demo: UNCHANGED
