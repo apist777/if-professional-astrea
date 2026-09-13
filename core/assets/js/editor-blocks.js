@@ -176,6 +176,22 @@
 		attributes: headingAndEmpty,
 	} );
 
+	registerDynamicBlock( 'astrea/business-status', {
+		title: __( '本日の営業状況', 'astrea-core' ),
+		icon: 'clock',
+		category: 'widgets',
+		description: __( 'ASTREA Core — 本日の営業状況（営業中・営業時間前・受付終了・定休日）を表示します。', 'astrea-core' ),
+		attributes: {},
+	} );
+
+	registerDynamicBlock( 'astrea/business-hours-summary', {
+		title: __( '営業時間（週間概要）', 'astrea-core' ),
+		icon: 'calendar-alt',
+		category: 'widgets',
+		description: __( 'ASTREA Core — 通常の週間営業時間の概要（連続する曜日をまとめた表示）を表示します。', 'astrea-core' ),
+		attributes: {},
+	} );
+
 	registerDynamicBlock( 'astrea/office-sns', {
 		title: __( 'SNSリンク', 'astrea-core' ),
 		icon: 'share',

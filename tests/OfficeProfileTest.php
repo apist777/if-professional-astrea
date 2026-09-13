@@ -608,6 +608,52 @@ class OfficeProfileTest extends WP_UnitTestCase {
 		$this->assertNull( $value );
 	}
 
+	/**
+	 * Construction 029-CI: Header/Footer's office name link.
+	 */
+	public function test_block_binding_office_name_home_link_wraps_name_in_home_anchor() {
+		update_option(
+			OfficeProfile\OPTION_NAME,
+			OfficeProfile\sanitize( array( 'office_name' => 'リンク事務所' ) )
+		);
+
+		$value = Bindings\get_bound_value( array( 'key' => 'office_name_home_link' ), null, 'content' );
+
+		$this->assertSame( '<a href="' . home_url( '/' ) . '">リンク事務所</a>', $value );
+	}
+
+	public function test_block_binding_office_name_home_link_escapes_office_name() {
+		update_option(
+			OfficeProfile\OPTION_NAME,
+			OfficeProfile\sanitize( array( 'office_name' => 'A&B事務所' ) )
+		);
+
+		$value = Bindings\get_bound_value( array( 'key' => 'office_name_home_link' ), null, 'content' );
+
+		$this->assertStringContainsString( 'A&amp;B事務所', $value );
+		$this->assertStringNotContainsString( 'A&B事務所<', $value );
+	}
+
+	public function test_block_binding_office_name_home_link_returns_null_when_unconfigured() {
+		$value = Bindings\get_bound_value( array( 'key' => 'office_name_home_link' ), null, 'content' );
+
+		$this->assertNull( $value );
+	}
+
+	public function test_block_binding_office_name_key_is_unaffected_by_home_link_addition() {
+		// Regression guard: adding office_name_home_link must not change
+		// the existing plain office_name binding used by Home Hero/Office
+		// page (Construction 029-CI must not touch their behaviour).
+		update_option(
+			OfficeProfile\OPTION_NAME,
+			OfficeProfile\sanitize( array( 'office_name' => 'プレーン事務所' ) )
+		);
+
+		$value = Bindings\get_bound_value( array( 'key' => 'office_name' ), null, 'content' );
+
+		$this->assertSame( 'プレーン事務所', $value );
+	}
+
 	public function test_deactivate_does_not_delete_office_profile_data() {
 		update_option(
 			OfficeProfile\OPTION_NAME,

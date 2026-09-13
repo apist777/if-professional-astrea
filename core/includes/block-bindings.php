@@ -37,8 +37,16 @@ const OFFICE_PROFILE_SOURCE = 'astrea-core/office-profile';
  * `representative_name` was removed here in Decision 023 (Construction
  * Order 003A): representative is a person and now belongs to Professional
  * Profile's `is_representative` flag, not Office Profile.
+ *
+ * `office_name_home_link` was added in Construction 029-CI: `core/paragraph`
+ * has no `url` attribute for Block Bindings to target (unlike `core/button`,
+ * which is how `phone_tel` links a button), so a clickable office name
+ * needs the anchor baked into the bound `content` value itself, rather
+ * than as a separate binding. This is a distinct key from the existing
+ * `office_name` — Header/Footer use this one; Home Hero and the Office
+ * page keep using plain `office_name`, unlinked, exactly as before.
  */
-const ALLOWED_KEYS = array( 'office_name', 'address', 'phone', 'phone_tel' );
+const ALLOWED_KEYS = array( 'office_name', 'address', 'phone', 'phone_tel', 'office_name_home_link' );
 
 add_action( 'init', __NAMESPACE__ . '\\register_office_profile_source' );
 
@@ -86,9 +94,30 @@ function get_bound_value( $source_args, $block_instance, $attribute_name ) { // 
 		return phone_to_tel_uri( (string) ( $profile['phone'] ?? '' ) );
 	}
 
+	if ( 'office_name_home_link' === $key ) {
+		return office_name_as_home_link( (string) ( $profile['office_name'] ?? '' ) );
+	}
+
 	$value = $profile[ $key ] ?? '';
 
 	return ( '' !== $value ) ? $value : null;
+}
+
+/**
+ * Wraps the office name in an anchor to the site's own Home URL, for use
+ * as a `content` binding on blocks (Header/Footer) with no separate `url`
+ * attribute to bind. Never a hard-coded URL (Construction 029-CI PHASE 2/
+ * 17 — Starter portability: works unmodified on any domain/subdirectory).
+ *
+ * @param string $office_name Raw office name from Office Profile.
+ * @return string|null Anchor-wrapped HTML, or null when there is no office name to show.
+ */
+function office_name_as_home_link( string $office_name ): ?string {
+	if ( '' === $office_name ) {
+		return null;
+	}
+
+	return '<a href="' . esc_url( home_url( '/' ) ) . '">' . esc_html( $office_name ) . '</a>';
 }
 
 /**

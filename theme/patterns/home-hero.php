@@ -62,6 +62,13 @@
  *   different site owner. Hidden on Mobile (matches Order §14's
  *   "decorative vertical text may hide on small screens").
  *
+ * Construction 029-CI: added `astrea/business-status` (today's business
+ * status, derived from Office Profile's existing weekly hours — no new
+ * data) between the primary copy and the phone/contact buttons, so the
+ * reading order is status → today's hours → CTA. Self-hides entirely when
+ * status can't be determined safely, so it never changes this Pattern's
+ * appearance for a site with no configured hours.
+ *
  * @package Astrea\Theme
  */
 
@@ -86,6 +93,8 @@ if ( ! defined( 'ABSPATH' ) ) {
 <!-- wp:paragraph {"className":"astrea-hero-primary","fontFamily":"heading"} -->
 <p class="astrea-hero-primary has-heading-font-family">お客様に寄り添う、専門家によるご相談窓口です。</p>
 <!-- /wp:paragraph -->
+
+<!-- wp:astrea/business-status /-->
 
 <!-- wp:buttons -->
 <div class="wp-block-buttons">

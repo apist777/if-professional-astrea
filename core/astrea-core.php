@@ -33,6 +33,8 @@ require ASTREA_CORE_DIR . 'includes/office-profile.php';
 require ASTREA_CORE_DIR . 'includes/office-profile-admin.php';
 require ASTREA_CORE_DIR . 'includes/office-summary-block.php';
 require ASTREA_CORE_DIR . 'includes/office-hours-block.php';
+require ASTREA_CORE_DIR . 'includes/office-business-status-block.php';
+require ASTREA_CORE_DIR . 'includes/office-business-hours-summary-block.php';
 require ASTREA_CORE_DIR . 'includes/office-sns-block.php';
 require ASTREA_CORE_DIR . 'includes/block-bindings.php';
 require ASTREA_CORE_DIR . 'includes/professional-profile.php';

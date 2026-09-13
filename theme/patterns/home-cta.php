@@ -5,6 +5,14 @@
  * Categories: astrea
  * Description: ページ末尾のCTA。電話番号（Office Profile Bindings）と、お問い合わせページへのボタンを配置する。お問い合わせページへのリンク先はPattern挿入後にユーザーがリンクを設定する（Construction Order 007のSetup機能で作成される問い合わせページを指定する）。
  *
+ * Construction 029-CI Revision 1: added `astrea/business-hours-summary`
+ * (grouped weekly hours, e.g. "月〜金　09:00〜18:00") between the heading
+ * and the phone/contact buttons — Home Hero's "本日の営業状況" answers
+ * "is it open right now?"; this answers "when is it normally open?",
+ * right next to the buttons a visitor would use to act on that answer.
+ * Self-hides entirely when there is no usable weekly-hours data, so a
+ * site with no configured hours sees this Pattern completely unchanged.
+ *
  * Construction Order 016D-R2 §5 (position + button treatment only — same
  * Block/Contact-URL/Phone data, no new functionality):
  * - Now placed immediately after Price in HOME_PATTERN_SLUGS
@@ -43,6 +51,8 @@ if ( ! defined( 'ABSPATH' ) ) {
 <!-- wp:heading {"textAlign":"center","fontFamily":"heading"} -->
 <h2 class="has-text-align-center has-heading-font-family">まずはお気軽にご相談ください</h2>
 <!-- /wp:heading -->
+
+<!-- wp:astrea/business-hours-summary /-->
 
 <!-- wp:buttons {"layout":{"type":"flex","justifyContent":"center"}} -->
 <div class="wp-block-buttons">
