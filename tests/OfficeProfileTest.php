@@ -143,6 +143,112 @@ class OfficeProfileTest extends WP_UnitTestCase {
 		$this->assertSame( '03-1111-2222', $result['phone'], 'Invalid phone must roll back to the previously stored value.' );
 	}
 
+	/**
+	 * Construction 029-CG (Office Information Admin Foundation) tests below:
+	 * postal_code/prefecture/address_line/building/fax/service_area are
+	 * additive fields on the same astrea_core_office_profile option (Single
+	 * Source of Truth) — no new option was created.
+	 */
+	public function test_sanitize_accepts_new_location_and_contact_fields() {
+		$result = OfficeProfile\sanitize(
+			array(
+				'postal_code'   => '100-0001',
+				'prefecture'    => '東京都',
+				'address_line'  => '千代田区千代田1-1',
+				'building'      => 'ASTREAビル 3F',
+				'fax'           => '03-1234-5679',
+				'service_area'  => '東京都・神奈川県・埼玉県・千葉県',
+			)
+		);
+
+		$this->assertSame( '100-0001', $result['postal_code'] );
+		$this->assertSame( '東京都', $result['prefecture'] );
+		$this->assertSame( '千代田区千代田1-1', $result['address_line'] );
+		$this->assertSame( 'ASTREAビル 3F', $result['building'] );
+		$this->assertSame( '03-1234-5679', $result['fax'] );
+		$this->assertSame( '東京都・神奈川県・埼玉県・千葉県', $result['service_area'] );
+	}
+
+	public function test_sanitize_new_fields_default_to_empty_string_when_omitted() {
+		$result = OfficeProfile\sanitize( array( 'office_name' => '事務所名のみ' ) );
+
+		$this->assertSame( '', $result['postal_code'] );
+		$this->assertSame( '', $result['prefecture'] );
+		$this->assertSame( '', $result['address_line'] );
+		$this->assertSame( '', $result['building'] );
+		$this->assertSame( '', $result['fax'] );
+		$this->assertSame( '', $result['service_area'] );
+	}
+
+	public function test_sanitize_rejects_invalid_fax_and_keeps_previous_value() {
+		update_option(
+			OfficeProfile\OPTION_NAME,
+			OfficeProfile\sanitize( array( 'fax' => '03-1111-2222' ) )
+		);
+
+		$result = OfficeProfile\sanitize( array( 'fax' => 'not a fax number' ) );
+
+		$this->assertSame( '03-1111-2222', $result['fax'], 'Invalid fax must roll back to the previously stored value.' );
+	}
+
+	public function test_sanitize_strips_tags_from_new_text_fields() {
+		$result = OfficeProfile\sanitize(
+			array(
+				'postal_code'  => '<script>alert(1)</script>100-0001',
+				'address_line' => "千代田区\n千代田1-1",
+			)
+		);
+
+		$this->assertSame( '100-0001', $result['postal_code'] );
+		$this->assertSame( '千代田区 千代田1-1', $result['address_line'] );
+	}
+
+	public function test_sanitize_does_not_introduce_any_representative_fields() {
+		// Responsibility boundary (Construction 029-CG): representative
+		// name/title/qualifications/profile/photo belong exclusively to
+		// Professional Profile and must never appear in Office Profile's
+		// sanitized output, even if a client submitted them.
+		$result = OfficeProfile\sanitize(
+			array(
+				'office_name'   => '事務所名',
+				'title'         => '行政書士',
+				'qualification' => '行政書士資格',
+				'profile'       => '経歴の説明',
+				'photo'         => '123',
+			)
+		);
+
+		$this->assertArrayNotHasKey( 'title', $result );
+		$this->assertArrayNotHasKey( 'qualification', $result );
+		$this->assertArrayNotHasKey( 'profile', $result );
+		$this->assertArrayNotHasKey( 'photo', $result );
+	}
+
+	public function test_new_fields_persist_across_save_and_reload() {
+		update_option(
+			OfficeProfile\OPTION_NAME,
+			OfficeProfile\sanitize(
+				array(
+					'postal_code'  => '100-0001',
+					'prefecture'   => '東京都',
+					'address_line' => '千代田区千代田1-1',
+					'building'     => '',
+					'fax'          => '',
+					'service_area' => '',
+				)
+			)
+		);
+
+		$reloaded = OfficeProfile\get_office_profile();
+
+		$this->assertSame( '100-0001', $reloaded['postal_code'] );
+		$this->assertSame( '東京都', $reloaded['prefecture'] );
+		$this->assertSame( '千代田区千代田1-1', $reloaded['address_line'] );
+		$this->assertSame( '', $reloaded['building'], 'Optional empty fields must persist as empty, not error.' );
+		$this->assertSame( '', $reloaded['fax'] );
+		$this->assertSame( '', $reloaded['service_area'] );
+	}
+
 	public function test_sanitize_accepts_valid_weekly_hours() {
 		$result = OfficeProfile\sanitize(
 			array(
@@ -356,6 +462,99 @@ class OfficeProfileTest extends WP_UnitTestCase {
 		$html = ob_get_clean();
 
 		$this->assertStringContainsString( 'astrea_core_office_profile[office_name]', $html );
+	}
+
+	public function test_admin_page_renders_new_construction_029cg_fields() {
+		$admin_id = self::factory()->user->create( array( 'role' => 'administrator' ) );
+		wp_set_current_user( $admin_id );
+
+		OfficeProfile\Admin\register_fields();
+
+		ob_start();
+		OfficeProfile\Admin\render_page();
+		$html = ob_get_clean();
+
+		$this->assertStringContainsString( 'astrea_core_office_profile[postal_code]', $html );
+		$this->assertStringContainsString( 'astrea_core_office_profile[prefecture]', $html );
+		$this->assertStringContainsString( 'astrea_core_office_profile[address_line]', $html );
+		$this->assertStringContainsString( 'astrea_core_office_profile[building]', $html );
+		$this->assertStringContainsString( 'astrea_core_office_profile[fax]', $html );
+		$this->assertStringContainsString( 'astrea_core_office_profile[service_area]', $html );
+	}
+
+	public function test_admin_page_links_to_professional_profile_for_representative_fields() {
+		$admin_id = self::factory()->user->create( array( 'role' => 'administrator' ) );
+		wp_set_current_user( $admin_id );
+
+		OfficeProfile\Admin\register_fields();
+
+		ob_start();
+		OfficeProfile\Admin\render_page();
+		$html = ob_get_clean();
+
+		$this->assertStringContainsString( 'edit.php?post_type=astrea_professional', $html );
+	}
+
+	public function test_office_information_submenu_is_registered_with_explicit_label() {
+		// add_submenu_page() silently no-ops (registers into
+		// $_wp_submenu_nopriv instead) unless the current user already has
+		// the page's capability — an admin user is required to observe it
+		// land in $submenu.
+		$admin_id = self::factory()->user->create( array( 'role' => 'administrator' ) );
+		wp_set_current_user( $admin_id );
+
+		global $submenu;
+		$previous = $submenu;
+		$submenu  = array(); // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
+
+		OfficeProfile\Admin\add_menu();
+
+		$this->assertArrayHasKey( 'astrea-core', $submenu, 'Expected a submenu entry array for the astrea-core parent slug.' );
+
+		$found = false;
+		foreach ( $submenu['astrea-core'] as $item ) {
+			if ( 'astrea-core' === $item[2] && '事務所情報' === $item[0] ) {
+				$found = true;
+			}
+		}
+		$this->assertTrue( $found, 'Expected an explicit "事務所情報"-labeled submenu entry pointing at the astrea-core page.' );
+
+		$submenu = $previous; // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
+	}
+
+	public function test_office_information_submenu_is_positioned_first_even_when_cpt_submenus_already_exist() {
+		// In real admin loads, WordPress core populates $submenu['astrea-core']
+		// with every ASTREA CPT's list-table entry (専門家プロフィール一覧
+		// etc.) BEFORE the `admin_menu` action fires at all — so
+		// add_submenu_page() always appends after them regardless of hook
+		// priority. Simulate that pre-existing state here to guard the
+		// Construction 029-CG requirement that Office Information appears
+		// first, above the content list tables.
+		$admin_id = self::factory()->user->create( array( 'role' => 'administrator' ) );
+		wp_set_current_user( $admin_id );
+
+		global $submenu;
+		$previous              = $submenu;
+		$submenu               = array(); // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
+		$submenu['astrea-core'] = array(
+			array( '専門家プロフィール一覧', 'edit_posts', 'edit.php?post_type=astrea_professional', '専門家プロフィール一覧' ),
+			array( '取扱業務一覧', 'edit_posts', 'edit.php?post_type=astrea_service', '取扱業務一覧' ),
+		);
+
+		OfficeProfile\Admin\add_menu();
+
+		$this->assertSame(
+			'astrea-core',
+			$submenu['astrea-core'][0][2],
+			'Expected the 事務所情報 entry (menu_slug astrea-core) to be moved to the top of the ASTREA submenu, above the pre-existing CPT list-table entries.'
+		);
+		$this->assertSame( '事務所情報', $submenu['astrea-core'][0][0] );
+		// The pre-existing entries must still be present, in their original
+		// relative order, just shifted down by one.
+		$this->assertSame( 'edit.php?post_type=astrea_professional', $submenu['astrea-core'][1][2] );
+		$this->assertSame( 'edit.php?post_type=astrea_service', $submenu['astrea-core'][2][2] );
+
+		$submenu = $previous; // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
 	}
 
 	public function test_block_binding_returns_value_for_allowed_key() {

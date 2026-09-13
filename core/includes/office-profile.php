@@ -163,6 +163,13 @@ function register() {
  * fabricated values, matching the 60-point-publish principle: an unfilled
  * field must never cause the Theme to display invented data.
  *
+ * `postal_code`/`prefecture`/`address_line`/`building`/`fax`/`service_area`
+ * were added by Construction 029-CG (事務所情報 Admin Foundation) alongside
+ * the existing free-form `address` field, which is kept as-is because
+ * `office-summary-block.php` and `seo-structured-data.php` already read it
+ * directly — Construction 029-CG is Admin/data-model only and must not
+ * change existing frontend output (see its report, PHASE 13/14).
+ *
  * @return array
  */
 function get_defaults(): array {
@@ -179,11 +186,17 @@ function get_defaults(): array {
 		'schema_version'               => SCHEMA_VERSION,
 		'office_name'                  => '',
 		'address'                      => '',
+		'postal_code'                  => '',
+		'prefecture'                   => '',
+		'address_line'                 => '',
+		'building'                     => '',
 		'phone'                        => '',
+		'fax'                          => '',
 		'business_hours'               => array(
 			'weekly'     => $weekly,
 			'exceptions' => array(),
 		),
+		'service_area'                 => '',
 		'sns_links'                    => array(),
 		LEGACY_REPRESENTATIVE_NAME_KEY => '',
 	);
@@ -279,19 +292,26 @@ function sanitize( $input ): array {
 
 	$output['schema_version'] = SCHEMA_VERSION;
 
-	$output['office_name'] = isset( $input['office_name'] ) ? sanitize_text_field( wp_unslash( (string) $input['office_name'] ) ) : '';
-	$output['address']     = isset( $input['address'] ) ? sanitize_text_field( wp_unslash( (string) $input['address'] ) ) : '';
+	$output['office_name']  = isset( $input['office_name'] ) ? sanitize_text_field( wp_unslash( (string) $input['office_name'] ) ) : '';
+	$output['address']      = isset( $input['address'] ) ? sanitize_text_field( wp_unslash( (string) $input['address'] ) ) : '';
+	$output['postal_code']  = isset( $input['postal_code'] ) ? sanitize_text_field( wp_unslash( (string) $input['postal_code'] ) ) : '';
+	$output['prefecture']   = isset( $input['prefecture'] ) ? sanitize_text_field( wp_unslash( (string) $input['prefecture'] ) ) : '';
+	$output['address_line'] = isset( $input['address_line'] ) ? sanitize_text_field( wp_unslash( (string) $input['address_line'] ) ) : '';
+	$output['building']     = isset( $input['building'] ) ? sanitize_text_field( wp_unslash( (string) $input['building'] ) ) : '';
 
 	// LEGACY_REPRESENTATIVE_NAME_KEY is intentionally left untouched here:
 	// there is no form field for it any more (see office-profile-admin.php),
 	// so it must never be overwritten by a submission that doesn't include it.
 
-	$output['phone'] = sanitize_phone( $input, $existing );
+	$output['phone'] = sanitize_phone_like( $input, $existing, 'phone', __( '電話番号', 'astrea-core' ) );
+	$output['fax']   = sanitize_phone_like( $input, $existing, 'fax', __( 'FAX番号', 'astrea-core' ) );
 
 	$output['business_hours'] = array(
 		'weekly'     => sanitize_weekly_hours( $input, $existing ),
 		'exceptions' => sanitize_exceptions( $input ),
 	);
+
+	$output['service_area'] = isset( $input['service_area'] ) ? sanitize_text_field( wp_unslash( (string) $input['service_area'] ) ) : '';
 
 	$output['sns_links'] = sanitize_sns_links( $input );
 
@@ -299,14 +319,19 @@ function sanitize( $input ): array {
 }
 
 /**
- * Sanitizes/validates the phone field.
+ * Sanitizes/validates a phone-shaped field (phone or fax). On invalid
+ * input, rolls back to the previously stored value for that same field
+ * and registers a settings error naming it, rather than saving a
+ * corrupted value or silently discarding the whole submission.
  *
- * @param array $input    Raw submitted data.
- * @param array $existing Previously stored, already-sanitized profile.
+ * @param array  $input    Raw submitted data.
+ * @param array  $existing Previously stored, already-sanitized profile.
+ * @param string $field    Field key, e.g. 'phone' or 'fax'.
+ * @param string $label    Human-readable field label for the error message.
  * @return string
  */
-function sanitize_phone( array $input, array $existing ): string {
-	$raw = isset( $input['phone'] ) ? sanitize_text_field( wp_unslash( (string) $input['phone'] ) ) : '';
+function sanitize_phone_like( array $input, array $existing, string $field, string $label ): string {
+	$raw = isset( $input[ $field ] ) ? sanitize_text_field( wp_unslash( (string) $input[ $field ] ) ) : '';
 
 	if ( '' === $raw ) {
 		return '';
@@ -321,11 +346,15 @@ function sanitize_phone( array $input, array $existing ): string {
 
 	add_settings_error(
 		OPTION_NAME,
-		'astrea_core_invalid_phone',
-		__( '電話番号の形式が正しくありません。数字・ハイフン・カッコ・スペースのみ使用できます。変更前の値を保持しました。', 'astrea-core' )
+		'astrea_core_invalid_' . $field,
+		sprintf(
+			/* translators: %s: field label, e.g. 電話番号 or FAX番号 */
+			__( '%sの形式が正しくありません。数字・ハイフン・カッコ・スペースのみ使用できます。変更前の値を保持しました。', 'astrea-core' ),
+			$label
+		)
 	);
 
-	return $existing['phone'];
+	return $existing[ $field ];
 }
 
 /**
